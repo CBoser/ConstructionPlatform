@@ -190,8 +190,11 @@ class UnifiedCodeParser:
         # Remove all spaces
         cleaned = raw_code.replace(' ', '')
 
-        # Split on ' - ' to separate main code from item type
-        parts = raw_code.split(' - ')
+        # Split on ' - ' or '-' to separate main code from item type
+        if ' - ' in raw_code:
+            parts = raw_code.split(' - ')
+        else:
+            parts = raw_code.split('-')
 
         # Get main part (before separator)
         main_part = parts[0].replace(' ', '')
