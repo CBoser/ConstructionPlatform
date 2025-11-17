@@ -353,25 +353,25 @@ class BATCodingSystemBuilder:
         count = cursor.execute("SELECT COUNT(*) FROM item_types").fetchone()[0]
         print(f"   ✓ {count} item types loaded")
     
-    def translate_richmond_code(self, plan_code: str, richmond_pack_id: str, 
+    def translate_richmond_code(self, plan_code: str, richmond_pack_id: str,
                                 elevation_str: str, item_type: str) -> str:
         """
         Translate Richmond code to unified format
-        
+
         Args:
             plan_code: Plan identifier (e.g., "1670")
             richmond_pack_id: Richmond pack ID (e.g., "|10.82")
             elevation_str: Elevation letters (e.g., "B, C, D")
             item_type: Item type (e.g., "Framing")
-            
+
         Returns:
             Unified code (e.g., "1670-010.820-BCD-1000")
         """
         if self.translation_df is None:
             raise ValueError("Translation table not loaded. Call load_translation_table() first.")
-        
-        # Normalize elevation string for matching
-        elevation_str = elevation_str.strip() if elevation_str else ""
+
+        # Normalize elevation string using Phase 1 normalizer
+        elevation_str = normalize_elevation(elevation_str) if elevation_str else ""
         
         # Look up in translation table
         match = self.translation_df[
@@ -720,6 +720,103 @@ class BATCodingSystemBuilder:
         report.append("="*80)
         
         return "\n".join(report)
+
+
+# ============================================================================
+# PHASE 1: NORMALIZATION FUNCTIONS
+# ============================================================================
+
+def normalize_elevation(elevation_str: str) -> str:
+    """
+    Normalize elevation string to standard format.
+
+    Handles various input formats and converts to alphabetically sorted,
+    uppercase string with no separators.
+
+    Args:
+        elevation_str: Elevation string in any format:
+            - "B, C, D"
+            - "BCD"
+            - "b/c/d"
+            - "B-C-D"
+            - "A"
+            - "**" (universal)
+
+    Returns:
+        Normalized elevation code:
+            - "BCD"
+            - "A"
+            - "ABCD"
+            - "**" (preserved for universal)
+
+    Examples:
+        >>> normalize_elevation("B, C, D")
+        'BCD'
+        >>> normalize_elevation("b/c/d")
+        'BCD'
+        >>> normalize_elevation("BCD")
+        'BCD'
+        >>> normalize_elevation("D-A-C")
+        'ACD'
+        >>> normalize_elevation("**")
+        '**'
+    """
+    if not elevation_str:
+        return ""
+
+    # Preserve universal elevation marker
+    if elevation_str.strip() == "**":
+        return "**"
+
+    # Remove all non-letter characters and convert to uppercase
+    cleaned = ''.join(c.upper() for c in elevation_str if c.isalpha())
+
+    # Sort alphabetically (A, B, C, D order)
+    return ''.join(sorted(set(cleaned)))
+
+
+def test_normalize_elevation():
+    """Unit tests for normalize_elevation function"""
+    print("\n" + "="*80)
+    print("Testing normalize_elevation()")
+    print("="*80)
+
+    tests = [
+        ("B, C, D", "BCD"),
+        ("b/c/d", "BCD"),
+        ("BCD", "BCD"),
+        ("A", "A"),
+        ("D-A-C", "ACD"),
+        ("**", "**"),
+        ("B,C,D", "BCD"),
+        ("b c d", "BCD"),
+        ("ABCD", "ABCD"),
+        ("D,C,B,A", "ABCD"),
+        ("a", "A"),
+        ("", ""),
+        ("B-B-C-C", "BC"),  # Removes duplicates
+    ]
+
+    passed = 0
+    failed = 0
+
+    for input_val, expected in tests:
+        result = normalize_elevation(input_val)
+        if result == expected:
+            print(f"  ✓ normalize_elevation('{input_val}') = '{result}'")
+            passed += 1
+        else:
+            print(f"  ✗ normalize_elevation('{input_val}') = '{result}' (expected '{expected}')")
+            failed += 1
+
+    print("-"*80)
+    print(f"Tests passed: {passed}/{len(tests)}")
+    if failed > 0:
+        print(f"Tests FAILED: {failed}")
+        return False
+    else:
+        print("✓ All elevation normalizer tests PASSED")
+        return True
 
 
 def main():
