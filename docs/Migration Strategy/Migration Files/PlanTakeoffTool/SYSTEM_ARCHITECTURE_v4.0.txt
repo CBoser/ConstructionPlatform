@@ -1,0 +1,351 @@
+# RF TAKEOFF SYSTEM v4.0 - ARCHITECTURE DIAGRAM
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    RF FRAMING TAKEOFF SYSTEM v4.0                          │
+│                     UserForm-Driven Database Edition                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              USER INTERFACE                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                      DASHBOARD (Sheet)                                │  │
+│  │  • Project statistics                                                 │  │
+│  │  • Quick links to all sheets                                          │  │
+│  │  • "Start New Takeoff" button → Opens frmMain UserForm               │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                    ↓                                         │
+│  ┌──────────────────────────────────────────────────────────────────────┐  │
+│  │                    frmMain (UserForm)                                 │  │
+│  │                                                                        │  │
+│  │  Tab 0: Project Info         Tab 4: Roof                             │  │
+│  │  Tab 1: Post & Beam          Tab 5: Deck Framing                     │  │
+│  │  Tab 2: Floor Systems        Tab 6: Deck Surface                     │  │
+│  │  Tab 3: Walls                                                         │  │
+│  │                                                                        │  │
+│  │  Each tab includes:                                                   │  │
+│  │  • Input fields with validation                                       │  │
+│  │  • Auto-calculating fields                                            │  │
+│  │  • Built-in checklists                                                │  │
+│  │  • Critical warnings                                                  │  │
+│  │  • "Add Entry" or "Save" buttons                                     │  │
+│  └──────────────────────────────────────────────────────────────────────┘  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           VALIDATION LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────┐  ┌────────────────────────┐                    │
+│  │  modValidation (VBA)   │  │  ValidationRules (Sheet)│                   │
+│  │                        │  │                        │                    │
+│  │  • ValidateProjectInfo │  │  • Required fields     │                    │
+│  │  • ValidateWallEntry   │  │  • Numeric ranges      │                    │
+│  │  • ValidateRoofEntry   │  │  • Dropdown options    │                    │
+│  │  • ValidateDeckHardware│  │  • Format requirements │                    │
+│  │  • ValidateFloorBlocking│  │  • Error messages     │                    │
+│  └────────────────────────┘  └────────────────────────┘                    │
+│                                                                              │
+│  Validation Rules:                                                          │
+│  ✓ Required fields cannot be blank                                         │
+│  ✓ Numeric fields within valid ranges                                      │
+│  ✓ Dropdowns must have valid selections                                    │
+│  ✓ Format checking (e.g., pitch = X/12)                                    │
+│  ✓ Critical warnings (blocking, Z-MAX, composite)                          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         BUSINESS LOGIC LAYER                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                        modMain (VBA)                                │    │
+│  │                                                                      │    │
+│  │  • InitializeSystem() - Entry point                                │    │
+│  │  • GenerateEntryID() - Unique IDs for entries                      │    │
+│  │  • GenerateProjectID() - Unique project IDs                        │    │
+│  │  • GetPanelHeight() - Auto-select based on wall height             │    │
+│  │      └→ ≤8' = 8', ≤9' = 9', ≤10' = 10', else 12'                  │    │
+│  │  • CalculateJoistQty() - Calculate from spacing                    │    │
+│  │      └→ 12" = L+1, 16" = L/1.33+1, 19.2" = L/1.6+1, 24" = L/2+1   │    │
+│  │  • GetSlopeFactor() - Lookup from pitch                            │    │
+│  │      └→ 6/12 = 1.118, 8/12 = 1.202, etc.                           │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                    LookupTables (Sheet)                             │    │
+│  │                                                                      │    │
+│  │  • Roof Pitch → Slope Factor                                       │    │
+│  │  • Wall Height → Panel Height                                      │    │
+│  │  • Joist Spacing → Calculation formulas                            │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          DATA ACCESS LAYER                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                     modDatabase (VBA)                               │    │
+│  │                                                                      │    │
+│  │  Write Operations:                                                  │    │
+│  │  • SaveProject() → Database sheet                                  │    │
+│  │  • SaveWallEntry() → WallData sheet                                │    │
+│  │  • SaveRoofEntry() → RoofData sheet                                │    │
+│  │  • SavePostBeamEntry() → PostBeamData sheet                        │    │
+│  │  • SaveFloorEntry() → FloorSystemData sheet                        │    │
+│  │  • SaveDeckFramingEntry() → DeckFramingData sheet                  │    │
+│  │  • SaveDeckSurfaceEntry() → DeckSurfaceData sheet                  │    │
+│  │                                                                      │    │
+│  │  Read Operations:                                                   │    │
+│  │  • Query by Project ID                                             │    │
+│  │  • Filter by floor level                                           │    │
+│  │  • Sum quantities for materials                                    │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                     modTypes (VBA)                                  │    │
+│  │                                                                      │    │
+│  │  Data Structures:                                                   │    │
+│  │  • ProjectData (Type)                                              │    │
+│  │  • WallData (Type)                                                 │    │
+│  │  • RoofData (Type)                                                 │    │
+│  │  • PostBeamData (Type)                                             │    │
+│  │  • FloorSystemData (Type)                                          │    │
+│  │  • DeckFramingData (Type)                                          │    │
+│  │  • DeckSurfaceData (Type)                                          │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          DATABASE LAYER                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────┐                                                     │
+│  │   Database (Sheet) │  ◄── Master Project List                           │
+│  │                    │                                                     │
+│  │  Columns:          │                                                     │
+│  │  A: Project ID (PK)│  ◄── Primary Key: PROJ-001, PROJ-002, etc.        │
+│  │  B: Project Name   │                                                     │
+│  │  C: Project Number │                                                     │
+│  │  D: Client Name    │                                                     │
+│  │  E: Estimator      │                                                     │
+│  │  F: Date Created   │                                                     │
+│  │  G-J: Address      │                                                     │
+│  │  K: Building Type  │                                                     │
+│  │  L: Status         │                                                     │
+│  │  M: Stories        │                                                     │
+│  │  N: Has Deck       │                                                     │
+│  │  O: Total SF       │                                                     │
+│  │  P: Notes          │                                                     │
+│  └────────────────────┘                                                     │
+│           │                                                                  │
+│           │ (One-to-Many Relationships)                                     │
+│           │                                                                  │
+│  ┌────────┴───────┬────────────┬────────────┬──────────────┬─────────┐     │
+│  ↓                ↓            ↓            ↓              ↓         ↓     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐    │
+│  │ WallData │  │ RoofData │  │PostBeam  │  │FloorData │  │DeckData  │    │
+│  │          │  │          │  │Data      │  │          │  │Framing   │    │
+│  │ Entry ID │  │ Entry ID │  │Entry ID  │  │Entry ID  │  │Entry ID  │    │
+│  │Project ID│  │Project ID│  │Project ID│  │Project ID│  │Project ID│    │
+│  │Floor Lvl │  │Plan #    │  │Location  │  │Floor Lvl │  │Deck Area │    │
+│  │Wall ID   │  │Section   │  │Beam ID   │  │Area ID   │  │Post Size │    │
+│  │Length    │  │Run       │  │Beam Type │  │Joist Type│  │Beam Size │    │
+│  │Height    │  │Depth     │  │Beam Size │  │Spacing   │  │Joist Size│    │
+│  │Gross SF  │  │Pitch     │  │Beam Len  │  │Span Len  │  │Area Len  │    │
+│  │Opening SF│  │Slope     │  │Post Size │  │Span Dep  │  │Joist Qty │    │
+│  │Net SF    │  │Gross SF  │  │Post Qty  │  │Blocking  │  │Ledger LF │    │
+│  │Corners   │  │Ridge LF  │  │Plates    │  │Joist Qty │  │Hardware  │    │
+│  │Header LF │  │Hip LF    │  │Hangers   │  │Sheath SF │  │Z-MAX?    │    │
+│  │Panel Ht  │  │Valley LF │  │          │  │Glue Tubes│  │          │    │
+│  │Panel Qty │  │          │  │          │  │          │  │          │    │
+│  │Date      │  │Date      │  │Date      │  │Date      │  │Date      │    │
+│  │Verified  │  │Verified  │  │Verified  │  │Verified  │  │Verified  │    │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘  └──────────┘    │
+│                                                               ↓             │
+│                                                      ┌──────────────┐       │
+│                                                      │DeckSurface   │       │
+│                                                      │Data          │       │
+│                                                      │Entry ID      │       │
+│                                                      │Project ID    │       │
+│                                                      │Area ID       │       │
+│                                                      │Decking Type  │       │
+│                                                      │Area SF       │       │
+│                                                      │Board Qty     │       │
+│                                                      │Fascia LF     │       │
+│                                                      │Blocking Pcs  │       │
+│                                                      │Rail LF       │       │
+│                                                      │Post Qty      │       │
+│                                                      │Baluster Qty  │       │
+│                                                      │Date          │       │
+│                                                      │Verified      │       │
+│                                                      └──────────────┘       │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                      ↓
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        REPORTING & ANALYSIS LAYER                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                MaterialSummary (Sheet)                              │    │
+│  │                                                                      │    │
+│  │  Input: Project ID in cell B3                                      │    │
+│  │                                                                      │    │
+│  │  Auto-Generated Material List:                                     │    │
+│  │                                                                      │    │
+│  │  Walls:                                                            │    │
+│  │  • RF Wall Panels by height                                        │    │
+│  │    └→ =SUMIFS(WallData!O:O,WallData!B:B,$B$3,WallData!N:N,"8")   │    │
+│  │  • Plate Material                                                  │    │
+│  │    └→ =SUMIF(WallData!B:B,$B$3,WallData!G:G)*4.5                 │    │
+│  │  • Headers, Corners                                                │    │
+│  │                                                                      │    │
+│  │  Roof:                                                             │    │
+│  │  • Sheathing SF                                                    │    │
+│  │    └→ =SUMIF(RoofData!B:B,$B$3,RoofData!I:I)                     │    │
+│  │  • Ridge, Hip, Valley LF                                           │    │
+│  │                                                                      │    │
+│  │  Post/Beam:                                                        │    │
+│  │  • Beam LF, Posts, Hardware                                        │    │
+│  │    └→ =SUMIF(PostBeamData!B:B,$B$3,PostBeamData!I:I)             │    │
+│  │                                                                      │    │
+│  │  Floors:                                                           │    │
+│  │  • Joists, Sheathing, Glue, Hangers                               │    │
+│  │    └→ =SUMIF(FloorSystemData!B:B,$B$3,FloorSystemData!L:L)       │    │
+│  │  • BLOCKING LF (critical!)                                         │    │
+│  │                                                                      │    │
+│  │  Deck:                                                             │    │
+│  │  • Posts, Beams, Joists, Ledger                                   │    │
+│  │  • Z-MAX Hardware                                                  │    │
+│  │  • Decking, Fascia, Blocking, Rails                               │    │
+│  │                                                                      │    │
+│  │  Unit Prices (Column G) → Extended Costs (Column H)               │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+│  ┌────────────────────────────────────────────────────────────────────┐    │
+│  │                   Historical Analysis                               │    │
+│  │                                                                      │    │
+│  │  Query Examples:                                                   │    │
+│  │  • All projects by client                                          │    │
+│  │  • Average panels per SF of wall                                   │    │
+│  │  • Roof sheathing per SF of plan                                   │    │
+│  │  • Compare similar projects                                        │    │
+│  │  • Estimating accuracy tracking                                    │    │
+│  │  • Benchmark database building                                     │    │
+│  └────────────────────────────────────────────────────────────────────┘    │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             SUPPORT SHEETS                                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐          │
+│  │ Checklists       │  │ ValidationRules  │  │ UserFormGuide    │          │
+│  │                  │  │                  │  │                  │          │
+│  │ Project Setup ☐  │  │ Field rules      │  │ Installation     │          │
+│  │ Post & Beam ☐    │  │ Error messages   │  │ VBA code refs    │          │
+│  │ Floor Systems ☐  │  │ Validation logic │  │ Control layout   │          │
+│  │ Walls ☐          │  │                  │  │                  │          │
+│  │ Roof ☐           │  │                  │  │                  │          │
+│  │ Deck Framing ☐   │  │                  │  │                  │          │
+│  │ Deck Surface ☐   │  │                  │  │                  │          │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘          │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+═════════════════════════════════════════════════════════════════════════════
+                             DATA FLOW EXAMPLE
+═════════════════════════════════════════════════════════════════════════════
+
+USER ACTION: Click "Add Entry" button on Wall tab of UserForm
+
+                                    ↓
+                    
+1. UserForm Code → btnAddWall_Click()
+   • Collects data from form fields
+   • Creates WallData structure
+                                    ↓
+                    
+2. modValidation → ValidateWallEntry()
+   • Checks length: 0.1 to 1000
+   • Checks height: 0.1 to 20
+   • Verifies numeric fields
+   • Returns errors collection
+                                    ↓
+                    
+3. If valid → modMain → GetPanelHeight()
+   • Wall height = 9.0'
+   • Returns "9" (9' panels)
+                                    ↓
+                    
+4. modDatabase → SaveWallEntry()
+   • Generates Entry ID: WALL-0042
+   • Writes to WallData sheet row 43
+   • Project ID: PROJ-001
+   • Floor Level: 1st
+   • Length: 24.5'
+   • Height: 9.0'
+   • Gross SF: 220.5 (calculated)
+   • Opening SF: 40.0
+   • Net SF: 180.5 (calculated)
+   • Panel Height: 9 (auto-selected)
+   • Panel Qty: =K43/36 (formula)
+   • Date: 2025-10-18
+   • Verified: Yes
+                                    ↓
+                    
+5. Confirmation
+   • UserForm shows success message
+   • Entry added to lstWalls ListBox
+   • Form clears for next entry
+                                    ↓
+                    
+6. Material Summary (When Queried)
+   • User enters PROJ-001 in B3
+   • Formula: =SUMIFS(WallData!O:O,WallData!B:B,$B$3,WallData!N:N,"9")
+   • Sums all 9' panel quantities for PROJ-001
+   • Result displays in material list
+
+═════════════════════════════════════════════════════════════════════════════
+                            KEY DESIGN PATTERNS
+═════════════════════════════════════════════════════════════════════════════
+
+1. SEPARATION OF CONCERNS
+   • UI Layer (UserForm) - User interaction only
+   • Business Logic (modMain) - Calculations and rules
+   • Validation (modValidation) - Input checking
+   • Data Access (modDatabase) - Database operations
+   • Types (modTypes) - Data structures
+
+2. DATABASE-CENTRIC
+   • All data stored in structured tables
+   • Unique IDs for referential integrity
+   • Query-based material generation
+   • Historical data retention
+
+3. VALIDATION-FIRST
+   • No data saved until validated
+   • Clear error messages
+   • Critical warnings for common mistakes
+
+4. AUTO-CALCULATION
+   • Minimize manual entry
+   • Leverage Excel formulas
+   • Real-time updates
+
+5. GUIDED WORKFLOW
+   • Stage-by-stage progression
+   • Built-in checklists
+   • Required fields enforced
+
+═════════════════════════════════════════════════════════════════════════════
+```

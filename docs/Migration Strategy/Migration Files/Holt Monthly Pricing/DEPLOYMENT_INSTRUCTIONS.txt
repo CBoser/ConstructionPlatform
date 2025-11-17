@@ -1,0 +1,131 @@
+================================================================================
+HOLT HOMES BAT UPDATER - DEPLOYMENT INSTRUCTIONS
+================================================================================
+Updated for Local Path: C:\Users\corey.boser\Documents\Holt Monthly Pricing\
+================================================================================
+
+STEP 1: COPY ALL FILES
+----------------------
+Copy ALL these files to your local folder:
+C:\Users\corey.boser\Documents\Holt Monthly Pricing\
+
+Files to copy:
+✅ holt_updater.py         - Main updater script
+✅ holt_csv_importer.py    - CSV import functionality  
+✅ simple_updater.py        - Simplified universal updater
+✅ RUN_HOLT_UPDATE.bat      - One-click Excel updater
+✅ RUN_HOLT_UPDATE.ps1      - PowerShell alternative
+✅ IMPORT_CSV_TO_BAT.bat    - One-click CSV importer
+✅ SETUP_PYTHON.bat         - Python setup helper
+✅ Price_Update_TEMPLATE.csv - Example CSV format
+✅ QUICK_REFERENCE.md       - Quick reference guide
+✅ HOLT_HOMES_README.md     - Full documentation
+
+================================================================================
+
+STEP 2: SETUP PYTHON (One-Time Only)
+------------------------------------
+1. Double-click SETUP_PYTHON.bat
+2. This will:
+   - Check if Python is installed
+   - Install the required openpyxl library
+   - Confirm everything is ready
+
+If Python is NOT installed:
+1. Download from https://python.org
+2. During installation, CHECK "Add Python to PATH" ✅
+3. Run SETUP_PYTHON.bat again
+
+================================================================================
+
+STEP 3: VERIFY YOUR BAT FILE
+----------------------------
+Make sure this file exists:
+C:\Users\corey.boser\Documents\Holt Monthly Pricing\HOLT BAT OCTOBER 2025 9-29-25.xlsm
+
+The file must have these sheets:
+- updatetool_MarginUpdates (or MARGINS TO CHANGE)
+- costsheet_UnconvertedPricing
+
+================================================================================
+
+DAILY USAGE - THREE OPTIONS
+---------------------------
+
+OPTION 1: Update from Excel (Most Common)
+-----------------------------------------
+1. Open your BAT file in Excel
+2. Add margin updates to "updatetool_MarginUpdates" sheet
+3. Save and close Excel
+4. Double-click RUN_HOLT_UPDATE.bat
+5. Find updated file with timestamp
+
+OPTION 2: Import from CSV Then Update
+-------------------------------------
+1. Create Price_Update.csv (use template as guide)
+2. Place CSV in same folder as scripts
+3. Double-click IMPORT_CSV_TO_BAT.bat
+4. Creates two timestamped files
+
+OPTION 3: Command Line (Advanced)
+---------------------------------
+Open Command Prompt in your folder and run:
+python holt_updater.py "HOLT BAT OCTOBER 2025 9-29-25.xlsm"
+
+================================================================================
+
+FILE DESCRIPTIONS
+----------------
+
+PYTHON SCRIPTS:
+• holt_updater.py       - Main updater, reads from Excel, applies to pricing
+• holt_csv_importer.py  - Imports CSV, creates margin table, runs updater
+• simple_updater.py     - Simplified version for any BAT structure
+
+BATCH FILES:
+• RUN_HOLT_UPDATE.bat   - Double-click to update from Excel
+• IMPORT_CSV_TO_BAT.bat - Double-click to import CSV and update
+• SETUP_PYTHON.bat      - Checks/installs Python requirements
+
+DOCUMENTATION:
+• QUICK_REFERENCE.md    - Quick guide with examples
+• HOLT_HOMES_README.md  - Complete documentation
+• Price_Update_TEMPLATE.csv - Example CSV format
+
+================================================================================
+
+TROUBLESHOOTING
+--------------
+
+"Python not found":
+→ Run SETUP_PYTHON.bat
+
+"File not found":
+→ Check file exists in: C:\Users\corey.boser\Documents\Holt Monthly Pricing\
+
+"No updates applied":
+→ Check Pricing Zone and Category match exactly
+→ Ensure Base Cost > 0 in pricing sheet
+
+================================================================================
+
+OUTPUT FILES
+-----------
+All scripts create timestamped backups:
+
+Original: HOLT BAT OCTOBER 2025 9-29-25.xlsm
+Updated:  HOLT BAT OCTOBER 2025 9-29-25_UPDATED_20250929_1430.xlsm
+
+Never overwrites original file!
+
+================================================================================
+
+READY TO USE!
+------------
+1. Copy all files to your folder
+2. Run SETUP_PYTHON.bat once
+3. Double-click RUN_HOLT_UPDATE.bat whenever you need to update prices
+
+================================================================================
+Version: 1.0 | Updated: September 2025 | For: Holt Homes
+================================================================================
