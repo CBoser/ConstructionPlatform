@@ -193,6 +193,138 @@ def parse_holt_code(code: str, mapping: dict = HOLT_MAPPING) -> dict:
         }
 
 
+# ============================================================================
+# PHASE 1: ITEM TYPE MAPPER
+# ============================================================================
+
+def map_item_type(customer_term: str, customer_type: str = 'holt') -> str:
+    """
+    Map customer terminology to unified item type codes.
+
+    Handles various customer-specific terms and activity codes,
+    maps them to standardized item type codes with fuzzy matching.
+
+    Args:
+        customer_term: Customer's term for item type
+            - Holt: Activity codes like "4085", "4155"
+            - Richmond: Terms like "Framing", "Siding", "Lumber"
+            - Custom: Any text description
+        customer_type: 'holt', 'richmond', or 'custom'
+
+    Returns:
+        Item type code (e.g., "1000", "2100", "9999" for unknown)
+
+    Examples:
+        >>> map_item_type("4085", "holt")
+        '1000'
+        >>> map_item_type("Framing", "richmond")
+        '1000'
+        >>> map_item_type("lumber", "custom")
+        '1000'
+        >>> map_item_type("siding", "custom")
+        '2100'
+    """
+    if not customer_term:
+        return "9999"  # Unknown
+
+    # Convert to lowercase for matching
+    term_lower = str(customer_term).lower().strip()
+
+    # Holt activity code mapping
+    if customer_type == 'holt':
+        holt_activity_map = HOLT_MAPPING['activity_to_item_type']
+        return holt_activity_map.get(customer_term, holt_activity_map['default'])
+
+    # General taxonomy mapping (works for Richmond and Custom)
+    taxonomy = {
+        # Framing / Structural (1000 series)
+        '1000': ['framing', 'lumber', 'wood', 'dimensional', 'stud', 'joist', 'beam', 'post'],
+        '1100': ['engineered', 'tji', 'lvl', 'lsl', 'glulam', 'i-joist'],
+        '1200': ['hardware', 'connector', 'hanger', 'fastener', 'nail', 'screw', 'bolt'],
+        '1300': ['concrete', 'foundation', 'rebar', 'cement', 'form'],
+
+        # Exterior Envelope (2000 series)
+        '2000': ['sheathing', 'osb', 'plywood', 'housewrap', 'tyvek', 'wrap'],
+        '2100': ['siding', 'cladding', 'lap', 'panel', 'shake', 'shingle exterior'],
+        '2200': ['roofing', 'shingle', 'underlayment', 'flashing', 'ridge', 'starter'],
+        '2300': ['window', 'door', 'entry', 'glass', 'patio door', 'sliding door'],
+        '2400': ['trim exterior', 'fascia', 'soffit', 'frieze', 'corner'],
+
+        # Rough Mechanicals (3000 series)
+        '3000': ['plumbing', 'pipe', 'pex', 'copper', 'drain', 'vent'],
+        '3100': ['electrical', 'wire', 'romex', 'box', 'outlet', 'switch'],
+        '3200': ['hvac', 'duct', 'furnace', 'ac', 'air conditioning', 'vent'],
+
+        # Interior Finish (4000 series)
+        '4000': ['drywall', 'gypsum', 'sheetrock', 'mud', 'tape', 'compound'],
+        '4100': ['trim interior', 'baseboard', 'casing', 'crown', 'molding', 'moulding'],
+        '4200': ['flooring', 'carpet', 'tile', 'hardwood', 'laminate', 'vinyl'],
+        '4300': ['cabinet', 'vanity', 'countertop', 'counter top'],
+
+        # Final / Appliances (5000 series)
+        '5000': ['fixture', 'light fixture', 'faucet', 'sink', 'toilet', 'shower'],
+        '5100': ['appliance', 'refrigerator', 'stove', 'dishwasher', 'microwave'],
+        '5200': ['hardware finish', 'doorknob', 'handle', 'hinge', 'lockset'],
+    }
+
+    # Search taxonomy for matches
+    for item_code, keywords in taxonomy.items():
+        for keyword in keywords:
+            if keyword in term_lower:
+                return item_code
+
+    # No match found
+    return "9999"
+
+
+def test_map_item_type():
+    """Unit tests for map_item_type function"""
+    print("\n" + "="*80)
+    print("Testing map_item_type()")
+    print("="*80)
+
+    tests = [
+        # Holt codes
+        ("4085", "holt", "1000"),
+        ("4155", "holt", "2100"),
+        ("4215", "holt", "2200"),
+
+        # Richmond/Custom terms
+        ("Framing", "richmond", "1000"),
+        ("Lumber", "custom", "1000"),
+        ("lumber", "custom", "1000"),
+        ("Siding", "richmond", "2100"),
+        ("siding", "custom", "2100"),
+        ("Roofing", "custom", "2200"),
+        ("Windows", "custom", "2300"),
+        ("Drywall", "custom", "4000"),
+        ("Cabinets", "custom", "4300"),
+        ("Unknown Item", "custom", "9999"),
+        ("", "custom", "9999"),
+    ]
+
+    passed = 0
+    failed = 0
+
+    for term, cust_type, expected in tests:
+        result = map_item_type(term, cust_type)
+        if result == expected:
+            print(f"  ✓ map_item_type('{term}', '{cust_type}') = '{result}'")
+            passed += 1
+        else:
+            print(f"  ✗ map_item_type('{term}', '{cust_type}') = '{result}' (expected '{expected}')")
+            failed += 1
+
+    print("-"*80)
+    print(f"Tests passed: {passed}/{len(tests)}")
+    if failed > 0:
+        print(f"Tests FAILED: {failed}")
+        return False
+    else:
+        print("✓ All item type mapper tests PASSED")
+        return True
+
+
 # Example usage and testing
 if __name__ == "__main__":
     # Test Holt parsing
