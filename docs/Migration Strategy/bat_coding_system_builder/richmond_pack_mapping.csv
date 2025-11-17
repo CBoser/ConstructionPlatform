@@ -1,0 +1,20 @@
+Richmond_Pack,Unified_Phase,Pack_Name,Shipping_Order
+|10,010.000,Foundation,10
+|12,012.000,Slab/Crawl,12
+|18,018.000,Foundation Accessories,18
+|20,020.000,Main Floor System,20
+|22,022.000,Main Floor Sheathing,22
+|23,023.000,Joist Hangers,23
+|27,027.000,Floor Accessories,27
+|30,030.000,Main Walls,30
+|32,032.000,Second Floor Walls,32
+|34,034.000,Wall Sheathing,34
+|37,037.000,Wall Accessories,37
+|40,040.000,Roof Trusses,40
+|42,042.000,Roof Framing,42
+|43,043.000,Roof Sheathing,43
+|58,058.000,Exterior Trim,58
+|60,060.000,Siding,60
+|62,062.000,Soffit/Fascia,62
+|63,063.000,Exterior Accessories,63
+|76,076.000,Special Items,76

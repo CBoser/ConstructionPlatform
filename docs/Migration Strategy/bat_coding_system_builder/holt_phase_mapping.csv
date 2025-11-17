@@ -1,0 +1,27 @@
+Holt_Phase,Unified_Phase,Phase_Name,Description
+000,000.000,Pre-Construction,Site prep and permits
+001,001.000,Site Work,Excavation and grading
+002,002.000,Utilities,Underground utilities
+007,007.000,Foundation Prep,Foundation preparation
+010,010.000,Foundation,Foundation and footings
+020,020.000,Main Floor,Main floor framing
+030,030.000,Upper Floor,Second floor framing
+040,040.000,Roof Framing,Roof trusses and framing
+043,043.000,Roof Deck,Roof sheathing
+050,050.000,Roofing,Roofing materials
+051,051.000,Roof Accessories,"Vents, flashings"
+060,060.000,Housewrap,Weather barrier
+061,061.000,Windows/Doors,Window and door installation
+100,100.000,Rough-In Start,Mechanicals rough-in prep
+101,101.000,Plumbing Rough,Plumbing rough-in
+110,110.000,HVAC Rough,HVAC rough-in
+111,111.000,Electrical Rough,Electrical rough-in
+112,112.000,Insulation,Wall and ceiling insulation
+113,113.000,Drywall,Drywall installation
+115,115.000,Interior Doors,Interior door installation
+120,120.000,Interior Trim,"Baseboards, casing, crown"
+307,307.000,Specialty Item,Special construction item
+950,950.000,Upgrades,Customer upgrades
+997,997.000,Adjustments,Cost adjustments
+998,998.000,Credits,Credits and allowances
+999,999.000,Unassigned,Unclassified items
