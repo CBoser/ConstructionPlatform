@@ -74,6 +74,8 @@ ConstructionPlatform/
 ├── tools/              # Development framework tools
 ├── docs/               # All documentation
 │   ├── framework/      # Framework guides and tools docs
+│   ├── methodology/    # ADRs, lessons learned, metrics
+│   ├── migration/      # BAT migration docs and testing
 │   ├── sessions/       # Development session notes
 │   ├── skills/         # Skill definitions
 │   ├── analysis/       # System analysis documents
@@ -86,6 +88,12 @@ ConstructionPlatform/
 ├── database/          # Database schemas and migrations
 └── shared/            # Shared types and utilities
 ```
+
+### Methodology & Decisions
+Architecture decisions, lessons learned, and project metrics are tracked in `docs/methodology/`:
+- **decisions/** - Architecture Decision Records (ADRs) capturing "why" behind major choices
+- **lessons/** - Phase-level lessons learned
+- **metrics/** - Aggregate development metrics
 
 ---
 
