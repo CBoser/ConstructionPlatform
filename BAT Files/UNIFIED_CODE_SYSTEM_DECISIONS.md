@@ -30,7 +30,9 @@ Before proceeding with the cross-reference tables and VBA integration, the follo
 ## Decision 2: Phase/Pack Code Mapping
 
 **Holt Phases** (from OptionPhase column):
-- Uses codes like 010, 020, 030, 040 with activity suffixes (4085, 4155-4162)
+- Uses 2-digit phase codes: 10, 11, 18-21, 25, 40, 83
+- Phase 10 = Elevations, Phase 11 = Siding add-ons, Phase 40 = Windows, Phase 83 = Doors & Trim
+- Cost codes are separate: 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 
 **Richmond Packs** (from PackID column):
 - Uses |10, |11, |12, |20, |22, |30, |34, |40, |42, etc.
@@ -38,12 +40,14 @@ Before proceeding with the cross-reference tables and VBA integration, the follo
 
 **Question:** How should these map to unified phase codes?
 
-| Richmond Pack | Holt Phase | Unified Code? |
-|---------------|------------|---------------|
-| \|10 Foundation | 010 Foundation | ??? |
-| \|20 Main Walls | 020 Main Floor | ??? |
-| \|30 2nd Floor | 030 Upper Floor | ??? |
-| \|40 Roof | 040 Roof | ??? |
+| Richmond Pack | Holt Phase | Description |
+|---------------|------------|-------------|
+| \|10 Foundation | 10 Elevations | Base house options |
+| \|20 Main Walls | 11 Siding | Siding add-ons |
+| \|30 2nd Floor | 20 Structural | Structural options |
+| \|40 Roof | 83 Doors/Trim | Doors & trim |
+
+**Note:** Holt and Richmond phases don't directly align - they use different categorization systems.
 
 ---
 
@@ -89,16 +93,15 @@ Options:
 
 ## Decision 5: Item Type Codes
 
-**Holt Activity Codes:**
-- 4085 = Framing Lumber
-- 4155 = Siding
-- 4156 = Roofing
-- 4157 = Windows/Doors
-- 4158 = Exterior Trim
-- 4159 = Interior Trim
-- 4160 = Fixtures
-- 4161 = Hardware
-- 4162 = Misc
+**Holt Cost Codes (8 total - CORRECTED):**
+- 4085 = Lumber
+- 4086 = Lumber - Barge Credit
+- 4120 = Trusses
+- 4140 = Window Supply
+- 4142 = Window Supply - U-22 Triple Pane (WA)
+- 4150 = Exterior Door Supply
+- 4155 = Siding Supply
+- 4320 = Interior Trim Supply - Millwork
 
 **Richmond Item Types:**
 - 1000 = Framing
@@ -106,7 +109,7 @@ Options:
 - (others TBD)
 
 **Question:** Which item type numbering to use?
-- [ ] Keep Holt's 4-digit activity codes (4085, 4155, etc.)
+- [ ] Keep Holt's 4-digit cost codes (4085, 4086, 4120, etc.)
 - [ ] Use simpler categories (1000, 2000, 3000)
 - [ ] Create new unified item type codes
 

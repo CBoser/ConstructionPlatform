@@ -120,8 +120,9 @@ D  = Elevation D only
 - Combined: AB, CD, ABCD
 
 **Holt Elevations:**
-- Uses numbers: 00, 05, 70, etc.
-- More granular tracking
+- Encoded in Item_No first digit (not separate field)
+- 1=A, 2=B, 3=C, 4=D, 5=Corner Enhanced, 6=Rear Enhanced
+- Example: Item_No 100 = Elevation A Base, 200 = Elevation B Base
 
 ---
 
@@ -147,12 +148,16 @@ D  = Elevation D only
 
 **Examples:**
 ```
-4085 = Nails/fasteners
-4086 = Bolts/anchors
-2085 = Studs (2x4, 2x6)
-3085 = Trim boards
+4085 = Lumber (Holt)
+4086 = Lumber - Barge Credit (Holt)
+4120 = Trusses (Holt)
+4140 = Window Supply (Holt)
+4155 = Siding Supply (Holt)
+4320 = Interior Trim - Millwork (Holt)
 9000 = Default/unknown
 ```
+
+**Holt Cost Codes (8 total):** 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 
 ---
 

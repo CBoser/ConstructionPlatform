@@ -38,23 +38,27 @@
 
 ## Code Format Analysis
 
-### Unified Code Format: `PPPP-PPP-EE - IIII`
+### Holt Code Format: `{Plan}{Phase}{ItemNo} - {CostCode}`
 
 **Example:** `167010100 - 4085`
 
 | Component | Position | Example | Description |
 |-----------|----------|---------|-------------|
-| Plan | Digits 1-4 | `1670` | Plan number |
-| Phase | Digits 5-7 | `101` | Phase code (3 digits) |
-| Elevation | Digits 8-9 | `00` | Elevation code (2 digits) |
-| Item Type | After ` - ` | `4085` | Item type code (4 digits) |
+| Plan | Digits 1-4 | `1670` | Plan number (4 digits) |
+| Phase | Digits 5-6 | `10` | Phase code (2 digits) |
+| Item_No | Digits 7-9 | `100` | Elevation + Option (3 digits) |
+| Cost Code | After ` - ` | `4085` | Cost code (4 digits) |
+
+**Item_No Breakdown:**
+- First digit = Elevation category (1=A, 2=B, 3=C, 4=D, 5=Corner, 6=Rear)
+- Last two digits = Option variant (00=base, 05=3-car garage, etc.)
 
 ### Code Examples
 
 ```
-167010100 - 4085  →  Plan: 1670, Phase: 101, Elev: 00, Item: 4085
-167010200 - 4085  →  Plan: 1670, Phase: 102, Elev: 00, Item: 4085
-189003004 - 4155  →  Plan: 1890, Phase: 030, Elev: 04, Item: 4155
+167010100 - 4085  →  Plan: 1670, Phase: 10, Item_No: 100 (Elev A, Base), Cost: 4085
+167010200 - 4085  →  Plan: 1670, Phase: 10, Item_No: 200 (Elev B, Base), Cost: 4085
+189011310 - 4155  →  Plan: 1890, Phase: 11, Item_No: 310 (Elev C, Option 10), Cost: 4155
 ```
 
 ---
@@ -69,10 +73,11 @@
 2184, 2299, 2336, 266B, 266i, 266j, 277e, 298e
 ```
 
-**Phases Found:** 17 unique phase codes
+**Phases Found:** 24 unique phase codes (2-digit)
 ```
-010, 030, 040, 101, 102, 103, 104, 105, 106,
-110, 111, 112, 195, 199, 200, 203, 204
+0-9 (Base house), 10 (Elevations), 11 (Siding add-ons), 13 (Specialty siding),
+18 (Balconies), 19 (Retreats), 20 (Structural), 21 (Floor/storage),
+25 (Bath), 36 (Smart home), 40 (Windows), 49, 80, 83 (Doors & trim)
 ```
 
 **Elevations Found:** 31 unique elevation codes
@@ -80,10 +85,11 @@
 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, ...
 ```
 
-**Item Types Found:** 12 unique item types
+**Cost Codes Found:** 8 unique cost codes
 ```
-4085, 4155, 4156, 4157, 4158, 4159, 4160,
-4161, 4162 (plus some whitespace variations)
+4085 (Lumber), 4086 (Lumber - Barge Credit), 4120 (Trusses),
+4140 (Window Supply), 4142 (Window Supply - U-22 Triple Pane),
+4150 (Exterior Door Supply), 4155 (Siding Supply), 4320 (Interior Trim - Millwork)
 ```
 
 **Total Unique Codes:** 521 plan-phase-elevation-item combinations
@@ -104,11 +110,11 @@ UOM:          MBF
 ```
 
 **Interpretation:**
-This single material (bracing) applies to 4 different plan-phase combinations:
-- Plan 1670, Phase 101, Elevation 00, Item Type 4085
-- Plan 1670, Phase 102, Elevation 00, Item Type 4085
-- Plan 1670, Phase 103, Elevation 00, Item Type 4085
-- Plan 1670, Phase 104, Elevation 00, Item Type 4085
+This single material (bracing) applies to 4 different elevation variants:
+- Plan 1670, Phase 10, Item_No 100 (Elevation A Base), Cost Code 4085 (Lumber)
+- Plan 1670, Phase 10, Item_No 200 (Elevation B Base), Cost Code 4085 (Lumber)
+- Plan 1670, Phase 10, Item_No 300 (Elevation C Base), Cost Code 4085 (Lumber)
+- Plan 1670, Phase 10, Item_No 400 (Elevation D Base), Cost Code 4085 (Lumber)
 
 ---
 
@@ -210,52 +216,64 @@ Entry 2:
 
 ```python
 def parse_holt_code(self, code_str: str) -> Dict:
-    """Parse Holt unified code into components
+    """Parse Holt code into components
 
     Args:
         code_str: Code like "167010100 - 4085"
 
     Returns:
-        Dict with plan, phase, elevation, item_type
+        Dict with plan, phase, item_no, elevation_category, option, cost_code
 
     Example:
         "167010100 - 4085" → {
             'plan': '1670',
-            'phase': '101',
-            'elevation': '00',
-            'item_type': '4085',
-            'full_code': '1670-101.000-00-4085'
+            'phase': '10',
+            'item_no': '100',
+            'elevation_category': 'A',
+            'option_variant': '00',
+            'cost_code': '4085',
+            'full_code': '167010100 - 4085'
         }
     """
-    # Split on ' - ' to separate main code from item type
+    # Split on ' - ' to separate main code from cost code
     parts = code_str.strip().split(' - ')
     if len(parts) != 2:
         return {'error': f"Invalid code format: {code_str}"}
 
     main_part = parts[0].strip()
-    item_type = parts[1].strip()
+    cost_code = parts[1].strip()
 
-    # Parse main part: PPPPPPPPEE (9 digits)
+    # Parse main part: PPPPPPIII (9 digits)
     # Plan: digits 0-3 (4 digits)
-    # Phase: digits 4-6 (3 digits)
-    # Elevation: digits 7-8 (2 digits)
+    # Phase: digits 4-5 (2 digits)
+    # Item_No: digits 6-8 (3 digits)
 
     if len(main_part) != 9:
         return {'error': f"Main code should be 9 digits, got {len(main_part)}: {main_part}"}
 
     plan = main_part[0:4]
-    phase = main_part[4:7]
-    elevation = main_part[7:9]
+    phase = main_part[4:6]
+    item_no = main_part[6:9]
 
-    # Build unified code: PPPP-PPP.000-EE-IIII
-    full_code = f"{plan}-{phase}.000-{elevation}-{item_type}"
+    # Parse Item_No for elevation info
+    first_digit = int(item_no[0])
+    last_two = item_no[1:3]
+
+    # Determine elevation category
+    elevation_map = {
+        1: 'A', 2: 'B', 3: 'C', 4: 'D',
+        5: 'Corner Enhanced', 6: 'Rear Enhanced'
+    }
+    elevation = elevation_map.get(first_digit, f'Other ({first_digit})')
 
     return {
         'plan': plan,
         'phase': phase,
-        'elevation': elevation,
-        'item_type': item_type,
-        'full_code': full_code,
+        'item_no': item_no,
+        'elevation_category': elevation,
+        'option_variant': last_two,
+        'cost_code': cost_code,
+        'full_code': code_str,
         'error': None
     }
 ```
@@ -277,15 +295,15 @@ def parse_holt_code(self, code_str: str) -> Dict:
 
 Before running full Holt import, validate:
 
-- [ ] Code parser handles all 521 unique codes
+- [ ] Code parser handles all unique codes
 - [ ] One-to-many expansion works correctly
 - [ ] Plan numbers are preserved (1670, 1890, etc.)
-- [ ] Phase codes maintain 3-digit format (101, 102, 030)
-- [ ] Elevation codes maintain 2-digit format (00, 01, 04)
-- [ ] Item types are correctly extracted (4085, 4155, etc.)
+- [ ] Phase codes maintain 2-digit format (10, 11, 20, 40, 83)
+- [ ] Item_No codes maintain 3-digit format (100, 200, 505)
+- [ ] Cost codes are correctly extracted (4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320)
 - [ ] SKUs and quantities are preserved
 - [ ] No duplicate entries created
-- [ ] All 9,373 materials process successfully
+- [ ] All materials process successfully
 - [ ] Database entries match expected count
 
 ---

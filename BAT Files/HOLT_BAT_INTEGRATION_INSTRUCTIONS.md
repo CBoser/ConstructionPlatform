@@ -133,12 +133,19 @@ Check these rows manually:
 **Row 2 (Holt Material):**
 - PlanTable: `plan_1670ABCD_CR`
 - OptionPhase: `167010100 - 4085 , 167010200 - 4085 , ...`
-- Expected UnifiedCode: `1670-010.000-ABCD-1000`
+- Holt Code Breakdown:
+  - `167010100 - 4085` = Plan 1670, Phase 10, Item_No 100 (Elev A Base), Cost 4085 (Lumber)
+  - `167010200 - 4085` = Plan 1670, Phase 10, Item_No 200 (Elev B Base), Cost 4085 (Lumber)
+- Expected UnifiedCode: Format TBD based on unified system decisions
 
 **Row with Richmond Material:**
 - PlanTable: (varies)
 - PackID: `|10ABCD FOUNDATION`
 - Expected UnifiedCode: `XXXX-010.000-ABCD-1000` (XXXX = plan number)
+
+**Note:** Holt code format is `{Plan 4}{Phase 2}{ItemNo 3} - {CostCode}`
+- Item_No first digit = elevation (1=A, 2=B, 3=C, 4=D, 5=Corner, 6=Rear)
+- Holt Cost Codes: 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 
 ### Check for Errors
 1. Filter Column E for cells containing "ERROR"

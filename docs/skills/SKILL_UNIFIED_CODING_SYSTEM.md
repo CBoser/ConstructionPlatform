@@ -322,14 +322,18 @@ CREATE TABLE holt_option_translations (
     holt_code TEXT PRIMARY KEY,      -- 9-digit: 167010100
     plan_id TEXT NOT NULL,
     phase_option_code TEXT NOT NULL,
-    elevation_code TEXT,
+    item_no TEXT NOT NULL,           -- 3-digit: elevation + option
+    cost_code TEXT NOT NULL,         -- 4-digit: 4085, 4155, etc.
     description TEXT,
     FOREIGN KEY (plan_id) REFERENCES plans(plan_id),
     FOREIGN KEY (phase_option_code) REFERENCES phase_option_definitions(phase_code)
 );
 
--- Holt 9-digit format: [PLAN 4][PHASE 2][OPTION 2][ELEVATION 2]
--- Example: 167010100 → Plan 1670, Phase 01, Option 01, Elevation A (100=A)
+-- Holt 9-digit format: [PLAN 4][PHASE 2][ITEM_NO 3] - [COST_CODE]
+-- Item_No: first digit = elevation (1=A, 2=B, 3=C, 4=D, 5=Corner, 6=Rear)
+--          last two digits = option variant (00=base, 05=3-car garage)
+-- Example: 167010100 - 4085 → Plan 1670, Phase 10, Item_No 100 (Elev A Base), Cost 4085 (Lumber)
+-- Holt Cost Codes: 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 ```
 
 ## Common Query Patterns

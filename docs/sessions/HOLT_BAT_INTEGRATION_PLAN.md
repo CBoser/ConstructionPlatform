@@ -23,9 +23,22 @@
 OptionPhase: "167010100 - 4085 , 167010200 - 4085 , 167010300 - 4085 , 167010400 - 4085"
 
 Breakdown:
-- 167010100 = Plan 1670, Elevation 1 (A), Phase 010, Sequence 00
-- 4085 = Activity code (Framing/Lumber)
-- Comma-separated = one material used in multiple elevations
+- 167010100 = Plan 1670, Phase 10, Item_No 100
+  - Plan: 1670 (4 digits)
+  - Phase: 10 (2 digits) - Elevations phase
+  - Item_No: 100 (3 digits) - First digit 1=Elevation A, last two 00=Base
+- 4085 = Cost code (Lumber)
+- Comma-separated = one material used in multiple Item_No variants (100=A, 200=B, 300=C, 400=D)
+
+Actual Holt Cost Codes (8 total):
+- 4085 = Lumber
+- 4086 = Lumber - Barge Credit
+- 4120 = Trusses
+- 4140 = Window Supply
+- 4142 = Window Supply - U-22 Triple Pane
+- 4150 = Exterior Door Supply
+- 4155 = Siding Supply
+- 4320 = Interior Trim Supply - Millwork
 ```
 
 #### 2. Richmond PackID Format
@@ -72,22 +85,28 @@ Components:
 #### Task 1.1: Holt Activity → Item Type Mapper
 **Already built in Python:** `customer_code_mapping.py:map_item_type()`
 
-**Current mappings:**
+**Actual Holt Cost Codes (8 total):**
 ```python
-'4085': '1000',  # Framing/Lumber
-'4155': '2100',  # Siding
-'4215': '2200',  # Roofing
-'4125': '2300',  # Windows/Doors
+'4085': 'Lumber',
+'4086': 'Lumber - Barge Credit',
+'4120': 'Trusses',
+'4140': 'Window Supply',
+'4142': 'Window Supply - U-22 Triple Pane',
+'4150': 'Exterior Door Supply',
+'4155': 'Siding Supply',
+'4320': 'Interior Trim Supply - Millwork'
 ```
 
-**Action:** Expand this mapping to cover all Holt activities found in the 9,374 material rows.
+**Action:** Map these 8 cost codes to unified item types.
 
 #### Task 1.2: Create Holt Phase → Unified Phase Mapper
-**Holt phases found:**
-- 010 = Foundation
-- 020 = Main Walls
-- 030 = Upper Walls
-- 040 = Roof Trusses
+**Holt phases found (2-digit):**
+- 10 = Elevations (base house options)
+- 11 = Siding add-ons
+- 18-21 = Structural options (balconies, retreats, patios)
+- 25 = Bath options
+- 40 = Window options
+- 83 = Doors & trim
 
 **Action:** Build complete phase mapping table.
 
@@ -189,11 +208,15 @@ End Function
 #### Test Cases:
 1. **Holt material with multi-elevation code:**
    - Input: `"167010100 - 4085 , 167010200 - 4085"`
-   - Expected: `"1670-010.000-AB-1000"` (combined elevations)
+   - Breakdown: Plan 1670, Phase 10, Item_No 100 (Elev A) and 200 (Elev B), Cost Code 4085 (Lumber)
+   - Expected unified code format TBD
 
 2. **Richmond material:**
    - Input: `"|10.82BCD"`
    - Expected: `"1670-010.820-BCD-1000"`
+
+**Note:** Holt code structure is: `{Plan 4-digit}{Phase 2-digit}{ItemNo 3-digit} - {CostCode}`
+Item_No first digit = elevation (1=A, 2=B, 3=C, 4=D, 5=Corner, 6=Rear), last two = option variant
 
 3. **Pricing lookup still works**
 4. **Material extraction exports both formats**
