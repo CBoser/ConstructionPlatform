@@ -1,227 +1,257 @@
-# Holt Code Hierarchy
+# Holt Code Structure
 
 ## Overview
-Holt uses a systematic hierarchical numeric code structure with clear parent-child relationships.
+Holt uses a composite numeric code structure that encodes Plan, Phase, and Option/Elevation information into a single identifier, paired with a Cost Code.
 
-## Hierarchy Levels
+## Composite Code Format
 
-### Level 1: Division (XX.00.00.000)
-Top-level material divisions
+**Format:** `{Plan}{Phase}{ItemNo} - {CostCode}`
 
-**Structure**: Two-digit number
-**Increment**: By 10
-**Range**: 10-99
+**Example:** `154210100 - 4085`
 
-**Example Divisions**:
-- **10** - Concrete & Foundations
-- **20** - Framing & Structure
-- **30** - Electrical
-- **40** - Plumbing
-- **50** - HVAC
-- **60** - Finishes
-- **70** - Fixtures
-- **80** - Openings (Doors/Windows)
-- **90** - Roofing & Exterior
+| Component | Digits | Example | Description |
+|-----------|--------|---------|-------------|
+| Plan | 4 | 1542 | Plan number |
+| Phase | 2 | 10 | Phase category |
+| Item_No | 3 | 100 | Elevation + Option variant |
+| Cost Code | 4 | 4085 | Material/Activity type |
 
-### Level 2: Category (10.XX.00.000)
-Material categories within divisions
+## Code Components Breakdown
 
-**Structure**: Two-digit number
-**Increment**: By 10 or smaller
-**Range**: 10-99
+### 1. Plan Number (4 digits)
+The plan identifier, representing distinct house plans.
 
-**Example** (Division 10 - Concrete):
-- **10.10** - Ready-mix concrete
-- **10.20** - Concrete accessories
-- **10.30** - Formwork
-- **10.40** - Reinforcing
+**Examples:**
+- 1542, 1632, 1633, 1649, 1656, 1669, 1670
+- 1816, 1890, 1987, 2009, 2157, 2184, 2260
+- 2299, 2321, 2336, 2383, 2414, 2674, 2676
+- 2978, 3297, 3370, 8000, 8021, 8022, 8023
 
-### Level 3: Subcategory (10.20.XX.000)
-Specific material types
+### 2. Phase Number (2 digits)
+Categorizes the type of option or construction phase.
 
-**Structure**: Two-digit number
-**Increment**: By 10 or smaller
-**Range**: 10-99
+| Phase | Category | Description |
+|-------|----------|-------------|
+| 0-9 | Base House | Plan-specific base house definitions |
+| 10 | Elevations | Standard elevations (A, B, C, D) and enhanced versions |
+| 11 | Siding Add-ons | Faux Wood colors, Masonry finishes |
+| 12-13 | Base/Specialty | Base house or specialty siding |
+| 18 | SH Balconies | Covered rear balconies, soffits |
+| 19 | Retreats | Optional retreats with patios |
+| 20 | Structural Add-ons | Covered patios, dens, bedrooms |
+| 21 | Floor/Storage | Open web joists, storage options |
+| 25 | Bath Options | Tub at primary, mudset showers |
+| 36 | Smart Home | Smart home packages |
+| 40 | Windows | Window frame color options |
+| 49 | Transom Windows | Above entry door |
+| 80 | Fireplaces | Double-sided gas fireplace |
+| 83 | Doors & Trim | 8' interior doors, crown molding, baseboards |
 
-**Example** (Category 10.20 - Accessories):
-- **10.20.10** - Anchor bolts
-- **10.20.20** - Expansion joints
-- **10.20.30** - Sealants
-- **10.20.40** - Coatings
+### 3. Item Number (3 digits)
+Encodes both the Elevation and the Option variant.
 
-### Level 4: Item (10.20.30.XXX)
-Individual materials
+**Structure:** First digit = Elevation Category, Last two digits = Option Variant
 
-**Structure**: Three-digit number
-**Increment**: Sequential
-**Range**: 001-999
+#### Elevation Categories (First Digit)
 
-**Example** (Subcategory 10.20.30 - Sealants):
-- **10.20.30.001** - Silicone sealant 10oz
-- **10.20.30.002** - Polyurethane sealant
-- **10.20.30.003** - Acrylic sealant
+| First Digit | Elevation Category | Description |
+|-------------|-------------------|-------------|
+| 1 | Elevation A | Standard Elevation A options |
+| 2 | Elevation B | Standard Elevation B options |
+| 3 | Elevation C | Standard Elevation C options |
+| 4 | Elevation D | Standard Elevation D options |
+| 5 | Corner Enhanced | Corner enhanced options |
+| 6 | Rear Enhanced | Rear enhanced options |
+| 7+ | Other Options | Various other options |
 
-## Complete Hierarchy Example
+#### Option Variants (Last Two Digits)
 
+| Last Two | Option | Example |
+|----------|--------|---------|
+| 00 | Base | 100 = Elevation A Base |
+| 01 | Gable End Sheathing | 101 = Elevation A Gable |
+| 05 | 3 Car Garage | 105 = Elevation A 3-Car |
+
+**Special Pattern for Enhanced Options (5xx, 6xx):**
+
+For Corner Enhanced (5xx) and Rear Enhanced (6xx), the last two digits encode which elevation:
+- 00 = Elevation A
+- 05 = Elevation B
+- 10 = Elevation C
+- 15 = Elevation D
+
+**Examples:**
+- 500 = Corner Enhanced - Elevation A
+- 505 = Corner Enhanced - Elevation B
+- 510 = Corner Enhanced - Elevation C
+- 515 = Corner Enhanced - Elevation D
+
+### 4. Cost Code (4 digits)
+Identifies the material/activity type.
+
+| Code | Activity | Description | Count |
+|------|----------|-------------|-------|
+| 4085 | Lumber | Structural lumber | 356 |
+| 4086 | Lumber - Barge Credit | Transportation credit | 24 |
+| 4120 | Trusses | Roof trusses | 117 |
+| 4140 | Window Supply | Standard windows | 177 |
+| 4142 | Window Supply - U-22 | WA triple pane upgrade | 56 |
+| 4150 | Exterior Door Supply | Entry/garage doors | 13 |
+| 4155 | Siding Supply | Exterior siding | 386 |
+| 4320 | Interior Trim - Millwork | Interior trim | 260 |
+
+## Complete Code Examples
+
+### Example 1: Base Elevation
 ```
-10 - Concrete & Foundations (Division)
-├── 10.10 - Ready-mix Concrete (Category)
-│   ├── 10.10.10 - Standard Mix (Subcategory)
-│   │   ├── 10.10.10.001 - 3000 PSI Mix
-│   │   ├── 10.10.10.002 - 4000 PSI Mix
-│   │   └── 10.10.10.003 - 5000 PSI Mix
-│   └── 10.10.20 - Specialty Mix
-│       ├── 10.10.20.001 - Fiber-reinforced
-│       └── 10.10.20.002 - Self-leveling
-├── 10.20 - Concrete Accessories
-│   ├── 10.20.10 - Anchor Bolts
-│   └── 10.20.20 - Expansion Joints
-└── 10.30 - Formwork
-    ├── 10.30.10 - Forms
-    └── 10.30.20 - Form Accessories
+154210100 - 4085
+│   │ │     │
+│   │ │     └── 4085 = Lumber
+│   │ └──────── 100 = Elevation A Base (1=A, 00=base)
+│   └────────── 10 = Phase 10 (Elevations)
+└────────────── 1542 = Plan Number
 ```
 
-## Systematic Benefits
+**Description:** Plan 1542, Elevation A Base, Lumber
 
-### Expandability
-Easy to add new items without restructuring:
-- New item in existing subcategory: 10.20.30.004
-- New subcategory: 10.20.50
-- New category: 10.50
-- New division: 100 (if needed)
-
-### Querying
-Hierarchical queries simple:
-```sql
--- All concrete items
-SELECT * FROM materials WHERE item_code LIKE '10.%'
-
--- All concrete accessories
-SELECT * FROM materials WHERE item_code LIKE '10.20.%'
-
--- All anchor bolts
-SELECT * FROM materials WHERE item_code LIKE '10.20.10.%'
+### Example 2: Option Variant
+```
+163210205 - 4120
+│   │ │     │
+│   │ │     └── 4120 = Trusses
+│   │ └──────── 205 = Elevation B, 3-Car Garage (2=B, 05=3-car)
+│   └────────── 10 = Phase 10 (Elevations)
+└────────────── 1632 = Plan Number
 ```
 
-### Organization
-Clear parent-child relationships:
-- Items roll up to subcategories
-- Subcategories roll up to categories
-- Categories roll up to divisions
+**Description:** Plan 1632, Elevation B, 3-Car Garage Option, Trusses
 
-## Division Details
+### Example 3: Corner Enhanced
+```
+154210505 - 4155
+│   │ │     │
+│   │ │     └── 4155 = Siding Supply
+│   │ └──────── 505 = Corner Enhanced - Elevation B
+│   └────────── 10 = Phase 10 (Elevations)
+└────────────── 1542 = Plan Number
+```
 
-### 10 - Concrete & Foundations
-**Item Count**: ~1,100
-**Categories**: Ready-mix, accessories, formwork, reinforcing
+**Description:** Plan 1542, Corner Enhanced Elevation B, Siding Supply
 
-### 20 - Framing & Structure
-**Item Count**: ~1,800
-**Categories**: Lumber, engineered wood, metal framing, fasteners
+### Example 4: Door/Trim Option
+```
+163283069 - 4085
+│   │ │     │
+│   │ │     └── 4085 = Lumber
+│   │ └──────── 69 = 8' Interior Swing Doors
+│   └────────── 83 = Phase 83 (Doors & Trim)
+└────────────── 1632 = Plan Number
+```
 
-### 30 - Electrical
-**Item Count**: ~1,300
-**Categories**: Wire/cable, panels, devices, fixtures
+**Description:** Plan 1632, 8' Interior Swing Doors Option, Lumber
 
-### 40 - Plumbing
-**Item Count**: ~1,200
-**Categories**: Pipe, fittings, fixtures, valves
+## Parsing Logic
 
-### 50 - HVAC
-**Item Count**: ~800
-**Categories**: Equipment, ductwork, vents, controls
+### Code Parser Function
+```python
+def parse_holt_code(code_str: str) -> dict:
+    """Parse Holt code into components
 
-### 60 - Finishes
-**Item Count**: ~2,400
-**Categories**: Drywall, paint, flooring, tile, trim
+    Args:
+        code_str: Code like "154210100 - 4085"
 
-### 70 - Fixtures & Appliances
-**Item Count**: ~900
-**Categories**: Cabinets, appliances, countertops
+    Returns:
+        Dict with plan, phase, item_no, elevation, option, cost_code
+    """
+    parts = code_str.strip().split(' - ')
+    if len(parts) != 2:
+        return {'error': f"Invalid format: {code_str}"}
 
-### 80 - Openings
-**Item Count**: ~1,200
-**Categories**: Doors, windows, hardware
+    main_part = parts[0].strip()
+    cost_code = parts[1].strip()
 
-### 90 - Roofing & Exterior
-**Item Count**: ~600
-**Categories**: Roofing, siding, gutters
+    if len(main_part) != 9:
+        return {'error': f"Main code should be 9 digits: {main_part}"}
 
-## Naming Convention
+    plan = main_part[0:4]      # First 4 digits
+    phase = main_part[4:6]     # Next 2 digits
+    item_no = main_part[6:9]   # Last 3 digits
 
-**Division Names**: Broad material groups
-**Category Names**: Specific material types
-**Subcategory Names**: Detailed classifications
-**Item Names**: Individual products with specs
+    # Parse Item_No for elevation info
+    first_digit = int(item_no[0])
+    last_two = int(item_no[1:3])
 
-## Code Assignment Rules
+    # Determine elevation category
+    elevation_map = {
+        1: 'A', 2: 'B', 3: 'C', 4: 'D',
+        5: 'Corner Enhanced', 6: 'Rear Enhanced'
+    }
+    elevation = elevation_map.get(first_digit, f'Other ({first_digit})')
 
-### New Item Assignment
-1. Identify appropriate division
-2. Select relevant category
-3. Choose subcategory
-4. Assign next available item number
-
-### Reserved Ranges
-- x9.xx.xx - Reserved for future expansion
-- xx.99.xx - Special items
-- xx.xx.99.xxx - Miscellaneous
+    return {
+        'plan': plan,
+        'phase': phase,
+        'item_no': item_no,
+        'elevation_category': elevation,
+        'option_variant': last_two,
+        'cost_code': cost_code,
+        'full_code': code_str
+    }
+```
 
 ## Comparison to Richmond
 
 | Aspect | Holt | Richmond |
 |--------|------|----------|
-| Structure | Hierarchical (4 levels) | Flat (prefix only) |
-| Expandability | Easy (add numbers) | Hard (new prefixes) |
-| Readability | Requires reference | Intuitive prefixes |
-| Organization | Systematic | Ad-hoc |
-| Validation | Programmatic | Manual |
-| Total Items | ~9,373 | ~55,604 |
+| Format | Numeric composite | Mnemonic abbreviations |
+| Example | 154210100 - 4085 | XGREAT, 3CARA |
+| Plan Encoding | In code (1542) | Separate field |
+| Elevation | In Item_No (1xx=A) | Letter suffix (A, B, C) |
+| Readability | Requires parsing | Human-readable |
+| Consistency | Systematic | Ad-hoc |
 
-## Migration to Unified
+## Key Advantages
 
-### Holt → Hybrid Mapping
-Holt codes can map cleanly to hybrid system:
+### Systematic Structure
+- Plan number always in same position
+- Phase always 2 digits
+- Item_No always 3 digits
+- Predictable parsing
 
-**Holt**: 10.20.30.001
-**Hybrid**: 10.CONC.030.001
+### Elevation Encoding
+- Single location (Item_No first digit)
+- No triple-encoding like Richmond
+- Clear and consistent
 
-Strategy:
-- Keep division number (10)
-- Add mnemonic hint (CONC)
-- Keep rest of hierarchy
+### Cost Code Standardization
+- Only 8 cost codes
+- Same meaning across all plans
+- Easy to categorize materials
 
-### Benefits
-- Preserves Holt structure
-- Adds Richmond readability
-- No data loss
-- Smooth transition
+## Best Practices
 
-## Efficiency Analysis
+### Code Generation
+1. Validate plan number exists (4 digits)
+2. Validate phase is known (2 digits)
+3. Build Item_No from elevation + option
+4. Append appropriate cost code
 
-**Why Holt Has Fewer Items** (9,373 vs Richmond's 55,604):
+### Code Validation
+1. Check total length (9 digits + separator + 4 digits)
+2. Verify plan number is valid
+3. Verify phase exists in system
+4. Verify cost code is one of 8 valid codes
 
-1. **Better Standardization**: Fewer duplicate materials
-2. **Consolidation**: Grouped similar items
-3. **Smaller Operation**: Fewer plans/communities
-4. **Efficient Management**: Less material proliferation
+### Database Storage
+Store both parsed components and full code:
+- `full_code`: "154210100 - 4085"
+- `plan`: "1542"
+- `phase`: "10"
+- `item_no`: "100"
+- `cost_code`: "4085"
 
-**Lesson**: Systematic codes promote efficiency
+---
 
-## Best Practices Demonstrated
-
-✅ Clear hierarchy
-✅ Logical groupings
-✅ Easy expansion
-✅ Programmatic validation
-✅ Minimal duplication
-✅ Efficient organization
-
-## Adoption for Unified System
-
-**Recommendations**:
-1. Use Holt's division structure (10, 20, 30...)
-2. Keep hierarchical levels
-3. Add mnemonic hints for readability
-4. Maintain systematic expansion
-5. Adopt validation rules
+**Document Updated:** 2025-11-18
+**Source:** Holt_Cost_Codes_20251118.xlsx (1,309 rows)
+**Status:** Corrected based on actual Holt data analysis
