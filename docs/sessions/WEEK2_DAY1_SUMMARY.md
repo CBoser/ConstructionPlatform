@@ -15,7 +15,9 @@
 ### 2. Code Systems Documented ✅
 
 **Current Code Systems in Use:**
-- **Holt OptionPhase Format:** `"167010100 - 4085"` (Plan-Elevation-Phase-Activity)
+- **Holt OptionPhase Format:** `"167010100 - 4085"` (Plan-Phase-ItemNo - CostCode)
+  - Format: `{Plan 4-digit}{Phase 2-digit}{ItemNo 3-digit} - {CostCode}`
+  - Item_No first digit = elevation (1=A, 2=B, 3=C, 4=D, 5=Corner, 6=Rear)
 - **Richmond PackID Format:** `"|10ABCD FOUNDATION"` (Pack-Elevations-Name)
 - **Their Unified Format:** `PPPP-PPP.000-EE-IIII` (already defined in CODE LEGEND!)
 
@@ -24,27 +26,26 @@
 ### 3. Unique Code Extraction ✅
 
 **Analyzed all 9,374 material rows and extracted:**
-- **15 Plans:** 1649, 1670, 1890, 2184, 2299, 2321, 2336, 2383, 2414, 2676, 168i, 169e, 172e, 177i, 178e
-- **26 Holt Phases:** 000-999 (Foundation, Walls, Roof, etc.)
-- **9 Holt Activities:** 4085, 4155-4162 (Lumber, Siding, Roofing, etc.)
+- **28 Plans:** 1542, 1632, 1633, 1649, 1656, 1669, 1670, 1816, 1890, etc.
+- **24 Holt Phases:** 2-digit codes (0-9, 10, 11, 18-21, 25, 40, 83, etc.)
+- **8 Holt Cost Codes:** 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 - **19 Richmond Packs:** |10 through |76
 
 ### 4. Mapping Tables Created ✅
 
 **Built 4 comprehensive mapping tables:**
 
-#### Table 1: Holt Activity → Item Type
-| Holt Activity | Unified Item Type | Name |
-|---------------|------------------|------|
-| 4085 | 1000 | Framing Lumber |
-| 4155 | 2100 | Siding |
-| 4156 | 2200 | Roofing |
-| 4157 | 2300 | Windows/Doors |
-| 4158 | 2400 | Exterior Trim |
-| 4159 | 4100 | Interior Trim |
-| 4160 | 5000 | Fixtures |
-| 4161 | 1200 | Hardware |
-| 4162 | 8000 | Misc Materials |
+#### Table 1: Holt Cost Codes (CORRECTED)
+| Holt Cost Code | Description | Count |
+|----------------|-------------|-------|
+| 4085 | Lumber | 356 |
+| 4086 | Lumber - Barge Credit | 24 |
+| 4120 | Trusses | 117 |
+| 4140 | Window Supply | 177 |
+| 4142 | Window Supply - U-22 Triple Pane (WA) | 56 |
+| 4150 | Exterior Door Supply | 13 |
+| 4155 | Siding Supply | 386 |
+| 4320 | Interior Trim Supply - Millwork | 260 |
 
 #### Table 2: Holt Phase → Unified Phase (26 phases)
 Maps construction phases from Holt format to unified format with proper sequencing.
@@ -61,7 +62,7 @@ Master list with plan details, elevations, and communities.
 
 **Contents (5 sheets):**
 1. **📖 USAGE_GUIDE** - Instructions for using the lookup tables
-2. **Holt_Activity_Lookup** - 9 activity mappings
+2. **Holt_Activity_Lookup** - 8 cost code mappings
 3. **Holt_Phase_Lookup** - 26 phase mappings
 4. **Richmond_Pack_Lookup** - 19 pack mappings
 5. **Plan_Master** - 15 plan records
@@ -106,9 +107,9 @@ Currently handling BOTH systems simultaneously:
 - Perfect position to add our unified codes!
 
 ### 3. Manageable Scope
-- Only 9 Holt activities (not hundreds!)
-- Only 26 phases (well-defined)
-- 15 plans (reasonable number)
+- Only 8 Holt cost codes (not hundreds!)
+- 24 phases (2-digit, well-defined)
+- 28 plans (reasonable number)
 - This is very doable!
 
 ### 4. Existing Formula Quality
@@ -174,10 +175,10 @@ Their formulas are well-written with:
 
 **Analysis Scope:**
 - 107 sheets reviewed
-- 9,374 material rows analyzed
-- 15 unique plans identified
-- 26 Holt phases mapped
-- 9 Holt activities mapped
+- 1,309 cost code rows analyzed (from Holt_Cost_Codes_20251118.xlsx)
+- 28 unique plans identified
+- 24 Holt phases mapped (2-digit)
+- 8 Holt cost codes mapped
 - 19 Richmond packs mapped
 
 **Deliverables:**
