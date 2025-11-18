@@ -298,18 +298,21 @@ VALUES
 ### Step 2: Import Holt BAT Data
 
 For each Holt pack:
-1. Parse Holt's hierarchical code (e.g., `167010200-4085`)
-2. Map to unified phase code using translation table
+1. Parse Holt's code (e.g., `167010100 - 4085`)
+   - Format: `{Plan 4-digit}{Phase 2-digit}{ItemNo 3-digit} - {CostCode}`
+   - Plan: 1670, Phase: 10, Item_No: 100, Cost Code: 4085
+2. Extract elevation from Item_No first digit (1=A, 2=B, 3=C, 4=D)
 3. Create Layer 1 code entry
 4. Import all line items as Layer 2 materials
 5. Link via `code_id`
 
-**Translation Logic:**
+**Holt Code Structure:**
 ```
-Holt Code Pattern → Unified Phase Code
-167010200-XXXX   → 10.00 (Foundation)
-167020000-XXXX   → 20.00 (Main Walls)
+167010100 - 4085 → Plan 1670, Phase 10 (Elevations), Item_No 100 (Elev A Base), Cost 4085 (Lumber)
+167011310 - 4155 → Plan 1670, Phase 11 (Siding), Item_No 310 (Elev C, Option 10), Cost 4155 (Siding)
 ```
+
+**Holt Cost Codes:** 4085, 4086, 4120, 4140, 4142, 4150, 4155, 4320
 
 ### Step 3: Import Richmond 3BAT Data
 
