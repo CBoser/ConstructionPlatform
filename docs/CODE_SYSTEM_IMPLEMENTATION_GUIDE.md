@@ -1,6 +1,7 @@
 # Code System Implementation Guide
 
 **Created:** 2025-11-14
+**Updated:** 2025-11-18
 **Status:** Ready for Implementation
 **Database Schema:** `database/schema/unified_code_system.sql`
 
@@ -13,8 +14,8 @@ This guide explains how to use the unified two-layer code system for managing co
 ### Two-Layer Design
 
 **Layer 1: Aggregate Codes** (Estimating/Quoting)
-- Format: `PLAN-PHASE/OPTION-MATERIALCLASS`
-- Example: `1234-20.00-1000` (Plan 1234, Main Walls, Framing)
+- Format: `PLAN-PHASE/OPTION-ELEV-MATERIALCLASS`
+- Example: `1234-20.00-AB-1000` (Plan 1234, Main Walls, Elevation, Framing)
 - Purpose: High-level pricing, quotes, estimates
 - Table: `layer1_codes`
 
@@ -28,9 +29,10 @@ This guide explains how to use the unified two-layer code system for managing co
 
 ### Full Code Structure
 ```
-XXXX-XX.XX-XXXX
- │    │     └─── Material Class (4 digits: 1000=Framing, 1100=Siding)
- │    └───────── Phase/Option Code (2-4 chars: numeric or alpha)
+XXXX-XX.XX-XX-XXXX
+ │    │     │  └─── Material Class (4 digits: 1000=Framing, 1100=Siding)
+ │    │     └─ Elevation Code (2 chars: A, B, C, D)
+ │    └────── Phase/Option Code (2-4 chars: numeric or alpha)
  └────────────── Plan Number (4 digits)
 ```
 
@@ -45,10 +47,10 @@ XXXX-XX.XX-XXXX
 - `60.00` - Exterior Trim and Siding
 
 **Numeric Options:**
-- `10.82` - Optional Den Foundation
-- `20.21` - Deluxe Master Bath Option 1
+- `xx.82` - Optional Den Foundation
+- `xx.21` - Deluxe Master Bath Option 1
 
-**Alpha Variants:**
+**Alpha Variants:** Note: These need to be mapped to numeric codes in the system.
 - `10.tc` - Tall Crawl
 - `20.rf` - ReadyFrame Walls
 - `60.pw` - Post Wrap
@@ -56,7 +58,7 @@ XXXX-XX.XX-XXXX
 
 ### No Code Collisions
 - Phase codes start with 1-9 (e.g., `10.00`, `20.rf`)
-- Elevation codes start with 0 (e.g., `01`, `02`, `03`, `04`)
+- Elevation codes are alphabetical (e.g., `A`, `B`, `C`, `D`)
 - This prevents confusion between phases and elevations
 
 ## Database Tables
@@ -74,6 +76,7 @@ XXXX-XX.XX-XXXX
 
 **`richmond_option_codes`**
 - Richmond's mnemonic codes (WO, XGREAT, SUN, DBA, etc.)
+- Richmond's Elevation codes are denoted with ELV (ELVA, ELVB, etc.)
 - Maps to phase codes where applicable
 - Supports multi-phase options
 
@@ -126,7 +129,7 @@ Returns all applicable codes for Plan 1234, Elevation B, ordered by shipping seq
 
 ```sql
 SELECT * FROM v_materials_complete
-WHERE layer1_code = '1234-20.00-1000';
+WHERE layer1_code = '1234-20.00-ABCD-1000';
 ```
 
 Shows all SKU-level materials for this aggregate code.
