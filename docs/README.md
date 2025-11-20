@@ -4,59 +4,62 @@
 
 ---
 
-## 📚 Documentation Structure
+## Documentation Structure
 
 ```
 docs/
-├── README.md                      # This file - documentation index
-├── PROJECT_MANAGEMENT.md          # Project management guide and review cadences
+├── README.md                 # This file - documentation index
 │
-├── sprints/                       # Sprint-specific documentation
-│   ├── sprint-01/
-│   │   ├── RETROSPECTIVE.md      # Sprint 1 retrospective and lessons learned
-│   │   ├── day-01.md             # Daily logs (optional)
-│   │   ├── day-02.md
-│   │   └── ...
-│   └── sprint-02/
-│       └── ...
+├── getting-started/          # Onboarding and setup
+│   ├── SETUP.md             # Detailed setup instructions
+│   ├── QUICK_START.md       # Quick reference guide
+│   ├── LAUNCH_GUIDE.md      # Launch instructions
+│   └── WINDOWS_SETUP.md     # Windows-specific setup
 │
-├── lessons-learned/               # Deep technical lessons and reusable patterns
-│   ├── README.md                 # Purpose and structure guide
-│   ├── sprint-01-security-foundation.md  # Sprint 1 detailed lessons
-│   └── sprint-02-xxx.md          # Future sprint lessons
+├── api/                      # API documentation
+│   ├── API_VERSIONING.md    # API versioning strategy
+│   ├── AUDIT_LOGGING.md     # Audit logging documentation
+│   ├── CORS_HARDENING.md    # CORS configuration
+│   └── RATE_LIMITING.md     # Rate limiting setup
 │
-├── time-tracking/                 # Time tracking and velocity data
-│   ├── TEMPLATE.md               # Time tracking template and instructions
-│   ├── 2025-11-week1.md          # Week 1 time log (Nov 7-15)
-│   └── 2025-11-week2.md          # Future weeks
+├── guides/                   # How-to guides
+│   ├── DAILY_WORKFLOW.md    # Development workflow
+│   ├── DEVOPS_TOOL.md       # DevOps tool usage
+│   ├── AUTH_TESTING_GUIDE.md # Authentication testing
+│   └── PROJECT_MANAGEMENT.md # Project management guide
 │
-├── technical-debt/                # Technical debt management
-│   └── REGISTER.md               # Active technical debt register
+├── architecture/             # Architecture Decision Records
+│   └── ADR-NNN-title.md     # Decision documents
 │
-├── architecture/                  # Architecture decisions (future)
-│   └── ADR-NNN-title.md          # Architecture Decision Records
+├── database/                 # Database documentation
 │
-├── runbooks/                      # Operational procedures (future)
-│   └── ...
+├── sprints/                  # Sprint documentation
+│   ├── sprint-01/           # Sprint 1 docs
+│   └── phase-reviews/       # Phase reviews
 │
-└── incidents/                     # Incident reports (future)
-    └── YYYY-MM-DD-title.md
+├── time-tracking/            # Time tracking logs
+│   └── YYYY-MM-weekN.md     # Weekly time logs
+│
+└── archive/                  # Historical documentation
+    ├── session-notes/       # Old session notes
+    ├── planning/            # Archived planning docs
+    └── lessons-learned/     # Sprint lessons learned
 ```
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### For Developers
 
 **First Time Setup**:
-1. Read [../QUICK_START.md](../QUICK_START.md) for platform setup
-2. Read [../DEVOPS_TOOL.md](../DEVOPS_TOOL.md) for DevOps tooling
-3. Read [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) for workflow
+1. Read [getting-started/SETUP.md](getting-started/SETUP.md) for platform setup
+2. Read [guides/DEVOPS_TOOL.md](guides/DEVOPS_TOOL.md) for DevOps tooling
+3. Read [guides/PROJECT_MANAGEMENT.md](guides/PROJECT_MANAGEMENT.md) for workflow
 
 **Daily Workflow**:
 1. Start of day: Review yesterday's progress
-2. During work: Log time using [time-tracking/TEMPLATE.md](time-tracking/TEMPLATE.md)
+2. During work: Log time using time-tracking files
 3. End of day: Update time log, document blockers
 4. Friday: Do weekly review (30 min)
 

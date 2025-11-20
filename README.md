@@ -32,7 +32,7 @@ npm run dev                             # Launch frontend + backend
 
 Access the app at **http://localhost:5173**
 
-For detailed instructions, see [docs/LAUNCH_GUIDE.md](./docs/LAUNCH_GUIDE.md)
+For detailed instructions, see [docs/getting-started/LAUNCH_GUIDE.md](./docs/getting-started/LAUNCH_GUIDE.md)
 
 ---
 
@@ -43,25 +43,24 @@ This project uses the **Corey Dev Framework** for sustainable, high-quality deve
 ### Framework Tools
 
 Located in `tools/`:
-- **create_sprint.py** - Create sprint structure with documentation
-- **log_time.py** - Track 30-minute development sessions
-- **run_validation.py** - Run automated quality checks
-- **sql_practice.py** - Track SQL learning progress
+- **utils/create_sprint.py** - Create sprint structure with documentation
+- **utils/log_time.py** - Track 30-minute development sessions
+- **validation/run_validation.py** - Run automated quality checks
+- **utils/sql_practice.py** - Track SQL learning progress
 
 ```bash
 # Create a sprint
-python tools/create_sprint.py 1
+python tools/utils/create_sprint.py 1
 
 # Track development time
-python tools/log_time.py start
-python tools/log_time.py end "What you accomplished"
+python tools/utils/log_time.py start
+python tools/utils/log_time.py end "What you accomplished"
 
 # Validate code quality
-python tools/run_validation.py quick
+python tools/validation/run_validation.py quick
 ```
 
 **Learn More:**
-- [Framework Tools Guide](./docs/framework/FRAMEWORK_TOOLS.md)
 - [Tools README](./tools/README.md)
 - [Learning Materials](./learning/)
 
@@ -71,29 +70,52 @@ python tools/run_validation.py quick
 
 ```
 ConstructionPlatform/
-├── tools/              # Development framework tools
-├── docs/               # All documentation
-│   ├── framework/      # Framework guides and tools docs
-│   ├── methodology/    # ADRs, lessons learned, metrics
-│   ├── migration/      # BAT migration docs and testing
-│   ├── sessions/       # Development session notes
-│   ├── skills/         # Skill definitions
-│   ├── analysis/       # System analysis documents
-│   └── sprints/        # Sprint planning and tracking
-├── learning/           # Learning materials and roadmaps
-│   └── sql/           # SQL curriculum (8-week program)
-├── scripts/           # Deployment and setup scripts
-├── backend/           # Backend API (Node.js + Express)
-├── frontend/          # Frontend UI (React + TypeScript)
-├── database/          # Database schemas and migrations
-└── shared/            # Shared types and utilities
+├── README.md           # This file - main entry point
+├── QUICK_START.md      # 5-minute setup guide
+├── CONTRIBUTING.md     # Contribution guidelines
+├── CHANGELOG.md        # Version history
+│
+├── frontend/           # React application (Vite + TypeScript)
+│   └── src/
+│       ├── components/ # Reusable UI (common/, layout/, customers/, etc.)
+│       ├── pages/      # Route pages (customers/, materials/, jobs/, etc.)
+│       ├── services/   # API client services
+│       ├── hooks/      # Custom React hooks
+│       ├── contexts/   # React contexts (Auth, Theme)
+│       └── styles/     # Global styles
+│
+├── backend/            # Node.js API (Express + Prisma)
+│   └── src/
+│       ├── routes/     # API route definitions
+│       ├── controllers/# Request handlers
+│       ├── services/   # Business logic
+│       ├── middleware/ # Express middleware
+│       └── validators/ # Input validation
+│
+├── shared/             # Shared TypeScript types and constants
+├── docs/               # Documentation
+│   ├── getting-started/# Installation, architecture, tech stack
+│   ├── api/            # API documentation
+│   ├── guides/         # How-to guides
+│   ├── architecture/   # Architecture Decision Records
+│   ├── sprints/        # Sprint planning and tracking
+│   └── archive/        # Historical documentation
+│
+├── scripts/            # Automation scripts
+│   ├── dev/            # Development (setup, launch-dev)
+│   ├── deploy/         # Deployment scripts
+│   └── maintenance/    # Maintenance scripts
+│
+├── tools/              # Python data tools
+│   ├── validation/     # Data validation tools
+│   ├── utils/          # Sprint, time tracking utilities
+│   └── import/         # Data import tools
+│
+└── learning/           # Learning materials and roadmaps
 ```
 
-### Methodology & Decisions
-Architecture decisions, lessons learned, and project metrics are tracked in `docs/methodology/`:
-- **decisions/** - Architecture Decision Records (ADRs) capturing "why" behind major choices
-- **lessons/** - Phase-level lessons learned
-- **metrics/** - Aggregate development metrics
+### Architecture Decisions
+Architecture Decision Records (ADRs) are tracked in `docs/architecture/`, capturing the "why" behind major choices.
 
 ---
 
@@ -409,7 +431,7 @@ The DevOps tool provides an interactive menu for:
 - Project tree generation
 - System diagnostics and health checks
 
-See [docs/DEVOPS_TOOL.md](./docs/DEVOPS_TOOL.md) for detailed usage.
+See [docs/guides/DEVOPS_TOOL.md](./docs/guides/DEVOPS_TOOL.md) for detailed usage.
 
 #### Option 3: Manual Setup
 
@@ -824,7 +846,7 @@ The DevOps tool provides:
 - Development server control
 - Project tree generation
 
-See [docs/DEVOPS_TOOL.md](./docs/DEVOPS_TOOL.md) for detailed troubleshooting guides.
+See [docs/guides/DEVOPS_TOOL.md](./docs/guides/DEVOPS_TOOL.md) for detailed troubleshooting guides.
 
 ### Database Connection Issues
 ```bash

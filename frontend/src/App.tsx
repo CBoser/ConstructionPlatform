@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, ProtectedRoute } from './contexts/AuthContext';
-import { ToastProvider } from './components/ui/Toast';
+import { ToastProvider } from './components/common/Toast';
 import MainLayout from './components/layout/MainLayout';
 
 // Create a client
@@ -23,26 +23,30 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 
-// Foundation pages
-import Customers from './pages/foundation/Customers';
+// Customer pages
+import Customers from './pages/customers';
 import CustomerDetail from './pages/customers/CustomerDetail';
-import Plans from './pages/foundation/Plans';
-import Materials from './pages/foundation/Materials';
 
-// Operations pages
-import Jobs from './pages/operations/Jobs';
-import Takeoffs from './pages/operations/Takeoffs';
+// Material pages
+import Materials from './pages/materials';
+
+// Plan pages
+import Plans from './pages/plans';
+
+// Job pages
+import Jobs from './pages/jobs';
+import Takeoffs from './pages/jobs/Takeoffs';
 
 // Transaction pages
-import PurchaseOrders from './pages/transactions/PurchaseOrders';
-import Schedule from './pages/transactions/Schedule';
+import PurchaseOrders from './pages/purchase-orders';
+import Schedule from './pages/schedule';
 
 // Other pages
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
+import Reports from './pages/reports';
+import Settings from './pages/settings';
 
-import './App.css';
-import './design-system.css';
+import './styles/App.css';
+import './styles/design-system.css';
 
 function App() {
   return (
