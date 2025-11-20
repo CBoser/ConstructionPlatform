@@ -68,3 +68,24 @@ backend/node_modules/.prisma/
 **/__pycache__/
 *.pyc
 *.pyo
+
+# Python virtual environments
+venv/
+env/
+.venv/
+
+# Testing
+.nyc_output/
+
+# Database
+*.db
+*.sqlite
+
+# Temporary
+tmp/
+temp/
+
+# Generated files
+FolderTree.txt
+Folder_Paths.txt
+project-snapshot.txt
