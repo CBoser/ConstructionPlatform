@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
-import Button from '../../components/ui/Button';
-import Card from '../../components/ui/Card';
-import Loading from '../../components/ui/Loading';
-import Table from '../../components/ui/Table';
-import { useToast } from '../../components/ui/Toast';
+import Button from '../../components/common/Button';
+import Card from '../../components/common/Card';
+import Loading from '../../components/common/Loading';
+import Table from '../../components/common/Table';
+import { useToast } from '../../components/common/Toast';
 import CustomerFormModal from '../../components/customers/CustomerFormModal';
 import ContactFormModal from '../../components/customers/ContactFormModal';
 import ExternalIdManager from '../../components/customers/ExternalIdManager';

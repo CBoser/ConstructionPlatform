@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Table from '../../components/ui/Table';
-import Loading from '../../components/ui/Loading';
-import Card from '../../components/ui/Card';
-import { useToast } from '../../components/ui/Toast';
+import Button from '../../components/common/Button';
+import Input from '../../components/common/Input';
+import Table from '../../components/common/Table';
+import Loading from '../../components/common/Loading';
+import Card from '../../components/common/Card';
+import { useToast } from '../../components/common/Toast';
 import CustomerFormModal from '../../components/customers/CustomerFormModal';
 import {
   useCustomers,

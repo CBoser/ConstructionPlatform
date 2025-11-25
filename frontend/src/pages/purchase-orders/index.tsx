@@ -1,6 +1,6 @@
 import React from 'react';
 import PageHeader from '../../components/layout/PageHeader';
-import Button from '../../components/ui/Button';
+import Button from '../../components/common/Button';
 
 const PurchaseOrders: React.FC = () => {
   return (
