@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Button from '../ui/Button';
-import Table from '../ui/Table';
-import Card from '../ui/Card';
-import { useToast } from '../ui/Toast';
+import Button from '../common/Button';
+import Table from '../common/Table';
+import Card from '../common/Card';
+import { useToast } from '../common/Toast';
 import ExternalIdFormModal from './ExternalIdFormModal';
 import {
   useCustomerExternalIds,

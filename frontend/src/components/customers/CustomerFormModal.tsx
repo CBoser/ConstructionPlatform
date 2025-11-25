@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Input from '../ui/Input';
-import Button from '../ui/Button';
-import { useToast } from '../ui/Toast';
+import Modal from '../common/Modal';
+import Input from '../common/Input';
+import Button from '../common/Button';
+import { useToast } from '../common/Toast';
 import {
   useCreateCustomer,
   useUpdateCustomer,
