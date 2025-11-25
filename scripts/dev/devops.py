@@ -34,8 +34,8 @@ from typing import Optional, List, Tuple
 IS_WINDOWS = platform.system() == "Windows"
 IS_WSL = "microsoft" in platform.uname().release.lower()
 
-# Project paths (devops.py is now in scripts/ subdirectory)
-PROJECT_ROOT = Path(__file__).parent.parent  # Go up one level from scripts/
+# Project paths (devops.py is in scripts/dev/ subdirectory)
+PROJECT_ROOT = Path(__file__).parent.parent.parent  # Go up two levels from scripts/dev/
 BACKEND_DIR = PROJECT_ROOT / "backend"
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
 DOCKER_COMPOSE_FILE = PROJECT_ROOT / "docker-compose.yml"
