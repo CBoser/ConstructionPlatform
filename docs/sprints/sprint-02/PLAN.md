@@ -20,6 +20,60 @@ Evaluate and select an appropriate coding system for organizing materials, labor
 - [ ] Create coding system implementation guide
 - [ ] Define material categorization standards
 - [ ] Map sample data to chosen system
+- [ ] Review existing schema for compatibility with chosen system
+
+---
+
+## Current Schema Status
+
+> **IMPORTANT**: The Prisma schema (`backend/prisma/schema.prisma`) already contains 22 models with specific categorization approaches. This sprint must evaluate how the chosen code system integrates with the existing schema.
+
+### Existing Material Categorization
+The current schema uses a `MaterialCategory` enum:
+```prisma
+enum MaterialCategory {
+  DIMENSIONAL_LUMBER
+  ENGINEERED_LUMBER
+  SHEATHING
+  PRESSURE_TREATED
+  HARDWARE
+  CONCRETE
+  ROOFING
+  SIDING
+  INSULATION
+  DRYWALL
+  OTHER
+}
+```
+
+### Existing Plan Categorization
+Plans use a `PlanType` enum and `OptionCategory` enum:
+```prisma
+enum PlanType {
+  SINGLE_STORY
+  TWO_STORY
+  THREE_STORY
+  DUPLEX
+  TOWNHOME
+}
+
+enum OptionCategory {
+  DECK
+  FENCING
+  ROOM_ADDITION
+  GARAGE
+  PATIO
+  STRUCTURAL
+  FINISH
+  OTHER
+}
+```
+
+### Decision Impact
+The code system decision will determine whether to:
+1. **Extend** existing enums with a hierarchical code field
+2. **Replace** enums with a code-based lookup table
+3. **Augment** with a parallel coding system that maps to existing categories
 
 ---
 
@@ -31,6 +85,7 @@ The coding system determines how all materials, labor categories, and costs are 
 - Create inconsistent data entry
 - Complicate integrations with external systems
 - Require expensive refactoring later
+- **Conflict with existing schema structure**
 
 ### Coding Systems to Evaluate
 
