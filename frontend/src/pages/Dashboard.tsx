@@ -1,9 +1,9 @@
 import React from 'react';
-import StatCard from '../components/StatCard';
-import Alert from '../components/Alert';
-import ActivityItem from '../components/ActivityItem';
-import ScheduleItem from '../components/ScheduleItem';
-import QuickAction from '../components/QuickAction';
+import StatCard from '../components/common/StatCard';
+import Alert from '../components/common/Alert';
+import ActivityItem from '../components/common/ActivityItem';
+import ScheduleItem from '../components/common/ScheduleItem';
+import QuickAction from '../components/common/QuickAction';
 
 const Dashboard: React.FC = () => {
   return (

@@ -1,5 +1,5 @@
 import React from 'react';
-import PageHeader from '../components/layout/PageHeader';
+import PageHeader from '../../components/layout/PageHeader';
 
 const Reports: React.FC = () => {
   return (
