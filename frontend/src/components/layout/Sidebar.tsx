@@ -38,6 +38,14 @@ const navigationItems: NavItem[] = [
       { path: '/transactions/schedule', label: 'Schedule', icon: '📅' },
     ],
   },
+  {
+    path: '/tools',
+    label: 'Tools',
+    icon: '🛠️',
+    children: [
+      { path: '/tools/spreadsheet-extractor', label: 'Spreadsheet Extractor', icon: '📊' },
+    ],
+  },
   { path: '/reports', label: 'Reports', icon: '📊' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];

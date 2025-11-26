@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes from '../auth';
 import customerRoutes from '../customer';
+import spreadsheetRoutes from '../spreadsheet';
 // import planRoutes from '../plan'; // TEMPORARILY DISABLED: Schema mismatch - needs refactoring (Sprint 6-7)
 // import materialRoutes from '../material'; // TEMPORARILY DISABLED: Schema mismatch - needs refactoring (Sprint 8-9)
 import { v1VersionHeader } from '../../middleware/apiVersion';
@@ -29,6 +30,9 @@ v1Router.use(v1VersionHeader);
 // Foundation Layer Routes (Phase 1)
 v1Router.use('/auth', authRoutes);
 v1Router.use('/customers', customerRoutes);
+
+// Tools & Utilities
+v1Router.use('/spreadsheet', spreadsheetRoutes);
 
 // Future routes (deferred to later sprints)
 // v1Router.use('/plans', planRoutes);      // Sprint 6-7

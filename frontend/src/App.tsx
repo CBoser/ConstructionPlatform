@@ -45,6 +45,9 @@ import Schedule from './pages/schedule';
 import Reports from './pages/reports';
 import Settings from './pages/settings';
 
+// Tools
+import SpreadsheetExtractor from './pages/tools/SpreadsheetExtractor';
+
 import './styles/App.css';
 import './styles/design-system.css';
 
@@ -184,6 +187,18 @@ function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <Settings />
+                  </MainLayout>
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Tools routes */}
+            <Route
+              path="/tools/spreadsheet-extractor"
+              element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <SpreadsheetExtractor />
                   </MainLayout>
                 </ProtectedRoute>
               }
