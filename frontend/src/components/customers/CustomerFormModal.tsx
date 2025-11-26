@@ -75,7 +75,7 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
   }, [isOpen, customer]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -148,10 +148,11 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
 
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving customer:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to save customer';
+        apiError?.data?.error || apiError?.message || 'Failed to save customer';
       showToast(errorMessage, 'error');
     }
   };
@@ -229,7 +230,7 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
             <textarea
               name="notes"
               value={formData.notes}
-              onChange={handleChange as any}
+              onChange={handleChange}
               className="input"
               rows={3}
               placeholder="Additional information about this customer..."

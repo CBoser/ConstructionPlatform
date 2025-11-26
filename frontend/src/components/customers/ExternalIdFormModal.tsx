@@ -216,10 +216,11 @@ const ExternalIdFormModal: React.FC<ExternalIdFormModalProps> = ({
 
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving external ID mapping:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to save external ID mapping';
+        apiError?.data?.error || apiError?.message || 'Failed to save external ID mapping';
       showToast(errorMessage, 'error');
     }
   };

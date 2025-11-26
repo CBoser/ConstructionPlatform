@@ -119,10 +119,11 @@ const CustomerList: React.FC = () => {
         'success'
       );
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error archiving customer:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to archive customer';
+        apiError?.data?.error || apiError?.message || 'Failed to archive customer';
       showToast(errorMessage, 'error');
     }
   };

@@ -81,10 +81,11 @@ const ExternalIdManager: React.FC<ExternalIdManagerProps> = ({
       showToast('External ID mapping deleted successfully', 'success');
       refetch();
       onRefresh?.();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting external ID mapping:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to delete external ID mapping';
+        apiError?.data?.error || apiError?.message || 'Failed to delete external ID mapping';
       showToast(errorMessage, 'error');
     }
   };

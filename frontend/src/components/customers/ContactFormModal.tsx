@@ -182,10 +182,11 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
 
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving contact:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to save contact';
+        apiError?.data?.error || apiError?.message || 'Failed to save contact';
       showToast(errorMessage, 'error');
     }
   };

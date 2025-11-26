@@ -29,7 +29,7 @@ const Input: React.FC<InputProps> = ({
       )}
 
       {inputType === 'select' ? (
-        <select className={inputClasses} {...(props as any)}>
+        <select className={inputClasses} {...(props as React.SelectHTMLAttributes<HTMLSelectElement>)}>
           <option value="">Select...</option>
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -41,7 +41,7 @@ const Input: React.FC<InputProps> = ({
         <input
           type={inputType}
           className={inputClasses}
-          {...(props as any)}
+          {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
         />
       )}
 

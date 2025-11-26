@@ -83,10 +83,11 @@ const CustomerDetail: React.FC = () => {
 
       showToast('Contact deleted successfully', 'success');
       refetch();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting contact:', error);
+      const apiError = error as { data?: { error?: string }; message?: string };
       const errorMessage =
-        error.data?.error || error.message || 'Failed to delete contact';
+        apiError?.data?.error || apiError?.message || 'Failed to delete contact';
       showToast(errorMessage, 'error');
     }
   };
