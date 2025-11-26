@@ -370,3 +370,306 @@ def analyze_spreadsheet(file_path: str) -> AnalysisResult:
     """Analyze a spreadsheet and return results."""
     analyzer = SpreadsheetAnalyzer()
     return analyzer.analyze(file_path)
+
+
+# ============================================================================
+# FORMULA EDITOR
+# ============================================================================
+
+@dataclass
+class FormulaChange:
+    """Represents a single formula change."""
+    sheet: str
+    address: str
+    old_formula: str
+    new_formula: str
+    applied: bool = False
+    error: Optional[str] = None
+
+
+@dataclass
+class EditResult:
+    """Result of a formula edit operation."""
+    success: bool
+    changes_made: int
+    changes: List[FormulaChange] = field(default_factory=list)
+    backup_path: Optional[str] = None
+    errors: List[str] = field(default_factory=list)
+
+
+class SpreadsheetEditor:
+    """Edit formulas across multiple sheets in Excel files."""
+
+    def __init__(self, file_path: str):
+        self.file_path = Path(file_path)
+        self.workbook = None
+        self._load_workbook()
+
+    def _load_workbook(self):
+        """Load the workbook for editing."""
+        if openpyxl is None:
+            raise ImportError("openpyxl is required for editing. Run: pip install openpyxl")
+
+        if not self.file_path.exists():
+            raise FileNotFoundError(f"File not found: {self.file_path}")
+
+        suffix = self.file_path.suffix.lower()
+        if suffix not in ['.xlsx', '.xlsm']:
+            raise ValueError(f"Only .xlsx and .xlsm files can be edited. Got: {suffix}")
+
+        self.workbook = openpyxl.load_workbook(
+            self.file_path,
+            data_only=False
+        )
+
+    def get_all_formulas(self) -> List[FormulaInfo]:
+        """Get all formulas in the workbook."""
+        formulas = []
+
+        for sheet_name in self.workbook.sheetnames:
+            ws = self.workbook[sheet_name]
+
+            for row in ws.iter_rows():
+                for cell in row:
+                    if cell.data_type == 'f' or (isinstance(cell.value, str) and str(cell.value).startswith('=')):
+                        formula_str = str(cell.value)
+                        if formula_str.startswith('='):
+                            formula_str = formula_str[1:]
+
+                        formulas.append(FormulaInfo(
+                            address=cell.coordinate,
+                            sheet=sheet_name,
+                            formula=formula_str,
+                            functions=extract_functions(formula_str),
+                            dependencies=extract_cell_references(formula_str),
+                            is_array_formula=is_array_formula(formula_str)
+                        ))
+
+        return formulas
+
+    def find_formulas(self, search_text: str, case_sensitive: bool = False,
+                      use_regex: bool = False, sheets: Optional[List[str]] = None) -> List[FormulaInfo]:
+        """Find formulas matching the search criteria."""
+        all_formulas = self.get_all_formulas()
+        matches = []
+
+        for formula in all_formulas:
+            # Filter by sheets if specified
+            if sheets and formula.sheet not in sheets:
+                continue
+
+            formula_text = formula.formula
+
+            if use_regex:
+                try:
+                    flags = 0 if case_sensitive else re.IGNORECASE
+                    if re.search(search_text, formula_text, flags):
+                        matches.append(formula)
+                except re.error:
+                    continue
+            else:
+                if case_sensitive:
+                    if search_text in formula_text:
+                        matches.append(formula)
+                else:
+                    if search_text.lower() in formula_text.lower():
+                        matches.append(formula)
+
+        return matches
+
+    def preview_replace(self, find_text: str, replace_text: str,
+                        case_sensitive: bool = False, use_regex: bool = False,
+                        sheets: Optional[List[str]] = None) -> List[FormulaChange]:
+        """Preview formula replacements without applying them."""
+        matches = self.find_formulas(find_text, case_sensitive, use_regex, sheets)
+        changes = []
+
+        for formula in matches:
+            if use_regex:
+                flags = 0 if case_sensitive else re.IGNORECASE
+                new_formula = re.sub(find_text, replace_text, formula.formula, flags=flags)
+            else:
+                if case_sensitive:
+                    new_formula = formula.formula.replace(find_text, replace_text)
+                else:
+                    # Case-insensitive replace
+                    pattern = re.compile(re.escape(find_text), re.IGNORECASE)
+                    new_formula = pattern.sub(replace_text, formula.formula)
+
+            if new_formula != formula.formula:
+                changes.append(FormulaChange(
+                    sheet=formula.sheet,
+                    address=formula.address,
+                    old_formula=formula.formula,
+                    new_formula=new_formula
+                ))
+
+        return changes
+
+    def apply_changes(self, changes: List[FormulaChange], create_backup: bool = True) -> EditResult:
+        """Apply formula changes to the workbook."""
+        result = EditResult(success=True, changes_made=0)
+
+        # Create backup
+        if create_backup:
+            backup_path = self.file_path.with_suffix(f'.backup{self.file_path.suffix}')
+            try:
+                import shutil
+                shutil.copy2(self.file_path, backup_path)
+                result.backup_path = str(backup_path)
+            except Exception as e:
+                result.errors.append(f"Failed to create backup: {str(e)}")
+
+        # Apply changes
+        for change in changes:
+            try:
+                ws = self.workbook[change.sheet]
+                cell = ws[change.address]
+                cell.value = f"={change.new_formula}"
+                change.applied = True
+                result.changes_made += 1
+            except Exception as e:
+                change.error = str(e)
+                result.errors.append(f"Failed to update {change.sheet}!{change.address}: {str(e)}")
+
+        result.changes = changes
+        return result
+
+    def save(self, output_path: Optional[str] = None) -> str:
+        """Save the workbook."""
+        save_path = Path(output_path) if output_path else self.file_path
+
+        try:
+            self.workbook.save(save_path)
+            return str(save_path)
+        except Exception as e:
+            raise IOError(f"Failed to save workbook: {str(e)}")
+
+    def close(self):
+        """Close the workbook."""
+        if self.workbook:
+            self.workbook.close()
+
+    def replace_formulas(self, find_text: str, replace_text: str,
+                         case_sensitive: bool = False, use_regex: bool = False,
+                         sheets: Optional[List[str]] = None,
+                         create_backup: bool = True,
+                         output_path: Optional[str] = None) -> EditResult:
+        """Find and replace formulas, then save."""
+        # Preview changes
+        changes = self.preview_replace(find_text, replace_text, case_sensitive, use_regex, sheets)
+
+        if not changes:
+            return EditResult(success=True, changes_made=0, errors=["No matching formulas found"])
+
+        # Apply changes
+        result = self.apply_changes(changes, create_backup)
+
+        # Save
+        if result.changes_made > 0:
+            try:
+                saved_path = self.save(output_path)
+                result.errors.append(f"Saved to: {saved_path}")
+            except IOError as e:
+                result.success = False
+                result.errors.append(str(e))
+
+        return result
+
+    def batch_replace(self, replacements: List[Dict[str, str]],
+                      create_backup: bool = True,
+                      output_path: Optional[str] = None) -> EditResult:
+        """
+        Apply multiple find/replace operations.
+
+        Args:
+            replacements: List of dicts with 'find', 'replace', and optional 'sheets', 'case_sensitive', 'use_regex'
+        """
+        all_changes = []
+
+        for repl in replacements:
+            find_text = repl.get('find', '')
+            replace_text = repl.get('replace', '')
+            case_sensitive = repl.get('case_sensitive', False)
+            use_regex = repl.get('use_regex', False)
+            sheets = repl.get('sheets', None)
+
+            if find_text:
+                changes = self.preview_replace(find_text, replace_text, case_sensitive, use_regex, sheets)
+                all_changes.extend(changes)
+
+        if not all_changes:
+            return EditResult(success=True, changes_made=0, errors=["No matching formulas found"])
+
+        # Apply all changes
+        result = self.apply_changes(all_changes, create_backup)
+
+        # Save
+        if result.changes_made > 0:
+            try:
+                saved_path = self.save(output_path)
+                result.errors.append(f"Saved to: {saved_path}")
+            except IOError as e:
+                result.success = False
+                result.errors.append(str(e))
+
+        return result
+
+    def rename_sheet_references(self, old_sheet_name: str, new_sheet_name: str,
+                                create_backup: bool = True) -> EditResult:
+        """Rename sheet references in all formulas."""
+        # Pattern to match sheet references like 'Sheet1'!A1 or Sheet1!A1
+        find_patterns = [
+            (f"'{old_sheet_name}'!", f"'{new_sheet_name}'!"),
+            (f"{old_sheet_name}!", f"{new_sheet_name}!"),
+        ]
+
+        all_changes = []
+        for find_text, replace_text in find_patterns:
+            changes = self.preview_replace(find_text, replace_text, case_sensitive=True)
+            all_changes.extend(changes)
+
+        if not all_changes:
+            return EditResult(success=True, changes_made=0, errors=["No sheet references found"])
+
+        result = self.apply_changes(all_changes, create_backup)
+
+        if result.changes_made > 0:
+            try:
+                self.save()
+            except IOError as e:
+                result.success = False
+                result.errors.append(str(e))
+
+        return result
+
+    def update_cell_references(self, old_ref: str, new_ref: str,
+                               create_backup: bool = True) -> EditResult:
+        """Update cell references across all formulas."""
+        return self.replace_formulas(
+            find_text=old_ref,
+            replace_text=new_ref,
+            case_sensitive=False,
+            use_regex=False,
+            create_backup=create_backup
+        )
+
+
+# Convenience functions for editing
+def find_and_replace_formulas(file_path: str, find_text: str, replace_text: str,
+                               output_path: Optional[str] = None, **kwargs) -> EditResult:
+    """Find and replace formulas in a spreadsheet."""
+    editor = SpreadsheetEditor(file_path)
+    try:
+        return editor.replace_formulas(find_text, replace_text, output_path=output_path, **kwargs)
+    finally:
+        editor.close()
+
+
+def preview_formula_changes(file_path: str, find_text: str, replace_text: str, **kwargs) -> List[FormulaChange]:
+    """Preview formula changes without applying them."""
+    editor = SpreadsheetEditor(file_path)
+    try:
+        return editor.preview_replace(find_text, replace_text, **kwargs)
+    finally:
+        editor.close()

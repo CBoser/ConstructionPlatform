@@ -8,10 +8,13 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 import webbrowser
 
-from analyzer import SpreadsheetAnalyzer, AnalysisResult
+from analyzer import (
+    SpreadsheetAnalyzer, AnalysisResult, SpreadsheetEditor,
+    FormulaChange, EditResult
+)
 from prompts import (
     PROMPT_LIBRARY, get_prompt_by_id, generate_contextual_prompt,
     generate_contextual_prompts, export_analysis_markdown, Prompt
@@ -31,6 +34,8 @@ class SpreadsheetExtractorApp:
         self.current_file: Optional[Path] = None
         self.analysis: Optional[AnalysisResult] = None
         self.selected_prompt: Optional[Prompt] = None
+        self.pending_changes: List[FormulaChange] = []
+        self.editor: Optional[SpreadsheetEditor] = None
 
         # Configure styles
         self._setup_styles()
@@ -106,6 +111,11 @@ class SpreadsheetExtractorApp:
         self.output_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.output_frame, text="Generated Prompt")
         self._create_output_tab(self.output_frame)
+
+        # Tab 4: Formula Editor
+        self.editor_frame = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(self.editor_frame, text="Formula Editor")
+        self._create_editor_tab(self.editor_frame)
 
         # Status bar
         self.status_var = tk.StringVar(value="Ready. Open a spreadsheet to begin.")
@@ -311,6 +321,309 @@ class SpreadsheetExtractorApp:
         clear_btn = ttk.Button(btn_frame, text="Clear", command=lambda: self.output_text.delete('1.0', tk.END))
         clear_btn.pack(side=tk.LEFT, padx=(5, 0))
 
+    def _create_editor_tab(self, parent):
+        """Create the formula editor tab for find/replace across sheets."""
+        # Top section - Find/Replace controls
+        controls_frame = ttk.LabelFrame(parent, text="Find & Replace Formulas", padding="10")
+        controls_frame.pack(fill=tk.X)
+
+        # Find row
+        find_frame = ttk.Frame(controls_frame)
+        find_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Label(find_frame, text="Find:", width=10).pack(side=tk.LEFT)
+        self.find_var = tk.StringVar()
+        self.find_entry = ttk.Entry(find_frame, textvariable=self.find_var, width=50)
+        self.find_entry.pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
+
+        # Replace row
+        replace_frame = ttk.Frame(controls_frame)
+        replace_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Label(replace_frame, text="Replace:", width=10).pack(side=tk.LEFT)
+        self.replace_var = tk.StringVar()
+        self.replace_entry = ttk.Entry(replace_frame, textvariable=self.replace_var, width=50)
+        self.replace_entry.pack(side=tk.LEFT, padx=(0, 10), fill=tk.X, expand=True)
+
+        # Options row
+        options_frame = ttk.Frame(controls_frame)
+        options_frame.pack(fill=tk.X, pady=(0, 10))
+
+        self.case_sensitive_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(options_frame, text="Case sensitive", variable=self.case_sensitive_var).pack(side=tk.LEFT, padx=(0, 15))
+
+        self.use_regex_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(options_frame, text="Use regex", variable=self.use_regex_var).pack(side=tk.LEFT, padx=(0, 15))
+
+        self.create_backup_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(options_frame, text="Create backup", variable=self.create_backup_var).pack(side=tk.LEFT, padx=(0, 15))
+
+        # Sheet filter
+        ttk.Label(options_frame, text="Sheets:").pack(side=tk.LEFT, padx=(20, 5))
+        self.sheet_filter_var = tk.StringVar(value="All sheets")
+        self.sheet_filter_combo = ttk.Combobox(options_frame, textvariable=self.sheet_filter_var, width=20, state='readonly')
+        self.sheet_filter_combo['values'] = ['All sheets']
+        self.sheet_filter_combo.pack(side=tk.LEFT)
+
+        # Buttons row
+        btn_frame = ttk.Frame(controls_frame)
+        btn_frame.pack(fill=tk.X)
+
+        preview_btn = ttk.Button(btn_frame, text="Preview Changes", command=self._preview_changes, style='Accent.TButton')
+        preview_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        apply_btn = ttk.Button(btn_frame, text="Apply Changes", command=self._apply_changes)
+        apply_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        clear_btn = ttk.Button(btn_frame, text="Clear Preview", command=self._clear_preview)
+        clear_btn.pack(side=tk.LEFT, padx=(0, 20))
+
+        # Quick actions
+        ttk.Separator(btn_frame, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=10)
+        ttk.Label(btn_frame, text="Quick:").pack(side=tk.LEFT, padx=(0, 5))
+
+        rename_sheet_btn = ttk.Button(btn_frame, text="Rename Sheet Refs...", command=self._rename_sheet_refs)
+        rename_sheet_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        # Preview section
+        preview_frame = ttk.LabelFrame(parent, text="Preview Changes (0 formulas will be modified)", padding="5")
+        preview_frame.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+        self.preview_label_frame = preview_frame
+
+        # Changes treeview
+        columns = ("sheet", "address", "old_formula", "new_formula")
+        self.changes_tree = ttk.Treeview(preview_frame, columns=columns, show="headings", height=15)
+        self.changes_tree.heading("sheet", text="Sheet")
+        self.changes_tree.heading("address", text="Cell")
+        self.changes_tree.heading("old_formula", text="Original Formula")
+        self.changes_tree.heading("new_formula", text="New Formula")
+        self.changes_tree.column("sheet", width=100)
+        self.changes_tree.column("address", width=60)
+        self.changes_tree.column("old_formula", width=300)
+        self.changes_tree.column("new_formula", width=300)
+
+        # Add scrollbars
+        y_scroll = ttk.Scrollbar(preview_frame, orient=tk.VERTICAL, command=self.changes_tree.yview)
+        x_scroll = ttk.Scrollbar(preview_frame, orient=tk.HORIZONTAL, command=self.changes_tree.xview)
+        self.changes_tree.configure(yscrollcommand=y_scroll.set, xscrollcommand=x_scroll.set)
+
+        self.changes_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        y_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Tag for highlighting differences
+        self.changes_tree.tag_configure('changed', background='#ffffcc')
+
+        # Output/save options
+        save_frame = ttk.LabelFrame(parent, text="Save Options", padding="5")
+        save_frame.pack(fill=tk.X, pady=(10, 0))
+
+        self.save_as_new_var = tk.BooleanVar(value=False)
+        ttk.Checkbutton(save_frame, text="Save as new file", variable=self.save_as_new_var).pack(side=tk.LEFT, padx=(0, 15))
+
+        ttk.Label(save_frame, text="Output path:").pack(side=tk.LEFT, padx=(0, 5))
+        self.output_path_var = tk.StringVar(value="")
+        self.output_path_entry = ttk.Entry(save_frame, textvariable=self.output_path_var, width=40)
+        self.output_path_entry.pack(side=tk.LEFT, padx=(0, 5), fill=tk.X, expand=True)
+
+        browse_btn = ttk.Button(save_frame, text="Browse...", command=self._browse_output_path)
+        browse_btn.pack(side=tk.LEFT)
+
+    # ========================================================================
+    # Formula Editor Actions
+    # ========================================================================
+
+    def _preview_changes(self):
+        """Preview formula changes without applying them."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open a spreadsheet first.")
+            return
+
+        find_text = self.find_var.get()
+        if not find_text:
+            messagebox.showwarning("Empty Search", "Please enter text to find.")
+            return
+
+        replace_text = self.replace_var.get()
+        case_sensitive = self.case_sensitive_var.get()
+        use_regex = self.use_regex_var.get()
+
+        # Get selected sheets
+        sheets = None
+        if self.sheet_filter_var.get() != "All sheets":
+            sheets = [self.sheet_filter_var.get()]
+
+        self.status_var.set("Previewing changes...")
+        self.root.update()
+
+        try:
+            # Close existing editor if any
+            if self.editor:
+                self.editor.close()
+
+            self.editor = SpreadsheetEditor(str(self.current_file))
+            self.pending_changes = self.editor.preview_replace(
+                find_text, replace_text, case_sensitive, use_regex, sheets
+            )
+
+            # Update the preview treeview
+            self._update_changes_preview()
+
+            if not self.pending_changes:
+                self.status_var.set("No matching formulas found.")
+            else:
+                self.status_var.set(f"Found {len(self.pending_changes)} formulas to modify. Review and click 'Apply Changes'.")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to preview changes: {str(e)}")
+            self.status_var.set("Preview failed.")
+
+    def _update_changes_preview(self):
+        """Update the changes preview treeview."""
+        # Clear existing items
+        self.changes_tree.delete(*self.changes_tree.get_children())
+
+        # Update frame label
+        count = len(self.pending_changes)
+        self.preview_label_frame.config(text=f"Preview Changes ({count} formulas will be modified)")
+
+        # Add changes to tree
+        for change in self.pending_changes:
+            old_display = change.old_formula[:60] + "..." if len(change.old_formula) > 60 else change.old_formula
+            new_display = change.new_formula[:60] + "..." if len(change.new_formula) > 60 else change.new_formula
+
+            self.changes_tree.insert("", tk.END, values=(
+                change.sheet,
+                change.address,
+                f"={old_display}",
+                f"={new_display}"
+            ), tags=('changed',))
+
+    def _apply_changes(self):
+        """Apply the pending formula changes."""
+        if not self.pending_changes:
+            messagebox.showwarning("No Changes", "No changes to apply. Run 'Preview Changes' first.")
+            return
+
+        if not self.editor:
+            messagebox.showerror("Error", "Editor not initialized. Please preview changes first.")
+            return
+
+        # Confirm
+        count = len(self.pending_changes)
+        if not messagebox.askyesno("Confirm Changes",
+                                    f"This will modify {count} formulas.\n\n"
+                                    f"{'A backup will be created.' if self.create_backup_var.get() else 'NO BACKUP will be created!'}\n\n"
+                                    "Continue?"):
+            return
+
+        self.status_var.set("Applying changes...")
+        self.root.update()
+
+        try:
+            # Determine output path
+            output_path = None
+            if self.save_as_new_var.get() and self.output_path_var.get():
+                output_path = self.output_path_var.get()
+
+            # Apply changes
+            result = self.editor.apply_changes(self.pending_changes, self.create_backup_var.get())
+
+            # Save
+            if result.changes_made > 0:
+                saved_path = self.editor.save(output_path)
+
+                # Show result
+                msg = f"Successfully modified {result.changes_made} formulas.\n\nSaved to: {saved_path}"
+                if result.backup_path:
+                    msg += f"\n\nBackup created: {result.backup_path}"
+
+                messagebox.showinfo("Changes Applied", msg)
+                self.status_var.set(f"Applied {result.changes_made} changes. Saved to {saved_path}")
+
+                # Clear preview and reload
+                self._clear_preview()
+                self._analyze_file()  # Re-analyze to show updated formulas
+            else:
+                messagebox.showwarning("No Changes", "No changes were applied.")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to apply changes: {str(e)}")
+            self.status_var.set("Apply failed.")
+
+    def _clear_preview(self):
+        """Clear the changes preview."""
+        self.pending_changes = []
+        self.changes_tree.delete(*self.changes_tree.get_children())
+        self.preview_label_frame.config(text="Preview Changes (0 formulas will be modified)")
+        self.status_var.set("Preview cleared.")
+
+        if self.editor:
+            self.editor.close()
+            self.editor = None
+
+    def _rename_sheet_refs(self):
+        """Quick action to rename sheet references."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open a spreadsheet first.")
+            return
+
+        # Create a dialog
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Rename Sheet References")
+        dialog.geometry("400x150")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        ttk.Label(dialog, text="Old sheet name:").pack(anchor=tk.W, padx=10, pady=(10, 0))
+        old_name_var = tk.StringVar()
+        old_entry = ttk.Entry(dialog, textvariable=old_name_var, width=40)
+        old_entry.pack(padx=10, pady=(0, 10))
+
+        ttk.Label(dialog, text="New sheet name:").pack(anchor=tk.W, padx=10)
+        new_name_var = tk.StringVar()
+        new_entry = ttk.Entry(dialog, textvariable=new_name_var, width=40)
+        new_entry.pack(padx=10, pady=(0, 10))
+
+        def do_rename():
+            old_name = old_name_var.get().strip()
+            new_name = new_name_var.get().strip()
+
+            if not old_name or not new_name:
+                messagebox.showwarning("Missing Input", "Please enter both old and new sheet names.")
+                return
+
+            # Set up find/replace
+            self.find_var.set(f"'{old_name}'!")
+            self.replace_var.set(f"'{new_name}'!")
+            self.case_sensitive_var.set(True)
+
+            dialog.destroy()
+
+            # Preview changes
+            self._preview_changes()
+
+        btn_frame = ttk.Frame(dialog)
+        btn_frame.pack(pady=10)
+        ttk.Button(btn_frame, text="Preview Changes", command=do_rename).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Cancel", command=dialog.destroy).pack(side=tk.LEFT)
+
+    def _browse_output_path(self):
+        """Browse for output file path."""
+        if not self.current_file:
+            return
+
+        default_name = self.current_file.stem + "_modified" + self.current_file.suffix
+        filepath = filedialog.asksaveasfilename(
+            title="Save Modified Spreadsheet",
+            defaultextension=self.current_file.suffix,
+            filetypes=[("Excel files", "*.xlsx *.xlsm"), ("All files", "*.*")],
+            initialfile=default_name
+        )
+
+        if filepath:
+            self.output_path_var.set(filepath)
+            self.save_as_new_var.set(True)
+
     # ========================================================================
     # Actions
     # ========================================================================
@@ -400,6 +713,10 @@ class SpreadsheetExtractorApp:
 
         # Enable re-analyze button
         self.analyze_btn.config(state=tk.NORMAL)
+
+        # Update sheet filter in editor tab
+        sheet_names = ['All sheets'] + [s.name for s in a.sheets]
+        self.sheet_filter_combo['values'] = sheet_names
 
         # Update status
         if a.errors:
