@@ -18,7 +18,7 @@ interface TableProps<T> {
   isLoading?: boolean;
 }
 
-function Table<T extends Record<string, any>>({
+function Table<T extends Record<string, unknown>>({
   data,
   columns,
   keyField = 'id' as keyof T,
