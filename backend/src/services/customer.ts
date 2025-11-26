@@ -8,6 +8,14 @@ export interface CreateCustomerInput {
   primaryContactId?: string;
   notes?: string;
   isActive?: boolean;
+
+  // BAT System Fields
+  billToId?: string;
+  customerId?: string; // BAT customer ID
+  salesId?: string;
+  salespersonName?: string;
+  locationCode?: string;
+  accountType?: string;
 }
 
 export interface UpdateCustomerInput {
@@ -17,6 +25,14 @@ export interface UpdateCustomerInput {
   primaryContactId?: string;
   notes?: string;
   isActive?: boolean;
+
+  // BAT System Fields
+  billToId?: string;
+  customerId?: string;
+  salesId?: string;
+  salespersonName?: string;
+  locationCode?: string;
+  accountType?: string;
 }
 
 export interface ListCustomersQuery {

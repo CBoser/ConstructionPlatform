@@ -10,6 +10,14 @@ export const createCustomerSchema = z.object({
   customerType: z.nativeEnum(CustomerType),
   pricingTier: z.string().optional(),
   notes: z.string().optional(),
+
+  // BAT System Fields
+  billToId: z.string().optional(),
+  customerId: z.string().optional(), // BAT customer ID
+  salesId: z.string().optional(),
+  salespersonName: z.string().optional(),
+  locationCode: z.string().optional(),
+  accountType: z.enum(['M', 'Q']).optional(),
 });
 
 export const updateCustomerSchema = z.object({
@@ -19,6 +27,14 @@ export const updateCustomerSchema = z.object({
   primaryContactId: z.string().uuid().optional(),
   isActive: z.boolean().optional(),
   notes: z.string().optional(),
+
+  // BAT System Fields
+  billToId: z.string().optional(),
+  customerId: z.string().optional(),
+  salesId: z.string().optional(),
+  salespersonName: z.string().optional(),
+  locationCode: z.string().optional(),
+  accountType: z.enum(['M', 'Q']).optional(),
 });
 
 // ============================================================================
@@ -48,13 +64,27 @@ export const updateCustomerContactSchema = z.object({
 // Customer Pricing Tier Validation Schemas
 // ============================================================================
 
+// Valid pricing tier codes
+const pricingTierCodes = z.enum([
+  '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'L5'
+]);
+
 export const createCustomerPricingTierSchema = z.object({
   customerId: z.string().uuid('Invalid customer ID'),
-  tierName: z.string().min(1, 'Tier name is required').max(100),
+
+  // DART Category-Based Pricing (BAT System)
+  dartCategory: z.number().int().min(1).max(15, 'DART category must be between 1-15'),
+  dartCategoryName: z.string().min(1, 'DART category name is required').max(100),
+  tier: pricingTierCodes,
+
+  // Legacy Fields (optional)
+  tierName: z.string().max(100).optional(),
   discountPercentage: z
     .number()
     .min(0, 'Discount cannot be negative')
-    .max(100, 'Discount cannot exceed 100%'),
+    .max(100, 'Discount cannot exceed 100%')
+    .optional(),
+
   effectiveDate: z.date(),
   expirationDate: z.date().optional(),
 }).refine(
@@ -71,7 +101,10 @@ export const createCustomerPricingTierSchema = z.object({
 );
 
 export const updateCustomerPricingTierSchema = z.object({
-  tierName: z.string().min(1).max(100).optional(),
+  dartCategory: z.number().int().min(1).max(15).optional(),
+  dartCategoryName: z.string().min(1).max(100).optional(),
+  tier: pricingTierCodes.optional(),
+  tierName: z.string().max(100).optional(),
   discountPercentage: z.number().min(0).max(100).optional(),
   effectiveDate: z.date().optional(),
   expirationDate: z.date().optional(),
