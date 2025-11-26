@@ -29,10 +29,11 @@ function getAllowedOrigins(): string[] {
   if (!allowedOriginsEnv) {
     console.warn('');
     console.warn('⚠️  WARNING: ALLOWED_ORIGINS not configured');
-    console.warn('   Using default development origin: http://localhost:5173');
+    console.warn('   Using default development origins: http://localhost:5173, http://localhost:5174');
     console.warn('   Set ALLOWED_ORIGINS in production for security!');
     console.warn('');
-    return ['http://localhost:5173']; // Safe default for development
+    // Include common Vite development ports (5173 is default, 5174 is fallback when 5173 is in use)
+    return ['http://localhost:5173', 'http://localhost:5174'];
   }
 
   // Parse comma-separated origins and trim whitespace
@@ -44,9 +45,9 @@ function getAllowedOrigins(): string[] {
   if (origins.length === 0) {
     console.error('');
     console.error('🔴 ERROR: ALLOWED_ORIGINS is set but empty');
-    console.error('   Falling back to development origin: http://localhost:5173');
+    console.error('   Falling back to development origins: http://localhost:5173, http://localhost:5174');
     console.error('');
-    return ['http://localhost:5173'];
+    return ['http://localhost:5173', 'http://localhost:5174'];
   }
 
   // Log configured origins (only in development)
