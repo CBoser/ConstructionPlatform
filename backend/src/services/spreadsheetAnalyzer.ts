@@ -425,7 +425,7 @@ export class SpreadsheetAnalyzer {
           value: cell?.v,
           formula: cell?.f,
           type: getCellType(cell),
-          numberFormat: cell?.z,
+          numberFormat: cell?.z != null ? String(cell.z) : undefined,
         });
       }
     }
