@@ -673,3 +673,872 @@ def preview_formula_changes(file_path: str, find_text: str, replace_text: str, *
         return editor.preview_replace(find_text, replace_text, **kwargs)
     finally:
         editor.close()
+
+
+# ============================================================================
+# FORMULA TO CODE CONVERTER
+# ============================================================================
+
+@dataclass
+class CodeConversion:
+    """Result of converting a formula to code."""
+    original_formula: str
+    python_code: str
+    javascript_code: str
+    cell_address: Optional[str] = None
+    sheet_name: Optional[str] = None
+    variables_used: List[str] = field(default_factory=list)
+    functions_used: List[str] = field(default_factory=list)
+    notes: List[str] = field(default_factory=list)
+
+
+class FormulaToCodeConverter:
+    """Convert Excel formulas to Python and JavaScript code."""
+
+    # Mapping of Excel functions to Python equivalents
+    PYTHON_FUNCTIONS = {
+        # Math
+        'ABS': 'abs',
+        'ROUND': 'round',
+        'ROUNDUP': 'math.ceil',
+        'ROUNDDOWN': 'math.floor',
+        'INT': 'int',
+        'MOD': 'lambda a, b: a % b',
+        'POWER': 'pow',
+        'SQRT': 'math.sqrt',
+        'SUM': 'sum',
+        'AVERAGE': 'lambda *args: sum(args) / len(args)',
+        'MIN': 'min',
+        'MAX': 'max',
+        'CEILING': 'math.ceil',
+        'FLOOR': 'math.floor',
+        'RAND': 'random.random',
+        'RANDBETWEEN': 'random.randint',
+
+        # Logical
+        'IF': 'lambda cond, true_val, false_val: true_val if cond else false_val',
+        'AND': 'all',
+        'OR': 'any',
+        'NOT': 'not',
+        'TRUE': 'True',
+        'FALSE': 'False',
+        'IFERROR': 'lambda val, fallback: fallback if isinstance(val, Exception) else val',
+        'IFS': '# Use chained if/elif/else',
+        'SWITCH': '# Use dict.get() or match/case',
+
+        # Text
+        'LEN': 'len',
+        'LEFT': 'lambda s, n: s[:n]',
+        'RIGHT': 'lambda s, n: s[-n:]',
+        'MID': 'lambda s, start, length: s[start-1:start-1+length]',
+        'UPPER': 'str.upper',
+        'LOWER': 'str.lower',
+        'PROPER': 'str.title',
+        'TRIM': 'str.strip',
+        'SUBSTITUTE': 'str.replace',
+        'CONCATENATE': "lambda *args: ''.join(str(a) for a in args)",
+        'TEXT': 'format',
+        'VALUE': 'float',
+        'FIND': 'str.find',
+        'SEARCH': 'str.lower().find',
+        'REPLACE': 'lambda s, start, num, new: s[:start-1] + new + s[start-1+num:]',
+
+        # Lookup
+        'VLOOKUP': '# Use dict lookup or pandas.merge',
+        'HLOOKUP': '# Use dict lookup or pandas',
+        'XLOOKUP': '# Use dict.get() or next() with filter',
+        'INDEX': 'lambda arr, row, col=None: arr[row-1] if col is None else arr[row-1][col-1]',
+        'MATCH': 'lambda val, arr, _: arr.index(val) + 1',
+        'OFFSET': '# Calculate cell reference dynamically',
+        'INDIRECT': '# Dynamic cell reference - use dict or getattr',
+        'CHOOSE': 'lambda idx, *args: args[idx-1]',
+
+        # Date/Time
+        'TODAY': 'datetime.date.today',
+        'NOW': 'datetime.datetime.now',
+        'DATE': 'datetime.date',
+        'YEAR': 'lambda d: d.year',
+        'MONTH': 'lambda d: d.month',
+        'DAY': 'lambda d: d.day',
+        'HOUR': 'lambda d: d.hour',
+        'MINUTE': 'lambda d: d.minute',
+        'SECOND': 'lambda d: d.second',
+        'DATEDIF': '# Calculate date difference manually',
+        'EDATE': 'lambda d, months: d + relativedelta(months=months)',
+        'EOMONTH': '# Use calendar.monthrange or dateutil',
+
+        # Statistical
+        'COUNT': 'len',
+        'COUNTA': 'lambda arr: sum(1 for x in arr if x is not None)',
+        'COUNTIF': 'lambda arr, cond: sum(1 for x in arr if cond(x))',
+        'COUNTIFS': '# Use list comprehension with multiple conditions',
+        'SUMIF': 'lambda arr, cond, sum_arr=None: sum(x for x in (sum_arr or arr) if cond(x))',
+        'SUMIFS': '# Use list comprehension with multiple conditions',
+        'AVERAGEIF': '# Use list comprehension with condition',
+
+        # Array/Dynamic (Excel 365)
+        'FILTER': 'lambda arr, cond: [x for x, c in zip(arr, cond) if c]',
+        'SORT': 'sorted',
+        'SORTBY': 'lambda arr, key_arr: [x for _, x in sorted(zip(key_arr, arr))]',
+        'UNIQUE': 'lambda arr: list(dict.fromkeys(arr))',
+        'SEQUENCE': 'lambda rows, cols=1, start=1, step=1: [[start + step*(r*cols+c) for c in range(cols)] for r in range(rows)]',
+        'LET': '# Use intermediate variables',
+
+        # Info
+        'ISBLANK': 'lambda x: x is None or x == ""',
+        'ISERROR': 'lambda x: isinstance(x, Exception)',
+        'ISNUMBER': 'lambda x: isinstance(x, (int, float))',
+        'ISTEXT': 'lambda x: isinstance(x, str)',
+        'ISNA': 'lambda x: x is None',
+    }
+
+    # Mapping of Excel functions to JavaScript equivalents
+    JS_FUNCTIONS = {
+        # Math
+        'ABS': 'Math.abs',
+        'ROUND': 'Math.round',
+        'ROUNDUP': 'Math.ceil',
+        'ROUNDDOWN': 'Math.floor',
+        'INT': 'Math.trunc',
+        'MOD': '(a, b) => a % b',
+        'POWER': 'Math.pow',
+        'SQRT': 'Math.sqrt',
+        'SUM': '(...args) => args.flat().reduce((a, b) => a + b, 0)',
+        'AVERAGE': '(...args) => args.flat().reduce((a, b) => a + b, 0) / args.flat().length',
+        'MIN': 'Math.min',
+        'MAX': 'Math.max',
+        'CEILING': 'Math.ceil',
+        'FLOOR': 'Math.floor',
+        'RAND': 'Math.random',
+        'RANDBETWEEN': '(min, max) => Math.floor(Math.random() * (max - min + 1)) + min',
+
+        # Logical
+        'IF': '(cond, trueVal, falseVal) => cond ? trueVal : falseVal',
+        'AND': '(...args) => args.every(Boolean)',
+        'OR': '(...args) => args.some(Boolean)',
+        'NOT': '!',
+        'TRUE': 'true',
+        'FALSE': 'false',
+        'IFERROR': '(val, fallback) => { try { return val; } catch { return fallback; } }',
+
+        # Text
+        'LEN': 's => s.length',
+        'LEFT': '(s, n) => s.slice(0, n)',
+        'RIGHT': '(s, n) => s.slice(-n)',
+        'MID': '(s, start, len) => s.substr(start - 1, len)',
+        'UPPER': 's => s.toUpperCase()',
+        'LOWER': 's => s.toLowerCase()',
+        'TRIM': 's => s.trim()',
+        'SUBSTITUTE': '(s, old, newStr) => s.replaceAll(old, newStr)',
+        'CONCATENATE': '(...args) => args.join("")',
+        'TEXT': '// Use Intl.NumberFormat or template literals',
+        'VALUE': 'parseFloat',
+        'FIND': '(find, text) => text.indexOf(find) + 1',
+        'SEARCH': '(find, text) => text.toLowerCase().indexOf(find.toLowerCase()) + 1',
+
+        # Lookup
+        'VLOOKUP': '// Use array.find() or Map.get()',
+        'XLOOKUP': '(lookup, arr, return_arr, fallback) => return_arr[arr.indexOf(lookup)] ?? fallback',
+        'INDEX': '(arr, row, col) => col ? arr[row-1][col-1] : arr[row-1]',
+        'MATCH': '(val, arr) => arr.indexOf(val) + 1',
+        'CHOOSE': '(idx, ...args) => args[idx - 1]',
+
+        # Date/Time
+        'TODAY': '() => new Date().toISOString().split("T")[0]',
+        'NOW': '() => new Date()',
+        'YEAR': 'd => new Date(d).getFullYear()',
+        'MONTH': 'd => new Date(d).getMonth() + 1',
+        'DAY': 'd => new Date(d).getDate()',
+
+        # Statistical
+        'COUNT': 'arr => arr.filter(x => typeof x === "number").length',
+        'COUNTA': 'arr => arr.filter(x => x != null && x !== "").length',
+        'COUNTIF': '(arr, cond) => arr.filter(cond).length',
+        'SUMIF': '(arr, cond, sumArr) => (sumArr || arr).filter((_, i) => cond(arr[i])).reduce((a, b) => a + b, 0)',
+
+        # Array/Dynamic
+        'FILTER': '(arr, cond) => arr.filter(cond)',
+        'SORT': 'arr => [...arr].sort((a, b) => a - b)',
+        'SORTBY': '(arr, keyArr) => arr.map((v, i) => [keyArr[i], v]).sort((a, b) => a[0] - b[0]).map(x => x[1])',
+        'UNIQUE': 'arr => [...new Set(arr)]',
+
+        # Info
+        'ISBLANK': 'x => x == null || x === ""',
+        'ISERROR': 'x => x instanceof Error',
+        'ISNUMBER': 'x => typeof x === "number" && !isNaN(x)',
+        'ISTEXT': 'x => typeof x === "string"',
+    }
+
+    def __init__(self):
+        self.cell_pattern = re.compile(r"([A-Z]+)(\d+)")
+        self.range_pattern = re.compile(r"([A-Z]+\d+):([A-Z]+\d+)")
+
+    def convert_formula(self, formula: str, cell_address: str = None,
+                        sheet_name: str = None) -> CodeConversion:
+        """Convert an Excel formula to Python and JavaScript code."""
+        # Remove leading = if present
+        if formula.startswith('='):
+            formula = formula[1:]
+
+        functions_used = extract_functions(formula)
+        cell_refs = extract_cell_references(formula)
+
+        # Generate variable names from cell references
+        variables = self._generate_variable_names(cell_refs)
+
+        # Convert to Python
+        python_code = self._convert_to_python(formula, variables, functions_used)
+
+        # Convert to JavaScript
+        js_code = self._convert_to_javascript(formula, variables, functions_used)
+
+        notes = []
+
+        # Add notes for complex functions
+        for func in functions_used:
+            if func.upper() in ['VLOOKUP', 'XLOOKUP', 'OFFSET', 'INDIRECT']:
+                notes.append(f"{func}: Consider using a lookup table (dict/Map) for better performance")
+            if func.upper() in ['SUMIFS', 'COUNTIFS', 'AVERAGEIFS']:
+                notes.append(f"{func}: Use filtered aggregation with multiple conditions")
+            if func.upper() in ['LET', 'LAMBDA']:
+                notes.append(f"{func}: Use named intermediate variables for clarity")
+
+        return CodeConversion(
+            original_formula=formula,
+            python_code=python_code,
+            javascript_code=js_code,
+            cell_address=cell_address,
+            sheet_name=sheet_name,
+            variables_used=list(variables.values()),
+            functions_used=functions_used,
+            notes=notes
+        )
+
+    def _generate_variable_names(self, cell_refs: List[str]) -> Dict[str, str]:
+        """Generate meaningful variable names from cell references."""
+        variables = {}
+        for ref in cell_refs:
+            # Clean up the reference
+            clean_ref = ref.replace('$', '').replace("'", "")
+
+            # Handle sheet references
+            if '!' in clean_ref:
+                sheet, cell = clean_ref.split('!')
+                var_name = f"{self._sanitize_name(sheet)}_{cell.lower()}"
+            else:
+                var_name = f"cell_{clean_ref.lower()}"
+
+            # Handle ranges
+            if ':' in var_name:
+                var_name = var_name.replace(':', '_to_')
+                var_name = f"range_{var_name}"
+
+            variables[ref] = var_name
+
+        return variables
+
+    def _sanitize_name(self, name: str) -> str:
+        """Sanitize a name for use as a variable."""
+        # Remove invalid characters
+        name = re.sub(r'[^a-zA-Z0-9_]', '_', name)
+        # Ensure it doesn't start with a number
+        if name and name[0].isdigit():
+            name = '_' + name
+        return name.lower()
+
+    def _convert_to_python(self, formula: str, variables: Dict[str, str],
+                           functions: List[str]) -> str:
+        """Convert formula to Python code."""
+        code = formula
+
+        # Replace cell references with variable names
+        for ref, var in sorted(variables.items(), key=lambda x: -len(x[0])):
+            code = code.replace(ref, var)
+
+        # Replace operators
+        code = code.replace('<>', '!=')
+        code = code.replace('^', '**')
+        code = code.replace('&', ' + ')  # String concatenation
+
+        # Replace functions
+        for func in functions:
+            upper_func = func.upper()
+            if upper_func in self.PYTHON_FUNCTIONS:
+                py_func = self.PYTHON_FUNCTIONS[upper_func]
+                # Handle lambda definitions vs simple replacements
+                if py_func.startswith('lambda') or py_func.startswith('#'):
+                    code = self._add_function_comment(code, func, py_func, 'Python')
+                else:
+                    pattern = re.compile(rf'\b{func}\s*\(', re.IGNORECASE)
+                    code = pattern.sub(f'{py_func}(', code)
+
+        # Format as Python
+        lines = []
+        lines.append("# Python equivalent")
+        lines.append("import math")
+        if any(f.upper() in ['TODAY', 'NOW', 'DATE', 'YEAR', 'MONTH', 'DAY'] for f in functions):
+            lines.append("import datetime")
+        if any(f.upper() in ['RAND', 'RANDBETWEEN'] for f in functions):
+            lines.append("import random")
+        lines.append("")
+
+        # Add variable definitions as comments
+        if variables:
+            lines.append("# Variables (replace with actual values):")
+            for ref, var in variables.items():
+                lines.append(f"# {var} = <value from {ref}>")
+            lines.append("")
+
+        lines.append(f"result = {code}")
+
+        return '\n'.join(lines)
+
+    def _convert_to_javascript(self, formula: str, variables: Dict[str, str],
+                                functions: List[str]) -> str:
+        """Convert formula to JavaScript code."""
+        code = formula
+
+        # Replace cell references with variable names
+        for ref, var in sorted(variables.items(), key=lambda x: -len(x[0])):
+            code = code.replace(ref, var)
+
+        # Replace operators
+        code = code.replace('<>', '!==')
+        code = code.replace('=', '===').replace('====', '===')  # Handle == comparisons
+        code = code.replace('^', '**')
+        code = code.replace('&', ' + ')  # String concatenation
+
+        # Replace functions
+        for func in functions:
+            upper_func = func.upper()
+            if upper_func in self.JS_FUNCTIONS:
+                js_func = self.JS_FUNCTIONS[upper_func]
+                if js_func.startswith('//') or '=>' in js_func:
+                    code = self._add_function_comment(code, func, js_func, 'JavaScript')
+                else:
+                    pattern = re.compile(rf'\b{func}\s*\(', re.IGNORECASE)
+                    code = pattern.sub(f'{js_func}(', code)
+
+        # Format as JavaScript
+        lines = []
+        lines.append("// JavaScript equivalent")
+        lines.append("")
+
+        # Add variable definitions as comments
+        if variables:
+            lines.append("// Variables (replace with actual values):")
+            for ref, var in variables.items():
+                lines.append(f"// const {var} = /* value from {ref} */;")
+            lines.append("")
+
+        lines.append(f"const result = {code};")
+
+        return '\n'.join(lines)
+
+    def _add_function_comment(self, code: str, func: str, replacement: str, lang: str) -> str:
+        """Add a comment explaining a complex function replacement."""
+        # Keep the original function but add note
+        return f"/* {func}: {replacement} */\n{code}"
+
+    def convert_formulas_batch(self, formulas: List[FormulaInfo]) -> List[CodeConversion]:
+        """Convert multiple formulas to code."""
+        return [
+            self.convert_formula(f.formula, f.address, f.sheet)
+            for f in formulas
+        ]
+
+    def generate_python_module(self, formulas: List[FormulaInfo],
+                                module_name: str = "spreadsheet_logic") -> str:
+        """Generate a complete Python module from spreadsheet formulas."""
+        lines = []
+        lines.append(f'"""')
+        lines.append(f'Auto-generated from spreadsheet formulas.')
+        lines.append(f'Module: {module_name}')
+        lines.append(f'"""')
+        lines.append('')
+        lines.append('import math')
+        lines.append('import datetime')
+        lines.append('from typing import Any, List, Optional')
+        lines.append('')
+        lines.append('')
+
+        # Group formulas by sheet
+        by_sheet: Dict[str, List[FormulaInfo]] = {}
+        for f in formulas:
+            if f.sheet not in by_sheet:
+                by_sheet[f.sheet] = []
+            by_sheet[f.sheet].append(f)
+
+        # Generate class for each sheet
+        for sheet_name, sheet_formulas in by_sheet.items():
+            class_name = self._sanitize_name(sheet_name).title().replace('_', '')
+            if not class_name:
+                class_name = 'Sheet'
+
+            lines.append(f'class {class_name}Calculator:')
+            lines.append(f'    """Calculations from sheet: {sheet_name}"""')
+            lines.append('')
+            lines.append('    def __init__(self, data: dict):')
+            lines.append('        """Initialize with cell data dictionary."""')
+            lines.append('        self.data = data')
+            lines.append('')
+
+            for formula in sheet_formulas:
+                method_name = f"calculate_{formula.address.lower()}"
+                conversion = self.convert_formula(formula.formula, formula.address, formula.sheet)
+
+                lines.append(f'    def {method_name}(self):')
+                lines.append(f'        """')
+                lines.append(f'        Cell {formula.address}: ={formula.formula}')
+                if conversion.functions_used:
+                    lines.append(f'        Functions: {", ".join(conversion.functions_used)}')
+                lines.append(f'        """')
+
+                # Add variable fetches
+                for ref, var in self._generate_variable_names(extract_cell_references(formula.formula)).items():
+                    lines.append(f'        {var} = self.data.get("{ref}", 0)')
+
+                # Add simplified calculation
+                lines.append(f'        # Original: ={formula.formula}')
+                lines.append(f'        result = None  # TODO: Implement')
+                lines.append(f'        return result')
+                lines.append('')
+
+            lines.append('')
+
+        return '\n'.join(lines)
+
+
+# Convenience function
+def convert_formula_to_code(formula: str, cell_address: str = None) -> CodeConversion:
+    """Convert a single formula to Python and JavaScript."""
+    converter = FormulaToCodeConverter()
+    return converter.convert_formula(formula, cell_address)
+
+
+# ============================================================================
+# DATA DICTIONARY GENERATOR
+# ============================================================================
+
+@dataclass
+class DataDictionaryEntry:
+    """Single entry in the data dictionary."""
+    name: str
+    entry_type: str  # 'named_range', 'table', 'column', 'sheet', 'formula_pattern'
+    location: str
+    description: str = ""
+    data_type: str = ""
+    formula: Optional[str] = None
+    sample_values: List[str] = field(default_factory=list)
+    dependencies: List[str] = field(default_factory=list)
+    used_by: List[str] = field(default_factory=list)
+
+
+@dataclass
+class DataDictionary:
+    """Complete data dictionary for a spreadsheet."""
+    file_name: str
+    generated_at: str
+    entries: List[DataDictionaryEntry] = field(default_factory=list)
+    summary: Dict[str, int] = field(default_factory=dict)
+
+
+class DataDictionaryGenerator:
+    """Generate data dictionary documentation from spreadsheets."""
+
+    def __init__(self, file_path: str):
+        self.file_path = Path(file_path)
+        self.workbook = None
+        self._load_workbook()
+
+    def _load_workbook(self):
+        """Load the workbook for analysis."""
+        if openpyxl is None:
+            raise ImportError("openpyxl is required. Run: pip install openpyxl")
+
+        if not self.file_path.exists():
+            raise FileNotFoundError(f"File not found: {self.file_path}")
+
+        suffix = self.file_path.suffix.lower()
+        if suffix not in ['.xlsx', '.xlsm', '.xlsb']:
+            raise ValueError(f"Only Excel files supported. Got: {suffix}")
+
+        self.workbook = openpyxl.load_workbook(
+            self.file_path,
+            data_only=False
+        )
+
+    def generate(self) -> DataDictionary:
+        """Generate a complete data dictionary."""
+        from datetime import datetime
+
+        dictionary = DataDictionary(
+            file_name=self.file_path.name,
+            generated_at=datetime.now().isoformat()
+        )
+
+        # Extract named ranges
+        self._extract_named_ranges(dictionary)
+
+        # Extract tables
+        self._extract_tables(dictionary)
+
+        # Extract sheet info
+        self._extract_sheets(dictionary)
+
+        # Extract formula patterns
+        self._extract_formula_patterns(dictionary)
+
+        # Build dependency graph
+        self._build_dependencies(dictionary)
+
+        # Generate summary
+        dictionary.summary = {
+            'named_ranges': sum(1 for e in dictionary.entries if e.entry_type == 'named_range'),
+            'tables': sum(1 for e in dictionary.entries if e.entry_type == 'table'),
+            'columns': sum(1 for e in dictionary.entries if e.entry_type == 'column'),
+            'sheets': sum(1 for e in dictionary.entries if e.entry_type == 'sheet'),
+            'formula_patterns': sum(1 for e in dictionary.entries if e.entry_type == 'formula_pattern'),
+            'total_entries': len(dictionary.entries)
+        }
+
+        return dictionary
+
+    def _extract_named_ranges(self, dictionary: DataDictionary):
+        """Extract all named ranges."""
+        if not self.workbook.defined_names:
+            return
+
+        for name in self.workbook.defined_names.definedName:
+            scope = 'workbook'
+            if name.localSheetId is not None:
+                scope = self.workbook.sheetnames[name.localSheetId]
+
+            entry = DataDictionaryEntry(
+                name=name.name,
+                entry_type='named_range',
+                location=name.attr_text or '',
+                description=f"Named range in {scope}",
+                formula=name.attr_text if name.attr_text and '(' in name.attr_text else None
+            )
+
+            # Try to get sample values
+            try:
+                if name.attr_text and '!' in name.attr_text:
+                    # Parse the reference
+                    ref = name.attr_text.replace('=', '')
+                    if ':' in ref:
+                        # Range reference
+                        entry.description = f"Range: {ref}"
+                    else:
+                        # Single cell - try to get value
+                        parts = ref.split('!')
+                        if len(parts) == 2:
+                            sheet_name = parts[0].strip("'")
+                            cell_ref = parts[1]
+                            if sheet_name in self.workbook.sheetnames:
+                                ws = self.workbook[sheet_name]
+                                cell = ws[cell_ref]
+                                if cell.value is not None:
+                                    entry.sample_values = [str(cell.value)[:50]]
+            except Exception:
+                pass
+
+            dictionary.entries.append(entry)
+
+    def _extract_tables(self, dictionary: DataDictionary):
+        """Extract all tables and their columns."""
+        for sheet_name in self.workbook.sheetnames:
+            ws = self.workbook[sheet_name]
+
+            if not hasattr(ws, 'tables'):
+                continue
+
+            for table_name, table in ws.tables.items():
+                # Table entry
+                entry = DataDictionaryEntry(
+                    name=table_name,
+                    entry_type='table',
+                    location=f"{sheet_name}!{table.ref}",
+                    description=f"Excel table in {sheet_name}"
+                )
+
+                # Get headers and row count
+                try:
+                    from openpyxl.utils import range_boundaries
+                    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
+
+                    headers = []
+                    for col in range(min_col, max_col + 1):
+                        cell = ws.cell(row=min_row, column=col)
+                        if cell.value:
+                            headers.append(str(cell.value))
+
+                    entry.sample_values = headers
+                    entry.description = f"Table with {max_row - min_row} rows, {len(headers)} columns"
+
+                    # Add column entries
+                    for i, header in enumerate(headers):
+                        col_entry = DataDictionaryEntry(
+                            name=f"{table_name}[{header}]",
+                            entry_type='column',
+                            location=f"{sheet_name}!{table.ref}",
+                            description=f"Column in table {table_name}",
+                            data_type=self._infer_column_type(ws, min_col + i, min_row + 1, max_row)
+                        )
+
+                        # Get sample values
+                        samples = []
+                        for row in range(min_row + 1, min(min_row + 4, max_row + 1)):
+                            cell = ws.cell(row=row, column=min_col + i)
+                            if cell.value is not None:
+                                samples.append(str(cell.value)[:30])
+                        col_entry.sample_values = samples
+
+                        dictionary.entries.append(col_entry)
+
+                except Exception:
+                    pass
+
+                dictionary.entries.append(entry)
+
+    def _infer_column_type(self, ws, col: int, start_row: int, end_row: int) -> str:
+        """Infer the data type of a column."""
+        types_found = set()
+
+        for row in range(start_row, min(start_row + 10, end_row + 1)):
+            cell = ws.cell(row=row, column=col)
+            if cell.value is None:
+                continue
+
+            if isinstance(cell.value, bool):
+                types_found.add('boolean')
+            elif isinstance(cell.value, (int, float)):
+                types_found.add('number')
+            elif isinstance(cell.value, str):
+                if cell.value.startswith('='):
+                    types_found.add('formula')
+                else:
+                    types_found.add('text')
+            elif hasattr(cell.value, 'strftime'):
+                types_found.add('date')
+
+        if len(types_found) == 0:
+            return 'unknown'
+        elif len(types_found) == 1:
+            return types_found.pop()
+        else:
+            return 'mixed: ' + ', '.join(sorted(types_found))
+
+    def _extract_sheets(self, dictionary: DataDictionary):
+        """Extract sheet-level information."""
+        for sheet_name in self.workbook.sheetnames:
+            ws = self.workbook[sheet_name]
+
+            entry = DataDictionaryEntry(
+                name=sheet_name,
+                entry_type='sheet',
+                location=sheet_name,
+                description=f"Worksheet"
+            )
+
+            # Add dimensions
+            if ws.dimensions:
+                entry.description = f"Worksheet: {ws.dimensions}"
+
+            # Count formulas
+            formula_count = 0
+            for row in ws.iter_rows():
+                for cell in row:
+                    if cell.data_type == 'f' or (isinstance(cell.value, str) and str(cell.value).startswith('=')):
+                        formula_count += 1
+
+            if formula_count:
+                entry.description += f", {formula_count} formulas"
+
+            dictionary.entries.append(entry)
+
+    def _extract_formula_patterns(self, dictionary: DataDictionary):
+        """Extract common formula patterns."""
+        formula_patterns: Dict[str, List[str]] = {}
+
+        for sheet_name in self.workbook.sheetnames:
+            ws = self.workbook[sheet_name]
+
+            for row in ws.iter_rows():
+                for cell in row:
+                    if cell.data_type == 'f' or (isinstance(cell.value, str) and str(cell.value).startswith('=')):
+                        formula = str(cell.value)
+                        if formula.startswith('='):
+                            formula = formula[1:]
+
+                        # Extract the function pattern
+                        functions = extract_functions(formula)
+                        if functions:
+                            pattern = '+'.join(sorted(set(f.upper() for f in functions)))
+                            if pattern not in formula_patterns:
+                                formula_patterns[pattern] = []
+                            formula_patterns[pattern].append(f"{sheet_name}!{cell.coordinate}")
+
+        # Add common patterns to dictionary
+        for pattern, locations in sorted(formula_patterns.items(), key=lambda x: -len(x[1])):
+            if len(locations) >= 2:  # Only include patterns used multiple times
+                entry = DataDictionaryEntry(
+                    name=f"Pattern: {pattern}",
+                    entry_type='formula_pattern',
+                    location=f"{len(locations)} cells",
+                    description=f"Formula pattern using: {pattern.replace('+', ', ')}",
+                    sample_values=locations[:5]  # First 5 locations
+                )
+                dictionary.entries.append(entry)
+
+    def _build_dependencies(self, dictionary: DataDictionary):
+        """Build dependency relationships between entries."""
+        # Create name->entry lookup
+        name_lookup = {e.name: e for e in dictionary.entries}
+
+        for entry in dictionary.entries:
+            if entry.entry_type == 'named_range' and entry.location:
+                # Find what uses this named range
+                for other in dictionary.entries:
+                    if other.formula and entry.name in other.formula:
+                        entry.used_by.append(other.name)
+                        other.dependencies.append(entry.name)
+
+    def export_markdown(self) -> str:
+        """Export data dictionary as Markdown."""
+        dd = self.generate()
+
+        lines = []
+        lines.append(f"# Data Dictionary: {dd.file_name}")
+        lines.append("")
+        lines.append(f"Generated: {dd.generated_at}")
+        lines.append("")
+
+        # Summary
+        lines.append("## Summary")
+        lines.append("")
+        lines.append("| Category | Count |")
+        lines.append("|----------|-------|")
+        for key, value in dd.summary.items():
+            lines.append(f"| {key.replace('_', ' ').title()} | {value} |")
+        lines.append("")
+
+        # Group by type
+        by_type: Dict[str, List[DataDictionaryEntry]] = {}
+        for entry in dd.entries:
+            if entry.entry_type not in by_type:
+                by_type[entry.entry_type] = []
+            by_type[entry.entry_type].append(entry)
+
+        # Named Ranges
+        if 'named_range' in by_type:
+            lines.append("## Named Ranges")
+            lines.append("")
+            lines.append("| Name | Location | Description |")
+            lines.append("|------|----------|-------------|")
+            for entry in by_type['named_range']:
+                desc = entry.description
+                if entry.sample_values:
+                    desc += f" (e.g., {entry.sample_values[0]})"
+                lines.append(f"| `{entry.name}` | {entry.location} | {desc} |")
+            lines.append("")
+
+        # Tables
+        if 'table' in by_type:
+            lines.append("## Tables")
+            lines.append("")
+            for entry in by_type['table']:
+                lines.append(f"### {entry.name}")
+                lines.append("")
+                lines.append(f"- **Location**: {entry.location}")
+                lines.append(f"- **Description**: {entry.description}")
+                if entry.sample_values:
+                    lines.append(f"- **Columns**: {', '.join(entry.sample_values)}")
+                lines.append("")
+
+        # Columns
+        if 'column' in by_type:
+            lines.append("## Table Columns")
+            lines.append("")
+            lines.append("| Column | Type | Samples |")
+            lines.append("|--------|------|---------|")
+            for entry in by_type['column']:
+                samples = ', '.join(entry.sample_values[:3]) if entry.sample_values else '-'
+                lines.append(f"| `{entry.name}` | {entry.data_type or '-'} | {samples} |")
+            lines.append("")
+
+        # Sheets
+        if 'sheet' in by_type:
+            lines.append("## Sheets")
+            lines.append("")
+            lines.append("| Sheet | Description |")
+            lines.append("|-------|-------------|")
+            for entry in by_type['sheet']:
+                lines.append(f"| {entry.name} | {entry.description} |")
+            lines.append("")
+
+        # Formula Patterns
+        if 'formula_pattern' in by_type:
+            lines.append("## Common Formula Patterns")
+            lines.append("")
+            for entry in by_type['formula_pattern']:
+                lines.append(f"### {entry.name}")
+                lines.append(f"- Used in: {entry.location}")
+                if entry.sample_values:
+                    lines.append(f"- Examples: {', '.join(entry.sample_values)}")
+                lines.append("")
+
+        return '\n'.join(lines)
+
+    def export_json(self) -> str:
+        """Export data dictionary as JSON."""
+        import json
+
+        dd = self.generate()
+
+        data = {
+            'file_name': dd.file_name,
+            'generated_at': dd.generated_at,
+            'summary': dd.summary,
+            'entries': [
+                {
+                    'name': e.name,
+                    'type': e.entry_type,
+                    'location': e.location,
+                    'description': e.description,
+                    'data_type': e.data_type,
+                    'formula': e.formula,
+                    'sample_values': e.sample_values,
+                    'dependencies': e.dependencies,
+                    'used_by': e.used_by
+                }
+                for e in dd.entries
+            ]
+        }
+
+        return json.dumps(data, indent=2)
+
+    def close(self):
+        """Close the workbook."""
+        if self.workbook:
+            self.workbook.close()
+
+
+# Convenience functions
+def generate_data_dictionary(file_path: str) -> DataDictionary:
+    """Generate a data dictionary for a spreadsheet."""
+    generator = DataDictionaryGenerator(file_path)
+    try:
+        return generator.generate()
+    finally:
+        generator.close()
+
+
+def export_data_dictionary_markdown(file_path: str) -> str:
+    """Export a data dictionary as Markdown."""
+    generator = DataDictionaryGenerator(file_path)
+    try:
+        return generator.export_markdown()
+    finally:
+        generator.close()

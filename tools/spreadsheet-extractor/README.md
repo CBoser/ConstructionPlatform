@@ -9,6 +9,9 @@ A standalone Python GUI tool for extracting business logic from Excel spreadshee
 - **Function Statistics**: See which Excel functions are used and how often
 - **Prompt Library**: 30+ categorized prompts for LLM-assisted extraction
 - **Contextual Prompts**: Auto-generated prompts based on your specific spreadsheet
+- **Formula Editor**: Find and replace formulas across multiple sheets
+- **Formula-to-Code**: Convert Excel formulas to Python and JavaScript code
+- **Data Dictionary**: Auto-generate documentation of named ranges, tables, and columns
 - **Markdown Export**: Export full analysis as documentation
 - **Copy to Clipboard**: One-click copy for prompts
 
@@ -93,6 +96,36 @@ For each dynamic array formula (FILTER, SORT, UNIQUE, SEQUENCE, etc.):
 5. Express this as a database query or filter operation.
 ```
 
+## Formula-to-Code Conversion
+
+The Formula → Code tab converts Excel formulas to both Python and JavaScript:
+
+- **Single Formula**: Enter any formula and click Convert
+- **Batch Conversion**: Convert all analyzed formulas at once
+- **Python Module Export**: Generate a complete Python module with calculator classes
+- **Supported Functions**: 60+ Excel functions including:
+  - Math: SUM, AVERAGE, MIN, MAX, ROUND, etc.
+  - Logical: IF, AND, OR, IFERROR, IFS
+  - Text: LEFT, RIGHT, MID, CONCATENATE, SUBSTITUTE
+  - Lookup: VLOOKUP, XLOOKUP, INDEX, MATCH
+  - Date: TODAY, NOW, YEAR, MONTH, DAY
+  - Array: FILTER, SORT, UNIQUE, SEQUENCE
+
+## Data Dictionary Generation
+
+The Data Dictionary tab auto-documents your spreadsheet structure:
+
+- **Named Ranges**: All defined names with their references and sample values
+- **Tables**: Excel tables with headers, row counts, and column details
+- **Columns**: Individual table columns with inferred data types
+- **Sheets**: Sheet dimensions and formula counts
+- **Formula Patterns**: Common function combinations used throughout
+
+Export options:
+- **Markdown**: Formatted documentation ready for wikis
+- **JSON**: Structured data for programmatic use
+- **Clipboard**: Quick copy for pasting anywhere
+
 ## Files
 
 | File | Description |
@@ -132,7 +165,13 @@ This tool is designed to work with any LLM:
 ## Programmatic Usage
 
 ```python
-from analyzer import analyze_spreadsheet
+from analyzer import (
+    analyze_spreadsheet,
+    FormulaToCodeConverter,
+    DataDictionaryGenerator,
+    generate_data_dictionary,
+    export_data_dictionary_markdown
+)
 from prompts import generate_contextual_prompts, export_analysis_markdown
 
 # Analyze a file
@@ -143,6 +182,19 @@ prompts = generate_contextual_prompts(analysis)
 
 # Export as markdown
 markdown = export_analysis_markdown(analysis)
+
+# Convert formulas to code
+converter = FormulaToCodeConverter()
+result = converter.convert_formula("=IF(A1>10, SUM(B1:B10), 0)")
+print(result.python_code)
+print(result.javascript_code)
+
+# Generate data dictionary
+data_dict = generate_data_dictionary("path/to/file.xlsx")
+print(f"Found {data_dict.summary['total_entries']} entries")
+
+# Export data dictionary as markdown
+md = export_data_dictionary_markdown("path/to/file.xlsx")
 ```
 
 ## License

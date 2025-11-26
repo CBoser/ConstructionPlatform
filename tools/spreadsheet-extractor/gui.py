@@ -13,7 +13,8 @@ import webbrowser
 
 from analyzer import (
     SpreadsheetAnalyzer, AnalysisResult, SpreadsheetEditor,
-    FormulaChange, EditResult
+    FormulaChange, EditResult, FormulaToCodeConverter, CodeConversion,
+    DataDictionaryGenerator, DataDictionary, DataDictionaryEntry
 )
 from prompts import (
     PROMPT_LIBRARY, get_prompt_by_id, generate_contextual_prompt,
@@ -116,6 +117,16 @@ class SpreadsheetExtractorApp:
         self.editor_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.editor_frame, text="Formula Editor")
         self._create_editor_tab(self.editor_frame)
+
+        # Tab 5: Formula to Code
+        self.code_frame = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(self.code_frame, text="Formula → Code")
+        self._create_code_tab(self.code_frame)
+
+        # Tab 6: Data Dictionary
+        self.dict_frame = ttk.Frame(self.notebook, padding="10")
+        self.notebook.add(self.dict_frame, text="Data Dictionary")
+        self._create_dict_tab(self.dict_frame)
 
         # Status bar
         self.status_var = tk.StringVar(value="Ready. Open a spreadsheet to begin.")
@@ -428,6 +439,539 @@ class SpreadsheetExtractorApp:
         browse_btn = ttk.Button(save_frame, text="Browse...", command=self._browse_output_path)
         browse_btn.pack(side=tk.LEFT)
 
+    def _create_code_tab(self, parent):
+        """Create the Formula-to-Code conversion tab."""
+        # Top section - Input
+        input_frame = ttk.LabelFrame(parent, text="Formula Input", padding="10")
+        input_frame.pack(fill=tk.X)
+
+        # Formula input row
+        formula_row = ttk.Frame(input_frame)
+        formula_row.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Label(formula_row, text="Formula:").pack(side=tk.LEFT)
+        self.code_formula_var = tk.StringVar()
+        self.code_formula_entry = ttk.Entry(formula_row, textvariable=self.code_formula_var, width=60)
+        self.code_formula_entry.pack(side=tk.LEFT, padx=(5, 10), fill=tk.X, expand=True)
+
+        convert_btn = ttk.Button(formula_row, text="Convert", command=self._convert_single_formula, style='Accent.TButton')
+        convert_btn.pack(side=tk.LEFT, padx=(0, 5))
+
+        # Options row
+        options_row = ttk.Frame(input_frame)
+        options_row.pack(fill=tk.X)
+
+        ttk.Label(options_row, text="Or select from analyzed formulas:").pack(side=tk.LEFT)
+
+        self.code_formula_combo = ttk.Combobox(options_row, width=50, state='readonly')
+        self.code_formula_combo['values'] = ['Analyze a file first...']
+        self.code_formula_combo.pack(side=tk.LEFT, padx=(5, 10))
+        self.code_formula_combo.bind('<<ComboboxSelected>>', self._on_formula_combo_select)
+
+        convert_all_btn = ttk.Button(options_row, text="Convert All Formulas", command=self._convert_all_formulas)
+        convert_all_btn.pack(side=tk.LEFT)
+
+        # Paned window for Python and JavaScript code
+        paned = ttk.PanedWindow(parent, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+
+        # Python code output
+        python_frame = ttk.LabelFrame(paned, text="Python Code", padding="5")
+        paned.add(python_frame, weight=1)
+
+        self.python_text = scrolledtext.ScrolledText(python_frame, wrap=tk.NONE, font=('Consolas', 10), height=20)
+        self.python_text.pack(fill=tk.BOTH, expand=True)
+
+        python_btn_frame = ttk.Frame(python_frame)
+        python_btn_frame.pack(fill=tk.X, pady=(5, 0))
+        ttk.Button(python_btn_frame, text="Copy Python", command=self._copy_python_code).pack(side=tk.LEFT)
+
+        # JavaScript code output
+        js_frame = ttk.LabelFrame(paned, text="JavaScript Code", padding="5")
+        paned.add(js_frame, weight=1)
+
+        self.js_text = scrolledtext.ScrolledText(js_frame, wrap=tk.NONE, font=('Consolas', 10), height=20)
+        self.js_text.pack(fill=tk.BOTH, expand=True)
+
+        js_btn_frame = ttk.Frame(js_frame)
+        js_btn_frame.pack(fill=tk.X, pady=(5, 0))
+        ttk.Button(js_btn_frame, text="Copy JavaScript", command=self._copy_js_code).pack(side=tk.LEFT)
+
+        # Notes section
+        notes_frame = ttk.LabelFrame(parent, text="Conversion Notes", padding="5")
+        notes_frame.pack(fill=tk.X, pady=(10, 0))
+
+        self.notes_text = scrolledtext.ScrolledText(notes_frame, wrap=tk.WORD, font=('Helvetica', 10), height=4)
+        self.notes_text.pack(fill=tk.X)
+
+        # Export options
+        export_frame = ttk.Frame(parent)
+        export_frame.pack(fill=tk.X, pady=(10, 0))
+
+        ttk.Button(export_frame, text="Export Python Module", command=self._export_python_module).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(export_frame, text="Export All Conversions", command=self._export_all_conversions).pack(side=tk.LEFT)
+
+    def _create_dict_tab(self, parent):
+        """Create the Data Dictionary tab."""
+        # Top section - Generate button
+        top_frame = ttk.Frame(parent)
+        top_frame.pack(fill=tk.X)
+
+        generate_btn = ttk.Button(top_frame, text="Generate Data Dictionary", command=self._generate_data_dict, style='Accent.TButton')
+        generate_btn.pack(side=tk.LEFT, padx=(0, 10))
+
+        ttk.Label(top_frame, text="Extracts named ranges, tables, columns, sheets, and formula patterns").pack(side=tk.LEFT)
+
+        # Summary section
+        summary_frame = ttk.LabelFrame(parent, text="Summary", padding="10")
+        summary_frame.pack(fill=tk.X, pady=(10, 0))
+
+        self.dict_summary_labels = {}
+        summary_items = [
+            ("named_ranges", "Named Ranges:"),
+            ("tables", "Tables:"),
+            ("columns", "Columns:"),
+            ("sheets", "Sheets:"),
+            ("formula_patterns", "Formula Patterns:"),
+            ("total_entries", "Total Entries:"),
+        ]
+
+        for i, (key, label) in enumerate(summary_items):
+            col = i % 3
+            row = i // 3
+            lbl = ttk.Label(summary_frame, text=label)
+            lbl.grid(row=row, column=col*2, sticky=tk.W, padx=(10, 5))
+            val = ttk.Label(summary_frame, text="-", font=('Helvetica', 10, 'bold'))
+            val.grid(row=row, column=col*2+1, sticky=tk.W, padx=(0, 20))
+            self.dict_summary_labels[key] = val
+
+        # Paned window for entries list and details
+        paned = ttk.PanedWindow(parent, orient=tk.HORIZONTAL)
+        paned.pack(fill=tk.BOTH, expand=True, pady=(10, 0))
+
+        # Left: Entries tree
+        entries_frame = ttk.LabelFrame(paned, text="Dictionary Entries", padding="5")
+        paned.add(entries_frame, weight=1)
+
+        # Filter by type
+        filter_frame = ttk.Frame(entries_frame)
+        filter_frame.pack(fill=tk.X, pady=(0, 5))
+
+        ttk.Label(filter_frame, text="Filter:").pack(side=tk.LEFT)
+        self.dict_type_filter = ttk.Combobox(filter_frame, width=20, state='readonly')
+        self.dict_type_filter['values'] = ['All Types', 'Named Ranges', 'Tables', 'Columns', 'Sheets', 'Formula Patterns']
+        self.dict_type_filter.set('All Types')
+        self.dict_type_filter.pack(side=tk.LEFT, padx=(5, 0))
+        self.dict_type_filter.bind('<<ComboboxSelected>>', self._filter_dict_entries)
+
+        # Entries treeview
+        columns = ("type", "location")
+        self.dict_tree = ttk.Treeview(entries_frame, columns=columns, show="tree headings", height=15)
+        self.dict_tree.heading("#0", text="Name")
+        self.dict_tree.heading("type", text="Type")
+        self.dict_tree.heading("location", text="Location")
+        self.dict_tree.column("#0", width=200)
+        self.dict_tree.column("type", width=100)
+        self.dict_tree.column("location", width=150)
+
+        dict_scroll = ttk.Scrollbar(entries_frame, orient=tk.VERTICAL, command=self.dict_tree.yview)
+        self.dict_tree.configure(yscrollcommand=dict_scroll.set)
+
+        self.dict_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        dict_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+        self.dict_tree.bind('<<TreeviewSelect>>', self._on_dict_entry_select)
+
+        # Right: Entry details
+        details_frame = ttk.LabelFrame(paned, text="Entry Details", padding="5")
+        paned.add(details_frame, weight=1)
+
+        self.dict_details_text = scrolledtext.ScrolledText(details_frame, wrap=tk.WORD, font=('Consolas', 10), height=15)
+        self.dict_details_text.pack(fill=tk.BOTH, expand=True)
+
+        # Export options
+        export_frame = ttk.Frame(parent)
+        export_frame.pack(fill=tk.X, pady=(10, 0))
+
+        ttk.Button(export_frame, text="Export as Markdown", command=self._export_dict_markdown).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(export_frame, text="Export as JSON", command=self._export_dict_json).pack(side=tk.LEFT, padx=(0, 5))
+        ttk.Button(export_frame, text="Copy to Clipboard", command=self._copy_dict_markdown).pack(side=tk.LEFT)
+
+        # Initialize data dictionary state
+        self.data_dictionary: Optional[DataDictionary] = None
+
+    # ========================================================================
+    # Formula-to-Code Actions
+    # ========================================================================
+
+    def _convert_single_formula(self):
+        """Convert a single formula to code."""
+        formula = self.code_formula_var.get().strip()
+        if not formula:
+            messagebox.showwarning("No Formula", "Please enter a formula to convert.")
+            return
+
+        self.status_var.set("Converting formula...")
+        self.root.update()
+
+        try:
+            converter = FormulaToCodeConverter()
+            result = converter.convert_formula(formula)
+
+            # Display Python code
+            self.python_text.delete('1.0', tk.END)
+            self.python_text.insert('1.0', result.python_code)
+
+            # Display JavaScript code
+            self.js_text.delete('1.0', tk.END)
+            self.js_text.insert('1.0', result.javascript_code)
+
+            # Display notes
+            self.notes_text.delete('1.0', tk.END)
+            if result.notes:
+                self.notes_text.insert('1.0', '\n'.join(result.notes))
+            else:
+                self.notes_text.insert('1.0', "No special notes for this formula.")
+
+            if result.functions_used:
+                self.notes_text.insert(tk.END, f"\n\nFunctions used: {', '.join(result.functions_used)}")
+            if result.variables_used:
+                self.notes_text.insert(tk.END, f"\nVariables: {', '.join(result.variables_used)}")
+
+            self.status_var.set(f"Converted formula with {len(result.functions_used)} functions")
+
+        except Exception as e:
+            messagebox.showerror("Conversion Error", f"Failed to convert formula: {str(e)}")
+            self.status_var.set("Conversion failed.")
+
+    def _on_formula_combo_select(self, event):
+        """Handle formula selection from dropdown."""
+        selection = self.code_formula_combo.get()
+        if selection and not selection.startswith('Analyze'):
+            # Extract formula from selection (format: "Sheet!Cell: =formula")
+            if ': =' in selection:
+                formula = selection.split(': =', 1)[1]
+                self.code_formula_var.set('=' + formula)
+
+    def _convert_all_formulas(self):
+        """Convert all analyzed formulas to code."""
+        if not self.analysis or not self.analysis.formulas:
+            messagebox.showwarning("No Formulas", "Please analyze a spreadsheet with formulas first.")
+            return
+
+        self.status_var.set("Converting all formulas...")
+        self.root.update()
+
+        try:
+            converter = FormulaToCodeConverter()
+            results = converter.convert_formulas_batch(self.analysis.formulas)
+
+            # Display aggregated results
+            python_lines = ["# Python conversions for all formulas\n"]
+            js_lines = ["// JavaScript conversions for all formulas\n"]
+            notes_lines = []
+
+            for i, result in enumerate(results):
+                python_lines.append(f"\n# --- {result.sheet_name}!{result.cell_address} ---")
+                python_lines.append(f"# Original: ={result.original_formula}")
+                python_lines.append(result.python_code.split('\n')[-1])  # Just the result line
+
+                js_lines.append(f"\n// --- {result.sheet_name}!{result.cell_address} ---")
+                js_lines.append(f"// Original: ={result.original_formula}")
+                js_lines.append(result.javascript_code.split('\n')[-1])
+
+                if result.notes:
+                    notes_lines.append(f"{result.sheet_name}!{result.cell_address}:")
+                    notes_lines.extend([f"  - {note}" for note in result.notes])
+
+            self.python_text.delete('1.0', tk.END)
+            self.python_text.insert('1.0', '\n'.join(python_lines))
+
+            self.js_text.delete('1.0', tk.END)
+            self.js_text.insert('1.0', '\n'.join(js_lines))
+
+            self.notes_text.delete('1.0', tk.END)
+            if notes_lines:
+                self.notes_text.insert('1.0', '\n'.join(notes_lines))
+            else:
+                self.notes_text.insert('1.0', f"Converted {len(results)} formulas. No special notes.")
+
+            self.status_var.set(f"Converted {len(results)} formulas")
+
+        except Exception as e:
+            messagebox.showerror("Conversion Error", f"Failed to convert formulas: {str(e)}")
+            self.status_var.set("Conversion failed.")
+
+    def _copy_python_code(self):
+        """Copy Python code to clipboard."""
+        content = self.python_text.get('1.0', tk.END).strip()
+        if content:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(content)
+            self.status_var.set("Python code copied to clipboard!")
+
+    def _copy_js_code(self):
+        """Copy JavaScript code to clipboard."""
+        content = self.js_text.get('1.0', tk.END).strip()
+        if content:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(content)
+            self.status_var.set("JavaScript code copied to clipboard!")
+
+    def _export_python_module(self):
+        """Export formulas as a Python module."""
+        if not self.analysis or not self.analysis.formulas:
+            messagebox.showwarning("No Formulas", "Please analyze a spreadsheet first.")
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            title="Export Python Module",
+            defaultextension=".py",
+            filetypes=[("Python files", "*.py"), ("All files", "*.*")],
+            initialfile=f"{Path(self.analysis.file_name).stem}_logic.py"
+        )
+
+        if filepath:
+            try:
+                converter = FormulaToCodeConverter()
+                module_code = converter.generate_python_module(
+                    self.analysis.formulas,
+                    Path(filepath).stem
+                )
+
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(module_code)
+
+                self.status_var.set(f"Exported Python module to {filepath}")
+                messagebox.showinfo("Export Complete", f"Python module exported to:\n{filepath}")
+
+            except Exception as e:
+                messagebox.showerror("Export Error", f"Failed to export: {str(e)}")
+
+    def _export_all_conversions(self):
+        """Export all conversions to a file."""
+        if not self.analysis or not self.analysis.formulas:
+            messagebox.showwarning("No Formulas", "Please analyze a spreadsheet first.")
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            title="Export All Conversions",
+            defaultextension=".md",
+            filetypes=[("Markdown files", "*.md"), ("Text files", "*.txt"), ("All files", "*.*")],
+            initialfile=f"{Path(self.analysis.file_name).stem}_conversions.md"
+        )
+
+        if filepath:
+            try:
+                converter = FormulaToCodeConverter()
+                results = converter.convert_formulas_batch(self.analysis.formulas)
+
+                lines = [f"# Formula Conversions: {self.analysis.file_name}\n"]
+
+                for result in results:
+                    lines.append(f"\n## {result.sheet_name}!{result.cell_address}")
+                    lines.append(f"\n**Original Formula:** `={result.original_formula}`\n")
+                    lines.append(f"\n### Python\n```python\n{result.python_code}\n```\n")
+                    lines.append(f"\n### JavaScript\n```javascript\n{result.javascript_code}\n```\n")
+                    if result.notes:
+                        lines.append(f"\n**Notes:**")
+                        for note in result.notes:
+                            lines.append(f"- {note}")
+                    lines.append("")
+
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write('\n'.join(lines))
+
+                self.status_var.set(f"Exported conversions to {filepath}")
+
+            except Exception as e:
+                messagebox.showerror("Export Error", f"Failed to export: {str(e)}")
+
+    # ========================================================================
+    # Data Dictionary Actions
+    # ========================================================================
+
+    def _generate_data_dict(self):
+        """Generate a data dictionary for the current file."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open a spreadsheet first.")
+            return
+
+        self.status_var.set("Generating data dictionary...")
+        self.root.update()
+
+        try:
+            generator = DataDictionaryGenerator(str(self.current_file))
+            self.data_dictionary = generator.generate()
+            generator.close()
+
+            # Update summary
+            for key, value in self.data_dictionary.summary.items():
+                if key in self.dict_summary_labels:
+                    self.dict_summary_labels[key].config(text=str(value))
+
+            # Populate entries tree
+            self._populate_dict_entries()
+
+            self.status_var.set(f"Generated data dictionary with {self.data_dictionary.summary['total_entries']} entries")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to generate data dictionary: {str(e)}")
+            self.status_var.set("Generation failed.")
+
+    def _populate_dict_entries(self, type_filter: str = None):
+        """Populate the dictionary entries tree."""
+        self.dict_tree.delete(*self.dict_tree.get_children())
+
+        if not self.data_dictionary:
+            return
+
+        type_map = {
+            'Named Ranges': 'named_range',
+            'Tables': 'table',
+            'Columns': 'column',
+            'Sheets': 'sheet',
+            'Formula Patterns': 'formula_pattern'
+        }
+
+        filter_type = type_map.get(type_filter) if type_filter and type_filter != 'All Types' else None
+
+        for entry in self.data_dictionary.entries:
+            if filter_type and entry.entry_type != filter_type:
+                continue
+
+            type_display = entry.entry_type.replace('_', ' ').title()
+            self.dict_tree.insert("", tk.END, text=entry.name,
+                                  values=(type_display, entry.location[:40]))
+
+    def _filter_dict_entries(self, event=None):
+        """Filter dictionary entries by type."""
+        filter_value = self.dict_type_filter.get()
+        self._populate_dict_entries(filter_value)
+
+    def _on_dict_entry_select(self, event):
+        """Handle dictionary entry selection."""
+        selection = self.dict_tree.selection()
+        if not selection:
+            return
+
+        item = self.dict_tree.item(selection[0])
+        entry_name = item['text']
+
+        # Find the entry
+        if not self.data_dictionary:
+            return
+
+        for entry in self.data_dictionary.entries:
+            if entry.name == entry_name:
+                self._display_dict_entry(entry)
+                break
+
+    def _display_dict_entry(self, entry: DataDictionaryEntry):
+        """Display details for a dictionary entry."""
+        self.dict_details_text.delete('1.0', tk.END)
+
+        lines = []
+        lines.append(f"Name: {entry.name}")
+        lines.append(f"Type: {entry.entry_type.replace('_', ' ').title()}")
+        lines.append(f"Location: {entry.location}")
+        lines.append(f"Description: {entry.description}")
+
+        if entry.data_type:
+            lines.append(f"Data Type: {entry.data_type}")
+
+        if entry.formula:
+            lines.append(f"\nFormula: {entry.formula}")
+
+        if entry.sample_values:
+            lines.append(f"\nSample Values:")
+            for val in entry.sample_values:
+                lines.append(f"  - {val}")
+
+        if entry.dependencies:
+            lines.append(f"\nDependencies:")
+            for dep in entry.dependencies:
+                lines.append(f"  - {dep}")
+
+        if entry.used_by:
+            lines.append(f"\nUsed By:")
+            for used in entry.used_by:
+                lines.append(f"  - {used}")
+
+        self.dict_details_text.insert('1.0', '\n'.join(lines))
+
+    def _export_dict_markdown(self):
+        """Export data dictionary as Markdown."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open and analyze a spreadsheet first.")
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            title="Export Data Dictionary",
+            defaultextension=".md",
+            filetypes=[("Markdown files", "*.md"), ("All files", "*.*")],
+            initialfile=f"{Path(self.current_file).stem}_data_dictionary.md"
+        )
+
+        if filepath:
+            try:
+                generator = DataDictionaryGenerator(str(self.current_file))
+                markdown = generator.export_markdown()
+                generator.close()
+
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(markdown)
+
+                self.status_var.set(f"Exported data dictionary to {filepath}")
+
+            except Exception as e:
+                messagebox.showerror("Export Error", f"Failed to export: {str(e)}")
+
+    def _export_dict_json(self):
+        """Export data dictionary as JSON."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open and analyze a spreadsheet first.")
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            title="Export Data Dictionary",
+            defaultextension=".json",
+            filetypes=[("JSON files", "*.json"), ("All files", "*.*")],
+            initialfile=f"{Path(self.current_file).stem}_data_dictionary.json"
+        )
+
+        if filepath:
+            try:
+                generator = DataDictionaryGenerator(str(self.current_file))
+                json_data = generator.export_json()
+                generator.close()
+
+                with open(filepath, 'w', encoding='utf-8') as f:
+                    f.write(json_data)
+
+                self.status_var.set(f"Exported data dictionary to {filepath}")
+
+            except Exception as e:
+                messagebox.showerror("Export Error", f"Failed to export: {str(e)}")
+
+    def _copy_dict_markdown(self):
+        """Copy data dictionary as Markdown to clipboard."""
+        if not self.current_file:
+            messagebox.showwarning("No File", "Please open and analyze a spreadsheet first.")
+            return
+
+        try:
+            generator = DataDictionaryGenerator(str(self.current_file))
+            markdown = generator.export_markdown()
+            generator.close()
+
+            self.root.clipboard_clear()
+            self.root.clipboard_append(markdown)
+            self.status_var.set("Data dictionary copied to clipboard!")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to copy: {str(e)}")
+
     # ========================================================================
     # Formula Editor Actions
     # ========================================================================
@@ -717,6 +1261,18 @@ class SpreadsheetExtractorApp:
         # Update sheet filter in editor tab
         sheet_names = ['All sheets'] + [s.name for s in a.sheets]
         self.sheet_filter_combo['values'] = sheet_names
+
+        # Update formula combo in code conversion tab
+        formula_list = []
+        for f in a.formulas[:50]:  # Limit to first 50 for performance
+            display = f"{f.sheet}!{f.address}: ={f.formula[:40]}"
+            if len(f.formula) > 40:
+                display += "..."
+            formula_list.append(display)
+        if formula_list:
+            self.code_formula_combo['values'] = formula_list
+        else:
+            self.code_formula_combo['values'] = ['No formulas found']
 
         # Update status
         if a.errors:
