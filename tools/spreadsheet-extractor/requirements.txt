@@ -1,0 +1,10 @@
+# Spreadsheet Business Logic Extractor - Dependencies
+
+# Excel file parsing
+openpyxl>=3.1.0    # For .xlsx, .xlsm files
+
+# Optional: Legacy Excel support
+xlrd>=2.0.0        # For .xls files (optional)
+
+# Note: tkinter is part of Python standard library
+# If missing on Linux, install: sudo apt-get install python3-tk
