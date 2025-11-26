@@ -18,7 +18,7 @@ interface TableProps<T> {
   isLoading?: boolean;
 }
 
-function Table<T extends Record<string, unknown>>({
+function Table<T extends object>({
   data,
   columns,
   keyField = 'id' as keyof T,
@@ -26,7 +26,7 @@ function Table<T extends Record<string, unknown>>({
   isLoading = false,
 }: TableProps<T>) {
   const [sortConfig, setSortConfig] = useState<{
-    key: string;
+    key: keyof T;
     direction: 'asc' | 'desc';
   } | null>(null);
 
@@ -34,7 +34,7 @@ function Table<T extends Record<string, unknown>>({
     return col.key || col.accessor?.toString() || `col-${index}`;
   };
 
-  const handleSort = (key: string) => {
+  const handleSort = (key: keyof T) => {
     let direction: 'asc' | 'desc' = 'asc';
 
     if (sortConfig?.key === key && sortConfig.direction === 'asc') {
@@ -50,6 +50,10 @@ function Table<T extends Record<string, unknown>>({
     return [...data].sort((a, b) => {
       const aVal = a[sortConfig.key];
       const bVal = b[sortConfig.key];
+
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return sortConfig.direction === 'asc' ? 1 : -1;
+      if (bVal == null) return sortConfig.direction === 'asc' ? -1 : 1;
 
       if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
@@ -80,11 +84,11 @@ function Table<T extends Record<string, unknown>>({
                   key={colKey}
                   style={{ width: col.width }}
                   className={col.sortable ? 'sortable' : ''}
-                  onClick={() => col.sortable && handleSort(colKey)}
+                  onClick={() => col.sortable && col.accessor && handleSort(col.accessor)}
                 >
                   <div className="th-content">
                     {col.header}
-                    {col.sortable && sortConfig?.key === colKey && (
+                    {col.sortable && sortConfig && sortConfig.key === col.accessor && (
                       <span className="sort-icon">
                         {sortConfig.direction === 'asc' ? '↑' : '↓'}
                       </span>
@@ -118,7 +122,8 @@ function Table<T extends Record<string, unknown>>({
                   } else if (col.render) {
                     content = col.render(item);
                   } else if (col.accessor) {
-                    content = item[col.accessor];
+                    const value = item[col.accessor];
+                    content = value != null ? String(value) : '';
                   } else {
                     content = '';
                   }

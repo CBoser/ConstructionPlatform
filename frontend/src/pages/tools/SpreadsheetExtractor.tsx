@@ -7,6 +7,8 @@ import {
   usePromptLibrary,
   useGeneratePrompt,
   useExportAnalysis,
+} from '../../services/spreadsheetService';
+import type {
   SpreadsheetAnalysis,
   PromptTemplate,
 } from '../../services/spreadsheetService';
