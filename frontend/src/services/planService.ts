@@ -10,6 +10,7 @@ export interface Plan {
   id: string;
   code: string;
   name: string | null;
+  customerPlanCode: string | null; // Customer's plan code if different from our code
   type: PlanType;
   builderId: string | null;
   builder?: {
@@ -31,6 +32,7 @@ export interface Plan {
     elevations: number;
     templateItems: number;
     jobs: number;
+    assignedOptions?: number;
   };
 }
 
@@ -93,6 +95,7 @@ export interface PlanFull extends Plan {
 export interface CreatePlanInput {
   code: string;
   name?: string;
+  customerPlanCode?: string;
   type: PlanType;
   builderId?: string;
   sqft?: number;
@@ -108,6 +111,7 @@ export interface CreatePlanInput {
 export interface UpdatePlanInput {
   code?: string;
   name?: string;
+  customerPlanCode?: string | null;
   type?: PlanType;
   builderId?: string | null;
   sqft?: number;
@@ -521,6 +525,165 @@ export function useDeleteElevation() {
       queryClient.invalidateQueries({ queryKey: elevationKeys.byPlan(variables.planId) });
       queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
       queryClient.invalidateQueries({ queryKey: planKeys.lists() });
+    },
+  });
+}
+
+// ============================================================================
+// Plan Assigned Options Types
+// ============================================================================
+
+export type OptionCategory =
+  | 'DECK'
+  | 'FENCING'
+  | 'ROOM_ADDITION'
+  | 'GARAGE'
+  | 'PATIO'
+  | 'STRUCTURAL'
+  | 'FINISH'
+  | 'OTHER';
+
+export interface PlanAssignedOption {
+  id: string;
+  planId: string;
+  elevationId: string | null; // null = plan-level, set = elevation-specific
+  name: string;
+  description: string | null;
+  category: OptionCategory;
+  estimatedCost: number | null;
+  notes: string | null;
+  isStandard: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAssignedOptionInput {
+  elevationId?: string;
+  name: string;
+  description?: string;
+  category?: OptionCategory;
+  estimatedCost?: number;
+  notes?: string;
+  isStandard?: boolean;
+}
+
+export type UpdateAssignedOptionInput = Partial<CreateAssignedOptionInput>;
+
+// ============================================================================
+// Plan Assigned Options API Functions
+// ============================================================================
+
+export async function fetchAssignedOptions(planId: string): Promise<PlanAssignedOption[]> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanAssignedOption[];
+  }>(`/api/v1/plans/${planId}/options`);
+
+  return response.data;
+}
+
+export async function createAssignedOption(
+  planId: string,
+  data: CreateAssignedOptionInput
+): Promise<PlanAssignedOption> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanAssignedOption;
+    message: string;
+  }>(`/api/v1/plans/${planId}/options`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+  return response.data;
+}
+
+export async function updateAssignedOption(
+  planId: string,
+  optionId: string,
+  data: UpdateAssignedOptionInput
+): Promise<PlanAssignedOption> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanAssignedOption;
+    message: string;
+  }>(`/api/v1/plans/${planId}/options/${optionId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+  return response.data;
+}
+
+export async function deleteAssignedOption(planId: string, optionId: string): Promise<void> {
+  await apiFetch<{
+    success: boolean;
+    message: string;
+  }>(`/api/v1/plans/${planId}/options/${optionId}`, {
+    method: 'DELETE',
+  });
+}
+
+// ============================================================================
+// Plan Assigned Options React Query Hooks
+// ============================================================================
+
+export const optionKeys = {
+  all: ['assignedOptions'] as const,
+  byPlan: (planId: string) => [...optionKeys.all, 'plan', planId] as const,
+  detail: (planId: string, optionId: string) => [...optionKeys.byPlan(planId), optionId] as const,
+};
+
+export function useAssignedOptions(planId: string) {
+  return useQuery({
+    queryKey: optionKeys.byPlan(planId),
+    queryFn: () => fetchAssignedOptions(planId),
+    enabled: !!planId,
+  });
+}
+
+export function useCreateAssignedOption() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, data }: { planId: string; data: CreateAssignedOptionInput }) =>
+      createAssignedOption(planId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: optionKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
+    },
+  });
+}
+
+export function useUpdateAssignedOption() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      planId,
+      optionId,
+      data,
+    }: {
+      planId: string;
+      optionId: string;
+      data: UpdateAssignedOptionInput;
+    }) => updateAssignedOption(planId, optionId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: optionKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
+    },
+  });
+}
+
+export function useDeleteAssignedOption() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, optionId }: { planId: string; optionId: string }) =>
+      deleteAssignedOption(planId, optionId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: optionKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
     },
   });
 }
