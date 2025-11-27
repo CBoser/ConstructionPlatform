@@ -11,6 +11,11 @@ export interface Plan {
   code: string;
   name: string | null;
   type: PlanType;
+  builderId: string | null;
+  builder?: {
+    id: string;
+    customerName: string;
+  } | null;
   sqft: number | null;
   bedrooms: number | null;
   bathrooms: number | null;
@@ -48,6 +53,7 @@ export interface CreatePlanInput {
   code: string;
   name?: string;
   type: PlanType;
+  builderId?: string;
   sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -62,6 +68,7 @@ export interface UpdatePlanInput {
   code?: string;
   name?: string;
   type?: PlanType;
+  builderId?: string | null;
   sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -77,6 +84,7 @@ export interface ListPlansQuery {
   limit?: number;
   search?: string;
   type?: PlanType;
+  builderId?: string;
   isActive?: boolean;
   sortBy?: 'code' | 'name' | 'sqft' | 'createdAt' | 'updatedAt';
   sortOrder?: 'asc' | 'desc';
@@ -147,6 +155,7 @@ export async function fetchPlans(query: ListPlansQuery = {}): Promise<ListPlansR
   if (query.limit) params.append('limit', query.limit.toString());
   if (query.search) params.append('search', query.search);
   if (query.type) params.append('type', query.type);
+  if (query.builderId) params.append('builderId', query.builderId);
   if (query.isActive !== undefined) params.append('isActive', query.isActive.toString());
   if (query.sortBy) params.append('sortBy', query.sortBy);
   if (query.sortOrder) params.append('sortOrder', query.sortOrder);

@@ -2707,7 +2707,19 @@ select.input {
   padding: var(--space-xs) var(--space-sm);
   background: rgba(45, 90, 61, 0.08);
   border-radius: var(--radius);
-  display: inline-block;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.plan-card-builder {
+  font-size: var(--font-size-xs);
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-sm);
 }
 
 .plan-card-details {

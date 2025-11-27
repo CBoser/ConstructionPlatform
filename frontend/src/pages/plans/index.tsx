@@ -347,6 +347,7 @@ const Plans: React.FC = () => {
                       code={plan.code}
                       name={plan.name}
                       type={plan.type}
+                      builderName={plan.builder?.customerName}
                       sqft={plan.sqft}
                       bedrooms={plan.bedrooms}
                       bathrooms={plan.bathrooms}
