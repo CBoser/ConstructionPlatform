@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { PlanType } from './planService';
 
 // ============================================================================
 // Types
@@ -103,7 +104,7 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
   const token = getAuthToken();
   const headers: Record<string, string> = {
     ...(token && { Authorization: `Bearer ${token}` }),
-    ...(options.headers as Record<string, string> | undefined),
+    ...(options.headers as Record<string, string>),
   };
 
   // Don't set Content-Type for FormData - browser will set it with boundary
@@ -309,7 +310,7 @@ interface ExportPlan {
   code: string;
   name: string | null;
   customerPlanCode: string | null;
-  type: string;
+  type: PlanType;
   builderId: string | null;
   builder?: {
     id: string;
