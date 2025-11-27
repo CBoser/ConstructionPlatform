@@ -109,9 +109,9 @@ model CustomerPricingTier {
   customerId          String    @map("customer_id")
 
   // DART Category-Based Tiering (BAT System)
-  dartCategory        Int       @map("dart_category")        // 1-15 (see DartCategory enum for mapping)
-  dartCategoryName    String    @map("dart_category_name")   // e.g., "01-Lumber", "02-StrctP"
-  tier                String    @map("tier")                 // "01"-"12" or "L5" (Random Lengths)
+  dartCategory        Int       @default(1) @map("dart_category")        // 1-15 (see DartCategory enum for mapping)
+  dartCategoryName    String    @default("01-Lumber") @map("dart_category_name")   // e.g., "01-Lumber", "02-StrctP"
+  tier                String    @default("01") @map("tier")                 // "01"-"12" or "L5" (Random Lengths)
 
   // Legacy discount-based pricing (optional)
   tierName            String?   @map("tier_name")
@@ -120,7 +120,7 @@ model CustomerPricingTier {
   effectiveDate       DateTime  @map("effective_date")
   expirationDate      DateTime? @map("expiration_date")
   createdAt           DateTime  @default(now()) @map("created_at")
-  updatedAt           DateTime  @updatedAt @map("updated_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
