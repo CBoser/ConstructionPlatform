@@ -223,6 +223,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             onChange={handleChange}
             error={errors.contactName}
             placeholder="e.g., John Doe"
+            autoComplete="name"
             required
             disabled={isLoading}
           />
@@ -233,6 +234,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             value={formData.role}
             onChange={handleChange}
             placeholder="e.g., Project Manager"
+            autoComplete="organization-title"
             disabled={isLoading}
           />
 
@@ -244,6 +246,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             onChange={handleChange}
             error={errors.email}
             placeholder="e.g., john@example.com"
+            autoComplete="email"
             disabled={isLoading}
           />
 
@@ -255,6 +258,7 @@ const ContactFormModal: React.FC<ContactFormModalProps> = ({
             onChange={handleChange}
             error={errors.phone}
             placeholder="e.g., (555) 123-4567"
+            autoComplete="tel"
             disabled={isLoading}
           />
 
