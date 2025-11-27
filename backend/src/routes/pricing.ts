@@ -241,7 +241,7 @@ router.post('/batch-calculate', authenticateToken, async (req: Request, res: Res
     const failed = results.filter((r) => !r.success);
 
     const totalAmount = successful.reduce(
-      (sum, r) => sum + (r.pricing?.total || 0),
+      (sum, r) => sum + ((r as any).pricing?.total || 0),
       0
     );
 

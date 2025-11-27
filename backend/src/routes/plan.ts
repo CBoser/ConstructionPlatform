@@ -116,6 +116,28 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 /**
+ * @route   GET /api/v1/plans/stats
+ * @desc    Get aggregate plan statistics for dashboard
+ * @access  Private
+ */
+router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const stats = await planService.getAggregateStats();
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error('Get plan aggregate stats error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get plan statistics',
+    });
+  }
+});
+
+/**
  * @route   GET /api/v1/plans/code/:code
  * @desc    Get plan by code
  * @access  Private

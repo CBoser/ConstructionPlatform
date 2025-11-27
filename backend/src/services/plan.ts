@@ -313,6 +313,29 @@ class PlanService {
   }
 
   /**
+   * Get aggregate plan statistics for dashboard
+   */
+  async getAggregateStats() {
+    const [total, activeCount, byType] = await Promise.all([
+      db.plan.count(),
+      db.plan.count({ where: { isActive: true } }),
+      db.plan.groupBy({
+        by: ['type'],
+        _count: { type: true },
+      }),
+    ]);
+
+    return {
+      total,
+      activeCount,
+      byType: byType.map((item) => ({
+        type: item.type,
+        count: item._count.type,
+      })),
+    };
+  }
+
+  /**
    * Get plan statistics
    */
   async getPlanStats(id: string) {
