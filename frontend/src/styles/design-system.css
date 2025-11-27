@@ -2617,26 +2617,14 @@ select.input {
 
 .plan-cards-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* Auto-fit cards: minimum 280px, expand to fill available space */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-md);
-}
-
-@media (min-width: 640px) {
-  .plan-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (min-width: 1024px) {
   .plan-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-lg);
-  }
-}
-
-@media (min-width: 1400px) {
-  .plan-cards-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -3426,19 +3414,14 @@ select.input {
 
 .job-cards-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* Auto-fit cards: minimum 320px, expand to fill available space */
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-md);
 }
 
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   .job-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .job-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
   }
 }
 
@@ -3594,26 +3577,14 @@ select.input {
 
 .material-cards-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* Auto-fit cards: minimum 280px, expand to fill available space */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-md);
-}
-
-@media (min-width: 640px) {
-  .material-cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (min-width: 1024px) {
   .material-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-lg);
-  }
-}
-
-@media (min-width: 1400px) {
-  .material-cards-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
@@ -4582,26 +4553,14 @@ select.input {
    ============================================================================ */
 .cards-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  /* Auto-fit cards: minimum 280px, expand to fill available space */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: var(--space-md);
-}
-
-@media (min-width: 640px) {
-  .cards-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (min-width: 1024px) {
   .cards-grid {
-    grid-template-columns: repeat(3, 1fr);
     gap: var(--space-lg);
-  }
-}
-
-@media (min-width: 1400px) {
-  .cards-grid {
-    grid-template-columns: repeat(4, 1fr);
   }
 }
 
