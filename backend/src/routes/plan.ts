@@ -1,5 +1,9 @@
 import { Router, Request, Response } from 'express';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs/promises';
 import { planService } from '../services/plan';
+import { planImportService } from '../services/planImport';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole, PlanType } from '@prisma/client';
 import documentRoutes from './document';
@@ -7,6 +11,44 @@ import elevationRoutes from './elevation';
 import optionRoutes from './option';
 
 const router = Router();
+
+// Configure multer for Excel file uploads
+const uploadDir = path.join(__dirname, '../../temp-uploads');
+const storage = multer.diskStorage({
+  destination: async (_req, _file, cb) => {
+    // Ensure temp upload directory exists
+    try {
+      await fs.mkdir(uploadDir, { recursive: true });
+    } catch (error) {
+      // Directory might already exist
+    }
+    cb(null, uploadDir);
+  },
+  filename: (_req, file, cb) => {
+    const timestamp = Date.now();
+    const sanitized = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
+    cb(null, `${timestamp}-${sanitized}`);
+  },
+});
+
+const uploadExcel = multer({
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit for Excel files
+  },
+  fileFilter: (_req, file, cb) => {
+    const allowedMimes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+    ];
+
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Please upload an Excel file (.xlsx or .xls)'));
+    }
+  },
+});
 
 // ====== PLAN ROUTES ======
 
@@ -209,6 +251,70 @@ router.get('/export-all', authenticateToken, async (req: Request, res: Response)
     });
   }
 });
+
+/**
+ * @route   POST /api/v1/plans/import
+ * @desc    Import plans from Excel file
+ * @access  Private (ADMIN, ESTIMATOR)
+ */
+router.post(
+  '/import',
+  authenticateToken,
+  requireRole(UserRole.ADMIN, UserRole.ESTIMATOR),
+  uploadExcel.single('file'),
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          error: 'No file uploaded',
+        });
+      }
+
+      // Validate file structure
+      const validation = await planImportService.validateExcelFile(req.file.path);
+      if (!validation.valid) {
+        // Clean up uploaded file
+        await fs.unlink(req.file.path).catch(() => {});
+        return res.status(400).json({
+          success: false,
+          error: validation.error || 'Invalid Excel file structure',
+        });
+      }
+
+      // Import plans
+      const result = await planImportService.importFromExcel(req.file.path);
+
+      // Clean up uploaded file
+      await fs.unlink(req.file.path).catch(() => {});
+
+      res.status(200).json({
+        success: result.success,
+        data: {
+          created: result.created,
+          updated: result.updated,
+          skipped: result.skipped,
+          errors: result.errors,
+        },
+        message: `Import completed: ${result.created} created, ${result.updated} updated, ${result.skipped} skipped${
+          result.errors.length > 0 ? `, ${result.errors.length} errors` : ''
+        }`,
+      });
+    } catch (error) {
+      console.error('Import plans error:', error);
+
+      // Clean up uploaded file on error
+      if (req.file) {
+        await fs.unlink(req.file.path).catch(() => {});
+      }
+
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to import plans',
+      });
+    }
+  }
+);
 
 /**
  * @route   GET /api/v1/plans/:id

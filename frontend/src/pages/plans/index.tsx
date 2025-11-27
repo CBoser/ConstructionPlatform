@@ -9,6 +9,7 @@ import StatCard from '../../components/common/StatCard';
 import PlanCard from '../../components/common/PlanCard';
 import PlanDetailModal from '../../components/plans/PlanDetailModal';
 import PlanFormModal from '../../components/plans/PlanFormModal';
+import PlanImportDialog from '../../components/plans/PlanImportDialog';
 import { useToast } from '../../components/common/Toast';
 import {
   usePlans,
@@ -34,6 +35,7 @@ const Plans: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
 
   // Filter state
@@ -161,6 +163,12 @@ const Plans: React.FC = () => {
     }
   };
 
+  // Handle import complete
+  const handleImportComplete = () => {
+    refetch(); // Refresh the plans list
+    setIsImportDialogOpen(false);
+  };
+
   // Format plan type for display
   const formatPlanType = (type: PlanType): string => {
     const typeMap: Record<PlanType, string> = {
@@ -272,6 +280,12 @@ const Plans: React.FC = () => {
         ]}
         actions={
           <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button
+              variant="secondary"
+              onClick={() => setIsImportDialogOpen(true)}
+            >
+              Import Plans
+            </Button>
             <Button
               variant="secondary"
               onClick={handleExportAll}
@@ -517,6 +531,12 @@ const Plans: React.FC = () => {
         onClose={handleCloseFormModal}
         plan={editingPlan}
         onSuccess={handleFormSuccess}
+      />
+
+      <PlanImportDialog
+        isOpen={isImportDialogOpen}
+        onClose={() => setIsImportDialogOpen(false)}
+        onImportComplete={handleImportComplete}
       />
     </div>
   );
