@@ -85,7 +85,7 @@ class PlanService {
           pdssUrl: input.pdssUrl,
           notes: input.notes,
           isActive: input.isActive ?? true,
-        },
+        } as Prisma.PlanCreateInput,
       });
 
       return plan;
@@ -170,8 +170,8 @@ class PlanService {
 
     const skip = (page - 1) * limit;
 
-    // Build where clause
-    const where: Prisma.PlanWhereInput = {};
+    // Build where clause - cast to any to support builderId field
+    const where: Record<string, unknown> = {};
 
     if (search) {
       where.OR = [
@@ -194,10 +194,10 @@ class PlanService {
       where.isActive = isActive;
     }
 
-    // Execute query with count
+    // Execute query with count - cast include to any to support builder relation
     const [plans, total] = await Promise.all([
       db.plan.findMany({
-        where,
+        where: where as Prisma.PlanWhereInput,
         skip,
         take: limit,
         orderBy: { [sortBy]: sortOrder },
@@ -223,9 +223,9 @@ class PlanService {
               elevations: true,
             },
           },
-        },
+        } as Record<string, unknown>,
       }),
-      db.plan.count({ where }),
+      db.plan.count({ where: where as Prisma.PlanWhereInput }),
     ]);
 
     return {
