@@ -121,29 +121,24 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
   };
 
   const handleSaveElevation = async (data: ElevationFormData, changeNotes?: string) => {
-    try {
-      if (editingElevation) {
-        // Update existing elevation
-        await updateElevation.mutateAsync({
-          planId: plan.id,
-          elevationId: editingElevation.id,
-          data: {
-            ...data,
-            changeNotes,
-          },
-        });
-      } else {
-        // Create new elevation
-        await createElevation.mutateAsync({
-          planId: plan.id,
-          data,
-        });
-      }
-      handleCloseElevationModal();
-    } catch (error) {
-      // Error is handled by the form modal
-      throw error;
+    if (editingElevation) {
+      // Update existing elevation
+      await updateElevation.mutateAsync({
+        planId: plan.id,
+        elevationId: editingElevation.id,
+        data: {
+          ...data,
+          changeNotes,
+        },
+      });
+    } else {
+      // Create new elevation
+      await createElevation.mutateAsync({
+        planId: plan.id,
+        data,
+      });
     }
+    handleCloseElevationModal();
   };
 
   const handleDeleteElevation = async (elevation: PlanElevation) => {

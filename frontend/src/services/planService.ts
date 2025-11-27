@@ -567,7 +567,7 @@ export interface CreateAssignedOptionInput {
   isStandard?: boolean;
 }
 
-export interface UpdateAssignedOptionInput extends Partial<CreateAssignedOptionInput> {}
+export type UpdateAssignedOptionInput = Partial<CreateAssignedOptionInput>;
 
 // ============================================================================
 // Plan Assigned Options API Functions
