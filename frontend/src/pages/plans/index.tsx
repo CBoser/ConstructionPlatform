@@ -18,11 +18,14 @@ import {
   type PlanType,
   type ListPlansQuery,
 } from '../../services/planService';
+import { exportAllPlans } from '../../services/documentService';
+import { exportPlansToExcel } from '../../utils/excelExport';
 
 type ViewMode = 'table' | 'cards';
 
 const Plans: React.FC = () => {
   const { showToast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
 
   // View mode state
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
@@ -143,6 +146,21 @@ const Plans: React.FC = () => {
     }
   };
 
+  // Handle export all plans
+  const handleExportAll = async () => {
+    setIsExporting(true);
+    try {
+      const plans = await exportAllPlans(isActiveFilter);
+      await exportPlansToExcel(plans);
+      showToast('Plans exported successfully', 'success');
+    } catch (error) {
+      console.error('Export error:', error);
+      showToast('Failed to export plans', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Format plan type for display
   const formatPlanType = (type: PlanType): string => {
     const typeMap: Record<PlanType, string> = {
@@ -253,9 +271,19 @@ const Plans: React.FC = () => {
           { label: 'Plans' },
         ]}
         actions={
-          <Button variant="primary" onClick={handleAddPlan}>
-            + Add Plan Template
-          </Button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Button
+              variant="secondary"
+              onClick={handleExportAll}
+              disabled={isExporting}
+              loading={isExporting}
+            >
+              Export All Plans
+            </Button>
+            <Button variant="primary" onClick={handleAddPlan}>
+              + Add Plan Template
+            </Button>
+          </div>
         }
       />
 
