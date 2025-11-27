@@ -5,24 +5,32 @@ import Input from '../../components/common/Input';
 import Table from '../../components/common/Table';
 import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
+import StatCard from '../../components/common/StatCard';
+import PlanCard from '../../components/common/PlanCard';
 import { useToast } from '../../components/common/Toast';
 import {
   usePlans,
   useDeletePlan,
+  usePlanStats,
   type Plan,
   type PlanType,
   type ListPlansQuery,
 } from '../../services/planService';
 
+type ViewMode = 'table' | 'cards';
+
 const Plans: React.FC = () => {
   const { showToast } = useToast();
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
   // Filter state
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<PlanType | ''>('');
   const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(true);
   const [page, setPage] = useState(1);
-  const limit = 20;
+  const limit = viewMode === 'cards' ? 12 : 20;
 
   // Build query
   const query: ListPlansQuery = useMemo(
@@ -38,8 +46,9 @@ const Plans: React.FC = () => {
     [page, limit, search, typeFilter, isActiveFilter]
   );
 
-  // Fetch plans
+  // Fetch plans and stats
   const { data, isLoading, error, refetch } = usePlans(query);
+  const { data: stats } = usePlanStats();
   const deletePlan = useDeletePlan();
 
   // Handle search
@@ -59,6 +68,12 @@ const Plans: React.FC = () => {
     setIsActiveFilter(
       value === '' ? undefined : value === 'true' ? true : false
     );
+    setPage(1);
+  };
+
+  // Handle view mode change
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
     setPage(1);
   };
 
@@ -171,6 +186,26 @@ const Plans: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Get stats display data
+  const statsData = useMemo(() => {
+    if (!stats) {
+      return {
+        total: 0,
+        active: 0,
+        singleStory: 0,
+        twoStory: 0,
+      };
+    }
+    const singleStory = stats.byType.find(t => t.type === 'SINGLE_STORY')?.count ?? 0;
+    const twoStory = stats.byType.find(t => t.type === 'TWO_STORY')?.count ?? 0;
+    return {
+      total: stats.total,
+      active: stats.activeCount,
+      singleStory,
+      twoStory,
+    };
+  }, [stats]);
+
   return (
     <div>
       <PageHeader
@@ -187,10 +222,55 @@ const Plans: React.FC = () => {
         }
       />
 
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <StatCard
+          value={statsData.total}
+          label="Total Plans"
+        />
+        <StatCard
+          value={statsData.active}
+          label="Active Plans"
+          variant="success"
+        />
+        <StatCard
+          value={statsData.singleStory}
+          label="Single Story"
+          variant="info"
+        />
+        <StatCard
+          value={statsData.twoStory}
+          label="Two Story"
+          variant="info"
+        />
+      </div>
+
       <div className="section">
         <Card>
           {/* Filters */}
           <div className="filters-bar">
+            <div className="filters-bar-header">
+              <span className="filters-bar-title">Filter Plans</span>
+              <div className="view-toggle">
+                <button
+                  className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                  onClick={() => handleViewModeChange('cards')}
+                  title="Card View"
+                >
+                  <span className="view-toggle-icon">▦</span>
+                  <span className="view-toggle-label">Cards</span>
+                </button>
+                <button
+                  className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => handleViewModeChange('table')}
+                  title="Table View"
+                >
+                  <span className="view-toggle-icon">☰</span>
+                  <span className="view-toggle-label">Table</span>
+                </button>
+              </div>
+            </div>
+
             <div className="filters-row">
               <Input
                 placeholder="Search plans..."
@@ -232,7 +312,7 @@ const Plans: React.FC = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Content */}
           {isLoading ? (
             <div className="loading-container">
               <Loading size="lg" />
@@ -248,7 +328,33 @@ const Plans: React.FC = () => {
             </div>
           ) : data && data.data.length > 0 ? (
             <>
-              <Table columns={columns} data={data.data} />
+              {/* Card View */}
+              {viewMode === 'cards' && (
+                <div className="plan-cards-grid">
+                  {data.data.map((plan) => (
+                    <PlanCard
+                      key={plan.id}
+                      code={plan.code}
+                      name={plan.name}
+                      type={plan.type}
+                      sqft={plan.sqft}
+                      bedrooms={plan.bedrooms}
+                      bathrooms={plan.bathrooms}
+                      garage={plan.garage}
+                      elevationCount={plan._count?.elevations}
+                      templateItemCount={plan._count?.templateItems}
+                      jobCount={plan._count?.jobs}
+                      isActive={plan.isActive}
+                      onDelete={() => handleDeletePlan(plan)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Table View */}
+              {viewMode === 'table' && (
+                <Table columns={columns} data={data.data} />
+              )}
 
               {/* Pagination */}
               {data.pagination.totalPages > 1 && (
@@ -311,6 +417,7 @@ const Plans: React.FC = () => {
             </>
           ) : (
             <div className="empty-state">
+              <div className="empty-state-icon">📋</div>
               <h3>No plans found</h3>
               <p>
                 {search || typeFilter || isActiveFilter !== undefined
