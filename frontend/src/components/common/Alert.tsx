@@ -5,7 +5,7 @@ interface AlertProps {
   icon: string;
   title: string;
   message: string;
-  time: string;
+  time?: string;
 }
 
 const Alert: React.FC<AlertProps> = ({ type, icon, title, message, time }) => {
@@ -15,7 +15,7 @@ const Alert: React.FC<AlertProps> = ({ type, icon, title, message, time }) => {
       <div className="alert-content">
         <div className="alert-title">{title}</div>
         <div>{message}</div>
-        <div className="alert-time">{time}</div>
+        {time && <div className="alert-time">{time}</div>}
       </div>
     </div>
   );

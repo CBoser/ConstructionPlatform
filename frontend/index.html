@@ -2,11 +2,75 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- Mobile-First Viewport Configuration -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2d5a3d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="MindFlow" />
+
+    <!-- SEO & Description -->
+    <meta name="description" content="MindFlow Construction Platform - Manage construction jobs, materials, and takeoffs from anywhere." />
+    <meta name="application-name" content="MindFlow" />
+
+    <!-- Prevent automatic phone number detection (for better UX) -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#2d5a3d" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Preconnect to API for faster requests -->
+    <link rel="preconnect" href="http://localhost:3000" crossorigin />
+
+    <title>MindFlow Construction Platform</title>
+
+    <!-- Splash Screen for iOS -->
+    <style>
+      /* Prevent FOUC (Flash of Unstyled Content) */
+      html {
+        background-color: #f0f2f5;
+      }
+
+      /* Loading state before React mounts */
+      #root:empty::before {
+        content: '';
+        display: block;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        margin: -20px 0 0 -20px;
+        border: 4px solid #e0e0e0;
+        border-top-color: #2d5a3d;
+        border-radius: 50%;
+        animation: initial-spin 0.8s linear infinite;
+      }
+
+      @keyframes initial-spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
   </head>
   <body>
+    <!-- No-JS Fallback -->
+    <noscript>
+      <div style="padding: 20px; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>MindFlow Construction Platform</h1>
+        <p>JavaScript is required to run this application.</p>
+        <p>Please enable JavaScript in your browser settings.</p>
+      </div>
+    </noscript>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

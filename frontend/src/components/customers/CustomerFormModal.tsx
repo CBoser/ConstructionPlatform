@@ -189,6 +189,7 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
             onChange={handleChange}
             error={errors.customerName}
             placeholder="e.g., Richmond American Homes"
+            autoComplete="organization"
             required
             disabled={isLoading}
           />
@@ -225,18 +226,15 @@ const CustomerFormModal: React.FC<CustomerFormModalProps> = ({
             disabled={isLoading}
           />
 
-          <div className="input-group">
-            <label className="input-label">Notes</label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              className="input"
-              rows={3}
-              placeholder="Additional information about this customer..."
-              disabled={isLoading}
-            />
-          </div>
+          <Input
+            label="Notes"
+            name="notes"
+            inputType="textarea"
+            value={formData.notes}
+            onChange={handleChange}
+            placeholder="Additional information about this customer..."
+            disabled={isLoading}
+          />
         </div>
       </form>
     </Modal>
