@@ -3303,6 +3303,170 @@ select.input {
 }
 
 /* ============================================================================
+   VERSION HISTORY (Mobile-First)
+   ============================================================================ */
+
+.version-history {
+  background: var(--background);
+  border-radius: var(--radius);
+  padding: var(--space-lg);
+}
+
+.version-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--gray-border);
+}
+
+.version-history-title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+}
+
+.version-history-count {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+}
+
+.version-history-loading,
+.version-history-error,
+.version-history-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  border: 1px dashed var(--gray-border);
+}
+
+.version-history-error {
+  color: var(--danger);
+}
+
+.version-history-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.version-history-item {
+  display: flex;
+  gap: var(--space-md);
+  position: relative;
+}
+
+.version-history-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.version-history-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--gray-border);
+  border: 2px solid var(--background);
+  z-index: 1;
+}
+
+.version-history-item-current .version-history-dot {
+  background: var(--primary);
+  border-color: var(--primary-light);
+}
+
+.version-history-line {
+  width: 2px;
+  flex: 1;
+  background: var(--gray-border);
+  margin: 4px 0;
+}
+
+.version-history-content {
+  flex: 1;
+  padding-bottom: var(--space-lg);
+}
+
+.version-history-item:last-child .version-history-content {
+  padding-bottom: 0;
+}
+
+.version-history-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.version-history-version {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.version-history-badge {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--primary);
+  background: var(--primary-light);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.version-history-date {
+  font-size: var(--font-size-xs);
+  color: var(--gray);
+}
+
+.version-history-changed-by {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+  margin-bottom: var(--space-xs);
+}
+
+.version-history-notes {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  padding: var(--space-sm);
+  background: var(--background-light);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.version-history-notes strong {
+  color: var(--dark);
+}
+
+.version-history-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.version-history-detail {
+  font-size: var(--font-size-xs);
+  color: var(--text);
+  padding: 2px 8px;
+  background: var(--background-dark);
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================================
    PLAN DETAIL MODAL (Mobile-First)
    ============================================================================ */
 

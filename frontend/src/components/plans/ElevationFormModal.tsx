@@ -3,6 +3,7 @@ import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
 import { useToast } from '../common/Toast';
+import ElevationVersionHistory from './ElevationVersionHistory';
 import type { PlanElevation, CustomDetail } from '../../services/planService';
 
 interface ElevationFormModalProps {
@@ -44,6 +45,7 @@ const ElevationFormModal: React.FC<ElevationFormModalProps> = ({
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [changeNotes, setChangeNotes] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
 
   const [formData, setFormData] = useState<ElevationFormData>({
     code: '',
@@ -103,6 +105,7 @@ const ElevationFormModal: React.FC<ElevationFormModalProps> = ({
         });
       }
       setChangeNotes('');
+      setShowHistory(false);
       setErrors({});
     }
   }, [isOpen, elevation]);
@@ -436,6 +439,31 @@ const ElevationFormModal: React.FC<ElevationFormModalProps> = ({
               helperText="These notes will be saved in the version history"
               disabled={isLoading}
             />
+          </div>
+        )}
+
+        {/* Version History (only for editing) */}
+        {isEditing && elevation && (
+          <div className="form-section">
+            <div className="form-section-header">
+              <h4 className="form-section-title">Version History</h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowHistory(!showHistory)}
+              >
+                {showHistory ? 'Hide History' : 'Show History'}
+              </Button>
+            </div>
+
+            {showHistory && (
+              <ElevationVersionHistory
+                planId={elevation.planId}
+                elevationId={elevation.id}
+                elevationCode={elevation.code}
+              />
+            )}
           </div>
         )}
       </form>
