@@ -1,25 +1,33 @@
-import { PrismaClient, Material, MaterialPricing, Prisma } from '@prisma/client';
+import { Material, Prisma, MaterialCategory } from '@prisma/client';
 import { db } from './database';
 
 export interface CreateMaterialInput {
-  name: string;
-  sku?: string;
-  category: string;
-  unit: string;
-  description?: string;
-  manufacturer?: string;
-  notes?: string;
+  sku: string;
+  description: string;
+  category: MaterialCategory;
+  subcategory?: string;
+  dartCategory?: number;
+  dartCategoryName?: string;
+  unitOfMeasure: string;
+  vendorCost: number;
+  freight?: number;
+  isRLLinked?: boolean;
+  rlTag?: string;
   isActive?: boolean;
 }
 
 export interface UpdateMaterialInput {
-  name?: string;
   sku?: string;
-  category?: string;
-  unit?: string;
   description?: string;
-  manufacturer?: string;
-  notes?: string;
+  category?: MaterialCategory;
+  subcategory?: string;
+  dartCategory?: number;
+  dartCategoryName?: string;
+  unitOfMeasure?: string;
+  vendorCost?: number;
+  freight?: number;
+  isRLLinked?: boolean;
+  rlTag?: string;
   isActive?: boolean;
 }
 
@@ -27,27 +35,12 @@ export interface ListMaterialsQuery {
   page?: number;
   limit?: number;
   search?: string;
-  category?: string;
+  category?: MaterialCategory;
+  dartCategory?: number;
   isActive?: boolean;
-  sortBy?: 'name' | 'category' | 'createdAt' | 'updatedAt';
+  isRLLinked?: boolean;
+  sortBy?: 'sku' | 'description' | 'category' | 'createdAt' | 'updatedAt' | 'vendorCost';
   sortOrder?: 'asc' | 'desc';
-}
-
-export interface CreateMaterialPricingInput {
-  materialId: string;
-  supplierId?: string;
-  pricePerUnit: number;
-  effectiveDate: Date;
-  source?: string;
-  notes?: string;
-}
-
-export interface UpdateMaterialPricingInput {
-  supplierId?: string;
-  pricePerUnit?: number;
-  effectiveDate?: Date;
-  source?: string;
-  notes?: string;
 }
 
 class MaterialService {
@@ -58,13 +51,17 @@ class MaterialService {
     try {
       const material = await db.material.create({
         data: {
-          name: input.name,
           sku: input.sku,
-          category: input.category,
-          unit: input.unit,
           description: input.description,
-          manufacturer: input.manufacturer,
-          notes: input.notes,
+          category: input.category,
+          subcategory: input.subcategory,
+          dartCategory: input.dartCategory,
+          dartCategoryName: input.dartCategoryName,
+          unitOfMeasure: input.unitOfMeasure,
+          vendorCost: input.vendorCost,
+          freight: input.freight ?? 0,
+          isRLLinked: input.isRLLinked ?? false,
+          rlTag: input.rlTag,
           isActive: input.isActive ?? true,
         },
       });
@@ -88,32 +85,52 @@ class MaterialService {
       where: { id },
       include: includeRelations
         ? {
-            pricing: {
-              orderBy: { effectiveDate: 'desc' },
-              take: 10, // Last 10 price records
-              include: {
-                supplier: {
-                  select: {
-                    id: true,
-                    name: true,
-                  },
-                },
-              },
-            },
-            planTemplateItems: {
+            vendor: {
               select: {
                 id: true,
+                name: true,
+                code: true,
+              },
+            },
+            pricingHistory: {
+              orderBy: { effectiveDate: 'desc' },
+              take: 10,
+            },
+            templateItems: {
+              select: {
+                id: true,
+                quantity: true,
+                unit: true,
+                category: true,
                 plan: {
                   select: {
                     id: true,
+                    code: true,
                     name: true,
-                    planNumber: true,
                   },
                 },
-                quantity: true,
-                unit: true,
               },
               take: 5,
+            },
+          }
+        : undefined,
+    });
+
+    return material;
+  }
+
+  /**
+   * Get material by SKU
+   */
+  async getMaterialBySku(sku: string, includeRelations = false) {
+    const material = await db.material.findUnique({
+      where: { sku },
+      include: includeRelations
+        ? {
+            vendor: true,
+            pricingHistory: {
+              orderBy: { effectiveDate: 'desc' },
+              take: 10,
             },
           }
         : undefined,
@@ -131,8 +148,10 @@ class MaterialService {
       limit = 50,
       search,
       category,
+      dartCategory,
       isActive,
-      sortBy = 'name',
+      isRLLinked,
+      sortBy = 'sku',
       sortOrder = 'asc',
     } = query;
 
@@ -143,19 +162,27 @@ class MaterialService {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
         { sku: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { manufacturer: { contains: search, mode: 'insensitive' } },
+        { subcategory: { contains: search, mode: 'insensitive' } },
+        { rlTag: { contains: search, mode: 'insensitive' } },
       ];
     }
 
     if (category) {
-      where.category = { contains: category, mode: 'insensitive' };
+      where.category = category;
+    }
+
+    if (dartCategory !== undefined) {
+      where.dartCategory = dartCategory;
     }
 
     if (isActive !== undefined) {
       where.isActive = isActive;
+    }
+
+    if (isRLLinked !== undefined) {
+      where.isRLLinked = isRLLinked;
     }
 
     // Execute query with count
@@ -166,25 +193,16 @@ class MaterialService {
         take: limit,
         orderBy: { [sortBy]: sortOrder },
         include: {
-          pricing: {
-            orderBy: { effectiveDate: 'desc' },
-            take: 1, // Latest price only
+          vendor: {
             select: {
               id: true,
-              pricePerUnit: true,
-              effectiveDate: true,
-              supplier: {
-                select: {
-                  id: true,
-                  name: true,
-                },
-              },
+              name: true,
             },
           },
           _count: {
             select: {
-              planTemplateItems: true,
-              pricing: true,
+              templateItems: true,
+              pricingHistory: true,
             },
           },
         },
@@ -293,279 +311,72 @@ class MaterialService {
   }
 
   /**
-   * Get material categories (unique list)
+   * Get material categories (unique list from enum)
    */
-  async getCategories(): Promise<string[]> {
+  async getCategories(): Promise<MaterialCategory[]> {
+    return Object.values(MaterialCategory);
+  }
+
+  /**
+   * Get materials by DART category
+   */
+  async getMaterialsByDartCategory(dartCategory: number, isActive = true) {
     const materials = await db.material.findMany({
-      where: { isActive: true },
-      select: { category: true },
-      distinct: ['category'],
-      orderBy: { category: 'asc' },
-    });
-
-    return materials.map((m: any) => m.category);
-  }
-
-  // ====== PRICING OPERATIONS ======
-
-  /**
-   * Create material pricing record
-   */
-  async createPricing(input: CreateMaterialPricingInput): Promise<MaterialPricing> {
-    try {
-      // Verify material exists
-      const material = await db.material.findUnique({
-        where: { id: input.materialId },
-      });
-
-      if (!material) {
-        throw new Error('Material not found');
-      }
-
-      // Verify supplier exists if provided
-      if (input.supplierId) {
-        const supplier = await db.supplier.findUnique({
-          where: { id: input.supplierId },
-        });
-
-        if (!supplier) {
-          throw new Error('Supplier not found');
-        }
-      }
-
-      const pricing = await db.materialPricing.create({
-        data: {
-          materialId: input.materialId,
-          supplierId: input.supplierId,
-          pricePerUnit: input.pricePerUnit,
-          effectiveDate: input.effectiveDate,
-          source: input.source,
-          notes: input.notes,
-        },
-        include: {
-          supplier: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-
-      return pricing;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Get pricing by ID
-   */
-  async getPricingById(id: string) {
-    const pricing = await db.materialPricing.findUnique({
-      where: { id },
-      include: {
-        material: {
-          select: {
-            id: true,
-            name: true,
-            sku: true,
-            unit: true,
-          },
-        },
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return pricing;
-  }
-
-  /**
-   * List pricing history for a material
-   */
-  async listMaterialPricing(materialId: string, limit = 50) {
-    const pricing = await db.materialPricing.findMany({
-      where: { materialId },
-      orderBy: { effectiveDate: 'desc' },
-      take: limit,
-      include: {
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return pricing;
-  }
-
-  /**
-   * Get current (latest) price for a material
-   */
-  async getCurrentPrice(materialId: string, supplierId?: string) {
-    const where: Prisma.MaterialPricingWhereInput = {
-      materialId,
-      effectiveDate: {
-        lte: new Date(),
-      },
-    };
-
-    if (supplierId) {
-      where.supplierId = supplierId;
-    }
-
-    const pricing = await db.materialPricing.findFirst({
-      where,
-      orderBy: { effectiveDate: 'desc' },
-      include: {
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return pricing;
-  }
-
-  /**
-   * Get price at a specific date
-   */
-  async getPriceAtDate(materialId: string, date: Date, supplierId?: string) {
-    const where: Prisma.MaterialPricingWhereInput = {
-      materialId,
-      effectiveDate: {
-        lte: date,
-      },
-    };
-
-    if (supplierId) {
-      where.supplierId = supplierId;
-    }
-
-    const pricing = await db.materialPricing.findFirst({
-      where,
-      orderBy: { effectiveDate: 'desc' },
-      include: {
-        supplier: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return pricing;
-  }
-
-  /**
-   * Update pricing record
-   */
-  async updatePricing(id: string, input: UpdateMaterialPricingInput): Promise<MaterialPricing> {
-    try {
-      // Verify supplier exists if being updated
-      if (input.supplierId) {
-        const supplier = await db.supplier.findUnique({
-          where: { id: input.supplierId },
-        });
-
-        if (!supplier) {
-          throw new Error('Supplier not found');
-        }
-      }
-
-      const pricing = await db.materialPricing.update({
-        where: { id },
-        data: input,
-        include: {
-          supplier: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-        },
-      });
-
-      return pricing;
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new Error('Pricing record not found');
-        }
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Delete pricing record
-   */
-  async deletePricing(id: string): Promise<void> {
-    try {
-      await db.materialPricing.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2025') {
-          throw new Error('Pricing record not found');
-        }
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Get pricing statistics for a material
-   */
-  async getPricingStats(materialId: string, days = 365) {
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - days);
-
-    const pricing = await db.materialPricing.findMany({
       where: {
-        materialId,
-        effectiveDate: {
-          gte: startDate,
-        },
+        dartCategory,
+        isActive,
       },
-      orderBy: { effectiveDate: 'asc' },
-      select: {
-        pricePerUnit: true,
-        effectiveDate: true,
-      },
+      orderBy: { description: 'asc' },
     });
 
-    if (pricing.length === 0) {
-      return null;
-    }
+    return materials;
+  }
 
-    const prices = pricing.map((p: any) => p.pricePerUnit.toNumber());
-    const currentPrice = prices[prices.length - 1];
-    const avgPrice = prices.reduce((sum: number, price: number) => sum + price, 0) / prices.length;
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
+  /**
+   * Get Random Lengths linked materials
+   */
+  async getRLLinkedMaterials() {
+    const materials = await db.material.findMany({
+      where: {
+        isRLLinked: true,
+        isActive: true,
+      },
+      orderBy: { rlTag: 'asc' },
+    });
+
+    return materials;
+  }
+
+  /**
+   * Get material statistics
+   */
+  async getMaterialStats() {
+    const [total, byCategory, byDartCategory, rlLinked] = await Promise.all([
+      db.material.count({ where: { isActive: true } }),
+      db.material.groupBy({
+        by: ['category'],
+        where: { isActive: true },
+        _count: { id: true },
+      }),
+      db.material.groupBy({
+        by: ['dartCategory'],
+        where: { isActive: true, dartCategory: { not: null } },
+        _count: { id: true },
+      }),
+      db.material.count({ where: { isActive: true, isRLLinked: true } }),
+    ]);
 
     return {
-      currentPrice,
-      avgPrice,
-      minPrice,
-      maxPrice,
-      priceCount: pricing.length,
-      firstDate: pricing[0].effectiveDate,
-      lastDate: pricing[pricing.length - 1].effectiveDate,
-      priceHistory: pricing,
+      total,
+      byCategory: byCategory.map((c) => ({
+        category: c.category,
+        count: c._count.id,
+      })),
+      byDartCategory: byDartCategory.map((d) => ({
+        dartCategory: d.dartCategory,
+        count: d._count.id,
+      })),
+      rlLinkedCount: rlLinked,
     };
   }
 }

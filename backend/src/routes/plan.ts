@@ -1,14 +1,14 @@
 import { Router, Request, Response } from 'express';
 import { planService } from '../services/plan';
 import { authenticateToken, requireRole } from '../middleware/auth';
-import { UserRole } from '@prisma/client';
+import { UserRole, PlanType } from '@prisma/client';
 
 const router = Router();
 
 // ====== PLAN ROUTES ======
 
 /**
- * @route   POST /api/plans
+ * @route   POST /api/v1/plans
  * @desc    Create a new plan
  * @access  Private (ADMIN, ESTIMATOR)
  */
@@ -19,44 +19,44 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const {
-        customerId,
+        code,
         name,
-        planNumber,
-        squareFootage,
+        type,
+        sqft,
         bedrooms,
         bathrooms,
-        stories,
-        garageSpaces,
-        description,
+        garage,
+        style,
+        pdssUrl,
         notes,
         isActive,
       } = req.body;
 
       // Validation
-      if (!customerId || customerId.trim().length === 0) {
+      if (!code || code.trim().length === 0) {
         return res.status(400).json({
           success: false,
-          error: 'Customer ID is required',
+          error: 'Plan code is required',
         });
       }
 
-      if (!name || name.trim().length === 0) {
+      if (!type || !Object.values(PlanType).includes(type)) {
         return res.status(400).json({
           success: false,
-          error: 'Plan name is required',
+          error: `Plan type is required. Valid types: ${Object.values(PlanType).join(', ')}`,
         });
       }
 
       const plan = await planService.createPlan({
-        customerId: customerId.trim(),
-        name: name.trim(),
-        planNumber: planNumber?.trim(),
-        squareFootage: squareFootage ? parseFloat(squareFootage) : undefined,
+        code: code.trim(),
+        name: name?.trim(),
+        type: type as PlanType,
+        sqft: sqft ? parseInt(sqft) : undefined,
         bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
         bathrooms: bathrooms ? parseFloat(bathrooms) : undefined,
-        stories: stories ? parseInt(stories) : undefined,
-        garageSpaces: garageSpaces ? parseInt(garageSpaces) : undefined,
-        description: description?.trim(),
+        garage: garage?.trim(),
+        style: style?.trim(),
+        pdssUrl: pdssUrl?.trim(),
         notes: notes?.trim(),
         isActive,
       });
@@ -76,7 +76,7 @@ router.post(
 );
 
 /**
- * @route   GET /api/plans
+ * @route   GET /api/v1/plans
  * @desc    List plans with filtering and pagination
  * @access  Private
  */
@@ -86,9 +86,9 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       page = '1',
       limit = '50',
       search,
-      customerId,
+      type,
       isActive,
-      sortBy = 'name',
+      sortBy = 'code',
       sortOrder = 'asc',
     } = req.query;
 
@@ -96,9 +96,9 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       page: parseInt(page as string),
       limit: parseInt(limit as string),
       search: search as string,
-      customerId: customerId as string,
+      type: type as PlanType | undefined,
       isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
-      sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt' | 'squareFootage',
+      sortBy: sortBy as 'code' | 'name' | 'createdAt' | 'updatedAt' | 'sqft',
       sortOrder: sortOrder as 'asc' | 'desc',
     });
 
@@ -116,7 +116,39 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
 });
 
 /**
- * @route   GET /api/plans/:id
+ * @route   GET /api/v1/plans/code/:code
+ * @desc    Get plan by code
+ * @access  Private
+ */
+router.get('/code/:code', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { code } = req.params;
+    const { includeRelations = 'false' } = req.query;
+
+    const plan = await planService.getPlanByCode(code, includeRelations === 'true');
+
+    if (!plan) {
+      return res.status(404).json({
+        success: false,
+        error: 'Plan not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: plan,
+    });
+  } catch (error) {
+    console.error('Get plan by code error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to get plan',
+    });
+  }
+});
+
+/**
+ * @route   GET /api/v1/plans/:id
  * @desc    Get plan by ID
  * @access  Private
  */
@@ -148,7 +180,7 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response) => {
 });
 
 /**
- * @route   GET /api/plans/:id/stats
+ * @route   GET /api/v1/plans/:id/stats
  * @desc    Get plan statistics
  * @access  Private
  */
@@ -172,7 +204,7 @@ router.get('/:id/stats', authenticateToken, async (req: Request, res: Response) 
 });
 
 /**
- * @route   PUT /api/plans/:id
+ * @route   PUT /api/v1/plans/:id
  * @desc    Update plan
  * @access  Private (ADMIN, ESTIMATOR)
  */
@@ -184,30 +216,30 @@ router.put(
     try {
       const { id } = req.params;
       const {
-        customerId,
+        code,
         name,
-        planNumber,
-        squareFootage,
+        type,
+        sqft,
         bedrooms,
         bathrooms,
-        stories,
-        garageSpaces,
-        description,
+        garage,
+        style,
+        pdssUrl,
         notes,
         isActive,
       } = req.body;
 
       // Build update object (only include provided fields)
       const updateData: any = {};
-      if (customerId !== undefined) updateData.customerId = customerId.trim();
+      if (code !== undefined) updateData.code = code.trim();
       if (name !== undefined) updateData.name = name.trim();
-      if (planNumber !== undefined) updateData.planNumber = planNumber.trim();
-      if (squareFootage !== undefined) updateData.squareFootage = parseFloat(squareFootage);
+      if (type !== undefined) updateData.type = type as PlanType;
+      if (sqft !== undefined) updateData.sqft = parseInt(sqft);
       if (bedrooms !== undefined) updateData.bedrooms = parseInt(bedrooms);
       if (bathrooms !== undefined) updateData.bathrooms = parseFloat(bathrooms);
-      if (stories !== undefined) updateData.stories = parseInt(stories);
-      if (garageSpaces !== undefined) updateData.garageSpaces = parseInt(garageSpaces);
-      if (description !== undefined) updateData.description = description.trim();
+      if (garage !== undefined) updateData.garage = garage.trim();
+      if (style !== undefined) updateData.style = style.trim();
+      if (pdssUrl !== undefined) updateData.pdssUrl = pdssUrl.trim();
       if (notes !== undefined) updateData.notes = notes.trim();
       if (isActive !== undefined) updateData.isActive = isActive;
 
@@ -228,7 +260,7 @@ router.put(
 );
 
 /**
- * @route   POST /api/plans/:id/deactivate
+ * @route   POST /api/v1/plans/:id/deactivate
  * @desc    Deactivate plan
  * @access  Private (ADMIN)
  */
@@ -257,7 +289,7 @@ router.post(
 );
 
 /**
- * @route   POST /api/plans/:id/activate
+ * @route   POST /api/v1/plans/:id/activate
  * @desc    Activate plan
  * @access  Private (ADMIN)
  */
@@ -286,7 +318,7 @@ router.post(
 );
 
 /**
- * @route   DELETE /api/plans/:id
+ * @route   DELETE /api/v1/plans/:id
  * @desc    Delete plan (hard delete - use with caution)
  * @access  Private (ADMIN only)
  */
@@ -317,7 +349,7 @@ router.delete(
 // ====== TEMPLATE ITEM ROUTES ======
 
 /**
- * @route   POST /api/plans/:planId/items
+ * @route   POST /api/v1/plans/:planId/items
  * @desc    Add template item to plan
  * @access  Private (ADMIN, ESTIMATOR)
  */
@@ -328,7 +360,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { planId } = req.params;
-      const { materialId, category, quantity, unit, notes } = req.body;
+      const { materialId, category, subcategory, quantity, unit, wasteFactor, notes } = req.body;
 
       // Validation
       if (!materialId || materialId.trim().length === 0) {
@@ -363,8 +395,10 @@ router.post(
         planId,
         materialId: materialId.trim(),
         category: category.trim(),
+        subcategory: subcategory?.trim(),
         quantity: parseFloat(quantity),
         unit: unit.trim(),
+        wasteFactor: wasteFactor ? parseFloat(wasteFactor) : undefined,
         notes: notes?.trim(),
       });
 
@@ -383,7 +417,7 @@ router.post(
 );
 
 /**
- * @route   GET /api/plans/:planId/items
+ * @route   GET /api/v1/plans/:planId/items
  * @desc    List template items for a plan
  * @access  Private
  */
@@ -407,7 +441,7 @@ router.get('/:planId/items', authenticateToken, async (req: Request, res: Respon
 });
 
 /**
- * @route   GET /api/plans/items/:itemId
+ * @route   GET /api/v1/plans/items/:itemId
  * @desc    Get template item by ID
  * @access  Private
  */
@@ -438,7 +472,7 @@ router.get('/items/:itemId', authenticateToken, async (req: Request, res: Respon
 });
 
 /**
- * @route   PUT /api/plans/items/:itemId
+ * @route   PUT /api/v1/plans/items/:itemId
  * @desc    Update template item
  * @access  Private (ADMIN, ESTIMATOR)
  */
@@ -449,12 +483,14 @@ router.put(
   async (req: Request, res: Response) => {
     try {
       const { itemId } = req.params;
-      const { quantity, unit, notes } = req.body;
+      const { quantity, unit, wasteFactor, subcategory, notes } = req.body;
 
       // Build update object
       const updateData: any = {};
       if (quantity !== undefined) updateData.quantity = parseFloat(quantity);
       if (unit !== undefined) updateData.unit = unit.trim();
+      if (wasteFactor !== undefined) updateData.wasteFactor = parseFloat(wasteFactor);
+      if (subcategory !== undefined) updateData.subcategory = subcategory.trim();
       if (notes !== undefined) updateData.notes = notes.trim();
 
       const item = await planService.updateTemplateItem(itemId, updateData);
@@ -474,7 +510,7 @@ router.put(
 );
 
 /**
- * @route   DELETE /api/plans/items/:itemId
+ * @route   DELETE /api/v1/plans/items/:itemId
  * @desc    Delete template item
  * @access  Private (ADMIN, ESTIMATOR)
  */
