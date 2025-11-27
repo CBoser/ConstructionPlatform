@@ -213,6 +213,7 @@ model Plan {
   templateItems    PlanTemplateItem[] // BOM template
   jobs             Job[]
   variancePatterns VariancePattern[]
+  documents        PlanDocument[]  // Uploaded documents
 
   @@index([code])
   @@index([type])
@@ -261,6 +262,7 @@ model PlanElevation {
   jobs            Job[]
   versionHistory  ElevationVersion[]
   assignedOptions PlanAssignedOption[]  // Options specific to this elevation
+  documents       PlanDocument[]  // Uploaded documents specific to this elevation
 
   @@unique([planId, code])
   @@index([planId])
@@ -360,6 +362,64 @@ enum OptionCategory {
   STRUCTURAL
   FINISH
   OTHER
+}
+
+// Plan Documents - File uploads for plans and elevations
+model PlanDocument {
+  id          String   @id @default(uuid())
+
+  // Association (either plan-level or elevation-specific)
+  planId      String   @map("plan_id")
+  elevationId String?  @map("elevation_id")  // null = plan-level, set = elevation-specific
+
+  // File metadata
+  fileName    String   @map("file_name")
+  fileType    DocumentType @map("file_type")
+  filePath    String   @map("file_path")      // Storage path
+  fileSize    Int      @map("file_size")      // Size in bytes
+  mimeType    String   @map("mime_type")
+
+  // Version control
+  version     Int      @default(1)
+  documentDate DateTime @map("document_date")  // User-specified date for the document
+
+  // Archive tracking
+  isArchived  Boolean  @default(false) @map("is_archived")
+  archiveDate DateTime? @map("archive_date")
+  archiveNotes String? @db.Text @map("archive_notes")
+
+  // Version comparison
+  changeNotes String?  @db.Text @map("change_notes")  // Notes on what changed in this version
+  replacedById String? @map("replaced_by_id")         // Points to the document that replaced this one
+  replacedBy  PlanDocument? @relation("DocumentReplacement", fields: [replacedById], references: [id], onDelete: SetNull)
+  replaces    PlanDocument[] @relation("DocumentReplacement")
+
+  // Metadata
+  uploadedBy  String?  @map("uploaded_by")    // User email or ID
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  plan        Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  elevation   PlanElevation? @relation(fields: [elevationId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([elevationId])
+  @@index([fileType])
+  @@index([isArchived])
+  @@index([documentDate])
+  @@map("plan_documents")
+}
+
+enum DocumentType {
+  PLAN_DRAWING       // Plan drawings/blueprints
+  ELEVATION_DRAWING  // Elevation-specific drawings
+  SPECIFICATIONS     // Plan specifications
+  MATERIAL_LIST      // Material/BOM lists
+  PRICING_SHEET      // Pricing information
+  OPTION_DETAILS     // Option details and pricing
+  OTHER              // Other document types
 }
 
 // Plan Template - The "recipe" for a plan
