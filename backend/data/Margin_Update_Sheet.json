@@ -1,0 +1,954 @@
+[
+  {
+    "CUSTOMER": "MARGIN CHANGES TO APPLY",
+    "03\r\nENGINEERED WOOD PRODUCTS": 3,
+    "04\r\nTRUSSES AND WALL PANELS": 4,
+    "05\r\nMILLWORK": 5,
+    "06\r\nWINDOWS": 6,
+    "07\r\nDOORS": 7,
+    "08\r\nCABINETS & TOPS": 8,
+    "09\r\nSIDINGS, METAL AND CONCRETE": 9,
+    "10\r\nINSULATION, WEATHERPROOFING": 10,
+    "11\r\nROOFING": 11,
+    "12\r\nGYPSUM & ACCESSORIES": 12,
+    "13\r\nHARDWARE, TOOLS, FASTENERS": 13,
+    "14\r\nHOME CENTER PRODUCTS": 14,
+    "special": 15
+  },
+  {
+    "CUSTOMER": "Enter your margin changes below. Use \"ALL\" in Item ID to apply to entire category.",
+    "03\r\nENGINEERED WOOD PRODUCTS": "10",
+    "04\r\nTRUSSES AND WALL PANELS": "01",
+    "05\r\nMILLWORK": "11",
+    "06\r\nWINDOWS": "12",
+    "07\r\nDOORS": "10",
+    "08\r\nCABINETS & TOPS": "09",
+    "09\r\nSIDINGS, METAL AND CONCRETE": "09",
+    "10\r\nINSULATION, WEATHERPROOFING": "08",
+    "11\r\nROOFING": "06",
+    "12\r\nGYPSUM & ACCESSORIES": "08",
+    "13\r\nHARDWARE, TOOLS, FASTENERS": "05",
+    "14\r\nHOME CENTER PRODUCTS": "01",
+    "special": "l5"
+  },
+  {
+    "CUSTOMER": "Pricing Zone",
+    "HERITAGE HMS OF MOLALLA OR*": "Product Category",
+    "__EMPTY": "Minor Category",
+    "__EMPTY_1": "Item ID",
+    "__EMPTY_2": "Description",
+    "__EMPTY_3": "New Margin %",
+    "__EMPTY_4": "Apply to ALL?",
+    "__EMPTY_5": "Multiple Items",
+    "__EMPTY_6": "Single Item",
+    "__EMPTY_7": "Price Level",
+    "__EMPTY_8": "Status",
+    "__EMPTY_9": "Target Column",
+    "__EMPTY_10": "Notes",
+    "__EMPTY_11": "Category",
+    "__EMPTY_12": "Dart_Category_No",
+    "__EMPTY_13": "Minor_Category_No"
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2001 - I JOISTS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 13 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2003 - LVL (LAMINATED VENEER LUMBER)",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 22 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2005 - RIM BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 7 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2006 - GLULAM",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 51 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2011 - WEYERHAEUSER - I JOIST",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 8 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2012 - WEYERHAEUSER - LVL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 3 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2013 - WEYERHAEUSER - LSL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 29 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2031 - LOUISIANA-PACIFIC - I JOIST",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 13 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2032 - LOUISIANA-PACIFIC - LVL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 15 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2033 - LOUISIANA-PACIFIC - LSL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 7 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2041 - BOISE CASCADE - I JOIST",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 11 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2042 - BOISE CASCADE - LVL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 24 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "20 - ENGINEERED LBR",
+    "__EMPTY": "2043 - BOISE CASCADE - LSL",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "10",
+    "__EMPTY_8": "OK - Updated 9 items @ PL10",
+    "__EMPTY_9": "AU",
+    "__EMPTY_10": "Will update PL10 → Column AU",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2210WWP",
+    "__EMPTY_2": "2\"X2\"-10' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2220WWP",
+    "__EMPTY_2": "2\"X2\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2420WWP",
+    "__EMPTY_2": "2\"X4\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2616WWP",
+    "__EMPTY_2": "2\"X6\"-16' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2620WWP",
+    "__EMPTY_2": "2\"X6\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2816WWP",
+    "__EMPTY_2": "2\"X8\"-16' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "2820WWP",
+    "__EMPTY_2": "2\"X8\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "21016WWP",
+    "__EMPTY_2": "2\"X10\"-16' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "21020WWP",
+    "__EMPTY_2": "2\"X10\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "25 - LUMBER",
+    "__EMPTY": "2510 - MISC. LUMBER",
+    "__EMPTY_1": "21220WWP",
+    "__EMPTY_2": "2\"X12\"-20' WW PRIMED",
+    "__EMPTY_3": 0.14,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 1 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "37 - INSULATION",
+    "__EMPTY": "3704 - MISC. INSULATION",
+    "__EMPTY_1": "SS350",
+    "__EMPTY_2": "SILL SEALER 3.5\" X 50'",
+    "__EMPTY_3": 0.2,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "08",
+    "__EMPTY_8": "OK - Updated 1 items @ PL08",
+    "__EMPTY_9": "AO",
+    "__EMPTY_10": "Will update PL08 → Column AO",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "37 - INSULATION",
+    "__EMPTY": "3704 - MISC. INSULATION",
+    "__EMPTY_1": "SS550",
+    "__EMPTY_2": "SILL SEALER 5.5\" X 50'",
+    "__EMPTY_3": 0.2,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "08",
+    "__EMPTY_8": "OK - Updated 1 items @ PL08",
+    "__EMPTY_9": "AO",
+    "__EMPTY_10": "Will update PL08 → Column AO",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "37 - INSULATION",
+    "__EMPTY": "3704 - MISC. INSULATION",
+    "__EMPTY_1": "SS750",
+    "__EMPTY_2": "SILL SEALER 7.5\" X 50'",
+    "__EMPTY_3": 0.2,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "08",
+    "__EMPTY_8": "OK - Updated 1 items @ PL08",
+    "__EMPTY_9": "AO",
+    "__EMPTY_10": "Will update PL08 → Column AO",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "37 - INSULATION",
+    "__EMPTY": "3704 - MISC. INSULATION",
+    "__EMPTY_1": "SS850",
+    "__EMPTY_2": "SILL SEALER 8\" X 50'",
+    "__EMPTY_3": 0.2,
+    "__EMPTY_4": "NO",
+    "__EMPTY_5": false,
+    "__EMPTY_6": true,
+    "__EMPTY_7": "08",
+    "__EMPTY_8": "OK - Updated 1 items @ PL08",
+    "__EMPTY_9": "AO",
+    "__EMPTY_10": "Will update PL08 → Column AO",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3901 - PLYWOOD SIDINGS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 27 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3902 - LUMBER SIDINGS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 40 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3903 - VINYL/ALUMINUM SIDINGS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 58 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3904 - FIBER CEMENT SIDING/HARDI",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 84 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3905 - HARDBOARD SIDINGS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 22 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "39 - SIDING",
+    "__EMPTY": "3906 - MISC. SIDINGS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 25 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4001 - SPRUCE BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 52 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4002 - FIR/LARCH BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 71 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4003 - PINE BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 56 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4005 - HARDWOOD BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 50 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4006 - SYNBOARD/PVC TRIM",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 3 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4009 - CEDAR/CYPRESS BOARDS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 156 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4011 - EXTERIOR LOUVERS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 7 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "40 - EXTERIOR TRIM",
+    "__EMPTY": "4015 - MISC. EXTERIOR TRIM",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.15,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 24 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "42 - MISC BUILDING MATERIALS",
+    "__EMPTY": "4203 - ADHESIVES & SEALANTS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.17,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "01",
+    "__EMPTY_8": "OK - Updated 242 items @ PL01",
+    "__EMPTY_9": "T",
+    "__EMPTY_10": "Will update PL01 → Column T",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "42 - MISC BUILDING MATERIALS",
+    "__EMPTY": "4206 - VENTS/FLASHING/GUTTER",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.22,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "09",
+    "__EMPTY_8": "OK - Updated 286 items @ PL09",
+    "__EMPTY_9": "AR",
+    "__EMPTY_10": "Will update PL09 → Column AR",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "45 - HARDWARE/TOOLS",
+    "__EMPTY": "4502 - CONNECTR,HANGERS,TIES,ANCHORS",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.22,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "05",
+    "__EMPTY_8": "OK - Updated 667 items @ PL05",
+    "__EMPTY_9": "AF",
+    "__EMPTY_10": "Will update PL05 → Column AF",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "45 - HARDWARE/TOOLS",
+    "__EMPTY": "4504 - HAND DRIVN FASTNR (NAILS,SCRW",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.22,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "05",
+    "__EMPTY_8": "OK - Updated 1577 items @ PL05",
+    "__EMPTY_9": "AF",
+    "__EMPTY_10": "Will update PL05 → Column AF",
+    "__EMPTY_12": 1
+  },
+  {
+    "CUSTOMER": "PORTOR",
+    "HERITAGE HMS OF MOLALLA OR*": "45 - HARDWARE/TOOLS",
+    "__EMPTY": "4505 - PNEUMATIC FASTENERS, ACCESSORI",
+    "__EMPTY_1": "ALL",
+    "__EMPTY_3": 0.22,
+    "__EMPTY_4": "YES",
+    "__EMPTY_5": true,
+    "__EMPTY_6": false,
+    "__EMPTY_7": "05",
+    "__EMPTY_8": "OK - Updated 177 items @ PL05",
+    "__EMPTY_9": "AF",
+    "__EMPTY_10": "Will update PL05 → Column AF",
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 2
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  },
+  {
+    "__EMPTY_12": 1
+  }
+]
