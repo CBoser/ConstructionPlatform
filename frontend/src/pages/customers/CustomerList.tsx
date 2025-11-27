@@ -1,16 +1,18 @@
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Table from '../../components/common/Table';
 import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
+import CustomerCard from '../../components/common/CustomerCard';
 import { useToast } from '../../components/common/Toast';
 import CustomerFormModal from '../../components/customers/CustomerFormModal';
+import CustomerDetailModal from '../../components/customers/CustomerDetailModal';
 import {
   useCustomers,
   useDeleteCustomer,
+  fetchCustomerById,
 } from '../../services/customerService';
 import type {
   Customer,
@@ -19,8 +21,9 @@ import type {
   ListCustomersQuery,
 } from '../../../../shared/types/customer';
 
+type ViewMode = 'cards' | 'table';
+
 const CustomerList: React.FC = () => {
-  const navigate = useNavigate();
   const { showToast } = useToast();
 
   // Filter state
@@ -34,11 +37,18 @@ const CustomerList: React.FC = () => {
   const [page, setPage] = useState(1);
   const limit = 20;
 
+  // View mode state
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerFull | null>(
     null
   );
+
+  // Detail modal state
+  const [selectedDetailCustomer, setSelectedDetailCustomer] = useState<CustomerFull | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Build query
   const query: ListCustomersQuery = useMemo(
@@ -86,16 +96,30 @@ const CustomerList: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  // Handle edit customer
-  const handleEditCustomer = (customer: Customer) => {
-    // Fetch full customer details
-    setSelectedCustomer(customer as CustomerFull);
-    setIsModalOpen(true);
+  // Handle click on customer card/row to open detail modal
+  const handleCustomerClick = async (customer: Customer) => {
+    try {
+      // Fetch full customer details for the modal
+      const fullCustomer = await fetchCustomerById(customer.id);
+      setSelectedDetailCustomer(fullCustomer);
+      setIsDetailModalOpen(true);
+    } catch (error) {
+      console.error('Error fetching customer details:', error);
+      showToast('Failed to load customer details', 'error');
+    }
   };
 
-  // Handle view customer details
-  const handleViewCustomer = (customer: Customer) => {
-    navigate(`/foundation/customers/${customer.id}`);
+  // Handle close detail modal
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedDetailCustomer(null);
+  };
+
+  // Handle edit from detail modal
+  const handleEditFromModal = (customer: Customer) => {
+    setSelectedCustomer(customer as CustomerFull);
+    setIsModalOpen(true);
+    setIsDetailModalOpen(false);
   };
 
   // Handle archive/activate customer
@@ -157,7 +181,7 @@ const CustomerList: React.FC = () => {
       cell: (customer: Customer) => (
         <button
           className="link-button"
-          onClick={() => handleViewCustomer(customer)}
+          onClick={() => handleCustomerClick(customer)}
         >
           {customer.customerName}
         </button>
@@ -166,7 +190,11 @@ const CustomerList: React.FC = () => {
     {
       header: 'Type',
       accessor: 'customerType' as keyof Customer,
-      cell: (customer: Customer) => formatCustomerType(customer.customerType),
+      cell: (customer: Customer) => (
+        <span className={`badge badge-${getTypeVariant(customer.customerType)}`}>
+          {formatCustomerType(customer.customerType)}
+        </span>
+      ),
     },
     {
       header: 'Pricing Tier',
@@ -182,36 +210,32 @@ const CustomerList: React.FC = () => {
         </span>
       ),
     },
-    {
-      header: 'Actions',
-      accessor: 'id' as keyof Customer,
-      cell: (customer: Customer) => (
-        <div className="table-actions">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleViewCustomer(customer)}
-          >
-            View
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditCustomer(customer)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleArchiveCustomer(customer)}
-          >
-            {customer.isActive ? 'Archive' : 'Activate'}
-          </Button>
-        </div>
-      ),
-    },
   ];
+
+  // Get badge variant based on customer type
+  const getTypeVariant = (type: string): string => {
+    const variantMap: Record<string, string> = {
+      PRODUCTION: 'primary',
+      SEMI_CUSTOM: 'warning',
+      FULL_CUSTOM: 'info',
+    };
+    return variantMap[type] || 'secondary';
+  };
+
+  // Compute stats from data
+  const stats = useMemo(() => {
+    if (!data?.data) {
+      return { total: 0, active: 0, production: 0, semiCustom: 0, fullCustom: 0 };
+    }
+    const customers = data.data;
+    return {
+      total: data.pagination.total,
+      active: customers.filter((c) => c.isActive).length,
+      production: customers.filter((c) => c.customerType === 'PRODUCTION').length,
+      semiCustom: customers.filter((c) => c.customerType === 'SEMI_CUSTOM').length,
+      fullCustom: customers.filter((c) => c.customerType === 'FULL_CUSTOM').length,
+    };
+  }, [data]);
 
   // Handle page change
   const handlePageChange = (newPage: number) => {
@@ -222,18 +246,42 @@ const CustomerList: React.FC = () => {
   return (
     <div>
       <PageHeader
-        title="Customers"
-        subtitle="Manage your customer database"
+        title="Builders"
+        subtitle="Manage your builder/customer database"
         breadcrumbs={[
           { label: 'Foundation', path: '/foundation' },
-          { label: 'Customers' },
+          { label: 'Builders' },
         ]}
         actions={
           <Button variant="primary" onClick={handleAddCustomer}>
-            + Add Customer
+            + Add Builder
           </Button>
         }
       />
+
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-value">{stats.total}</div>
+          <div className="stat-label">Total Builders</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.active}</div>
+          <div className="stat-label">Active</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.production}</div>
+          <div className="stat-label">Production</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.semiCustom}</div>
+          <div className="stat-label">Semi-Custom</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">{stats.fullCustom}</div>
+          <div className="stat-label">Full Custom</div>
+        </div>
+      </div>
 
       <div className="section">
         <Card>
@@ -241,7 +289,7 @@ const CustomerList: React.FC = () => {
           <div className="filters-bar">
             <div className="filters-row">
               <Input
-                placeholder="Search customers..."
+                placeholder="Search builders..."
                 value={search}
                 onChange={handleSearchChange}
                 className="search-input"
@@ -275,10 +323,30 @@ const CustomerList: React.FC = () => {
                   { value: 'false', label: 'Archived' },
                 ]}
               />
+
+              {/* View Toggle */}
+              <div className="view-toggle">
+                <Button
+                  variant={viewMode === 'cards' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('cards')}
+                  title="Card View"
+                >
+                  Cards
+                </Button>
+                <Button
+                  variant={viewMode === 'table' ? 'primary' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('table')}
+                  title="Table View"
+                >
+                  Table
+                </Button>
+              </div>
             </div>
           </div>
 
-          {/* Table */}
+          {/* Content */}
           {isLoading ? (
             <div className="loading-container">
               <Loading size="lg" />
@@ -286,7 +354,7 @@ const CustomerList: React.FC = () => {
           ) : error ? (
             <div className="error-container">
               <p className="text-danger">
-                Failed to load customers. Please try again.
+                Failed to load builders. Please try again.
               </p>
               <Button variant="secondary" onClick={() => refetch()}>
                 Retry
@@ -294,7 +362,22 @@ const CustomerList: React.FC = () => {
             </div>
           ) : data && data.data.length > 0 ? (
             <>
-              <Table columns={columns} data={data.data} />
+              {viewMode === 'cards' ? (
+                <div className="cards-grid">
+                  {data.data.map((customer) => (
+                    <CustomerCard
+                      key={customer.id}
+                      customerName={customer.customerName}
+                      customerType={customer.customerType}
+                      pricingTier={customer.pricingTier}
+                      isActive={customer.isActive}
+                      onClick={() => handleCustomerClick(customer)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Table columns={columns} data={data.data} />
+              )}
 
               {/* Pagination */}
               {data.pagination.totalPages > 1 && (
@@ -302,7 +385,7 @@ const CustomerList: React.FC = () => {
                   <div className="pagination-info">
                     Showing {(page - 1) * limit + 1} to{' '}
                     {Math.min(page * limit, data.pagination.total)} of{' '}
-                    {data.pagination.total} customers
+                    {data.pagination.total} builders
                   </div>
 
                   <div className="pagination-controls">
@@ -358,15 +441,15 @@ const CustomerList: React.FC = () => {
             </>
           ) : (
             <div className="empty-state">
-              <h3>No customers found</h3>
+              <h3>No builders found</h3>
               <p>
                 {search || customerTypeFilter || isActiveFilter !== undefined
                   ? 'Try adjusting your filters'
-                  : 'Get started by adding your first customer'}
+                  : 'Get started by adding your first builder'}
               </p>
               {!search && !customerTypeFilter && (
                 <Button variant="primary" onClick={handleAddCustomer}>
-                  + Add Customer
+                  + Add Builder
                 </Button>
               )}
             </div>
@@ -380,6 +463,15 @@ const CustomerList: React.FC = () => {
         onClose={handleModalClose}
         customer={selectedCustomer}
         onSuccess={handleModalSuccess}
+      />
+
+      {/* Customer Detail Modal */}
+      <CustomerDetailModal
+        customer={selectedDetailCustomer}
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        onEdit={handleEditFromModal}
+        onArchive={handleArchiveCustomer}
       />
     </div>
   );
