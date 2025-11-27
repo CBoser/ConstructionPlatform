@@ -36,13 +36,19 @@ function readCSV(filename: string): Record<string, string>[] {
     return [];
   }
 
-  const fileContent = fs.readFileSync(filePath, 'utf-8');
+  let fileContent = fs.readFileSync(filePath, 'utf-8');
+
+  // Remove BOM (Byte Order Mark) if present - this is common in Excel-exported CSVs
+  if (fileContent.charCodeAt(0) === 0xFEFF) {
+    fileContent = fileContent.slice(1);
+  }
 
   return parse(fileContent, {
     columns: true,
     skip_empty_lines: true,
     trim: true,
     relax_column_count: true,
+    bom: true, // Also tell csv-parse to handle BOM
   });
 }
 
