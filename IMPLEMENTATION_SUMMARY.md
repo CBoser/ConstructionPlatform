@@ -406,6 +406,98 @@ For issues or questions:
 
 ---
 
+## Bug Fixes (November 27, 2025)
+
+After initial implementation, several runtime errors were identified and fixed:
+
+### 1. Type Import Errors
+
+**Issue:** Runtime module errors when importing TypeScript types as values.
+
+**Errors:**
+- `DocumentType` import in `FileUploadDialog.tsx`
+- `PlanDocument` import in `DocumentVersionHistoryDialog.tsx`
+
+**Solution:**
+Changed type imports to use `import type` syntax:
+```typescript
+// Before:
+import { DocumentType } from '../../services/documentService';
+
+// After:
+import type { DocumentType } from '../../services/documentService';
+```
+
+**Files Fixed:**
+- `frontend/src/components/plans/FileUploadDialog.tsx`
+- `frontend/src/components/plans/DocumentVersionHistoryDialog.tsx`
+
+### 2. Button Component Props
+
+**Issue:** React warning about non-boolean attribute `loading`.
+
+**Error:**
+```
+Received `false` for a non-boolean attribute `loading`
+```
+
+**Solution:**
+Changed all Button components to use `isLoading` prop instead of `loading`:
+```typescript
+// Before:
+<Button loading={isExporting} disabled={isExporting}>
+
+// After:
+<Button isLoading={isExporting}>
+```
+
+**Files Fixed:**
+- `frontend/src/pages/plans/index.tsx`
+- `frontend/src/components/plans/FileUploadDialog.tsx`
+- `frontend/src/components/plans/DocumentVersionHistoryDialog.tsx`
+
+### 3. Export All Plans 404 Error
+
+**Issue:** GET `/api/v1/plans/export-all` returned 404 because Express router was matching `/:id` route first.
+
+**Root Cause:**
+Route ordering issue - parameterized routes (`/:id`) were defined before specific routes (`/export-all`), causing Express to treat "export-all" as an ID value.
+
+**Solution:**
+Moved `/export-all` route definition before `/:id` route in `backend/src/routes/plan.ts`:
+```typescript
+// Specific routes MUST come before parameterized routes
+router.get('/export-all', authenticateToken, async (req, res) => { ... });
+router.get('/:id', authenticateToken, async (req, res) => { ... });
+```
+
+**File Fixed:**
+- `backend/src/routes/plan.ts`
+
+### 4. Prisma Migration Issues
+
+**Issue:** EPERM errors when running migrations on Windows due to locked Prisma client files.
+
+**Solution:**
+1. Stop all running Node.js processes
+2. Delete locked `.prisma` folder:
+   ```powershell
+   Remove-Item -Recurse -Force .\node_modules\.prisma
+   ```
+3. Regenerate Prisma client:
+   ```powershell
+   npx prisma generate
+   ```
+4. Run migration:
+   ```powershell
+   npx prisma migrate dev --name add_plan_documents
+   ```
+
+**Result:**
+Database migration completed successfully, all TypeScript types generated correctly.
+
+---
+
 ## Implementation Complete
 
 All requested features have been successfully implemented:
@@ -420,5 +512,7 @@ All requested features have been successfully implemented:
 ✅ Integration with plan detail modal
 ✅ Export all plans button on plans page
 ✅ Document section showing uploaded files
+✅ All runtime errors fixed (type imports, button props, route ordering)
+✅ Prisma migration completed successfully
 
 The system is ready for testing after running the database migration.
