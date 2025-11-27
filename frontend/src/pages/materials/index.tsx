@@ -5,18 +5,26 @@ import Input from '../../components/common/Input';
 import Table from '../../components/common/Table';
 import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
+import StatCard from '../../components/common/StatCard';
+import MaterialCard from '../../components/common/MaterialCard';
 import { useToast } from '../../components/common/Toast';
 import {
   useMaterials,
   useDeactivateMaterial,
   useActivateMaterial,
+  useMaterialStats,
   type Material,
   type MaterialCategory,
   type ListMaterialsQuery,
 } from '../../services/materialService';
 
+type ViewMode = 'table' | 'cards';
+
 const Materials: React.FC = () => {
   const { showToast } = useToast();
+
+  // View mode state
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -25,7 +33,7 @@ const Materials: React.FC = () => {
   const [isActiveFilter, setIsActiveFilter] = useState<boolean | undefined>(true);
   const [rlLinkedFilter, setRlLinkedFilter] = useState<boolean | undefined>(undefined);
   const [page, setPage] = useState(1);
-  const limit = 25;
+  const limit = viewMode === 'cards' ? 12 : 25;
 
   // Build query
   const query: ListMaterialsQuery = useMemo(
@@ -43,8 +51,9 @@ const Materials: React.FC = () => {
     [page, limit, search, categoryFilter, dartCategoryFilter, isActiveFilter, rlLinkedFilter]
   );
 
-  // Fetch materials
+  // Fetch materials and stats
   const { data, isLoading, error, refetch } = useMaterials(query);
+  const { data: stats } = useMaterialStats();
   const deactivateMaterial = useDeactivateMaterial();
   const activateMaterial = useActivateMaterial();
 
@@ -79,6 +88,12 @@ const Materials: React.FC = () => {
     setRlLinkedFilter(
       value === '' ? undefined : value === 'true' ? true : false
     );
+    setPage(1);
+  };
+
+  // Handle view mode change
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
     setPage(1);
   };
 
@@ -241,6 +256,25 @@ const Materials: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Get stats display data
+  const statsData = useMemo(() => {
+    if (!stats) {
+      return {
+        total: 0,
+        lumber: 0,
+        rlLinked: 0,
+        categories: 0,
+      };
+    }
+    const lumberCount = stats.byCategory.find(c => c.category === 'DIMENSIONAL_LUMBER')?.count ?? 0;
+    return {
+      total: stats.total,
+      lumber: lumberCount,
+      rlLinked: stats.rlLinkedCount,
+      categories: stats.byCategory.length,
+    };
+  }, [stats]);
+
   return (
     <div>
       <PageHeader
@@ -257,10 +291,55 @@ const Materials: React.FC = () => {
         }
       />
 
+      {/* Stats Grid */}
+      <div className="stats-grid">
+        <StatCard
+          value={statsData.total}
+          label="Total Materials"
+        />
+        <StatCard
+          value={statsData.lumber}
+          label="Dimensional Lumber"
+          variant="info"
+        />
+        <StatCard
+          value={statsData.rlLinked}
+          label="RL Linked"
+          variant="warning"
+        />
+        <StatCard
+          value={statsData.categories}
+          label="Categories"
+          variant="success"
+        />
+      </div>
+
       <div className="section">
         <Card>
           {/* Filters */}
           <div className="filters-bar">
+            <div className="filters-bar-header">
+              <span className="filters-bar-title">Filter Materials</span>
+              <div className="view-toggle">
+                <button
+                  className={`view-toggle-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                  onClick={() => handleViewModeChange('cards')}
+                  title="Card View"
+                >
+                  <span className="view-toggle-icon">▦</span>
+                  <span className="view-toggle-label">Cards</span>
+                </button>
+                <button
+                  className={`view-toggle-btn ${viewMode === 'table' ? 'active' : ''}`}
+                  onClick={() => handleViewModeChange('table')}
+                  title="Table View"
+                >
+                  <span className="view-toggle-icon">☰</span>
+                  <span className="view-toggle-label">Table</span>
+                </button>
+              </div>
+            </div>
+
             <div className="filters-row">
               <Input
                 placeholder="Search SKU, description..."
@@ -338,7 +417,7 @@ const Materials: React.FC = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Content */}
           {isLoading ? (
             <div className="loading-container">
               <Loading size="lg" />
@@ -354,7 +433,32 @@ const Materials: React.FC = () => {
             </div>
           ) : data && data.data.length > 0 ? (
             <>
-              <Table columns={columns} data={data.data} />
+              {/* Card View */}
+              {viewMode === 'cards' && (
+                <div className="material-cards-grid">
+                  {data.data.map((material) => (
+                    <MaterialCard
+                      key={material.id}
+                      sku={material.sku}
+                      description={material.description}
+                      category={material.category}
+                      dartCategory={material.dartCategory}
+                      unitOfMeasure={material.unitOfMeasure}
+                      vendorCost={material.vendorCost}
+                      isRLLinked={material.isRLLinked}
+                      rlTag={material.rlTag}
+                      isActive={material.isActive}
+                      templateItemCount={material._count?.templateItems}
+                      onToggleActive={() => handleToggleActive(material)}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Table View */}
+              {viewMode === 'table' && (
+                <Table columns={columns} data={data.data} />
+              )}
 
               {/* Pagination */}
               {data.pagination.totalPages > 1 && (
@@ -417,6 +521,7 @@ const Materials: React.FC = () => {
             </>
           ) : (
             <div className="empty-state">
+              <div className="empty-state-icon">📦</div>
               <h3>No materials found</h3>
               <p>
                 {search || categoryFilter || dartCategoryFilter || isActiveFilter !== undefined || rlLinkedFilter !== undefined
