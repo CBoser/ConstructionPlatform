@@ -8,6 +8,7 @@ import Card from '../../components/common/Card';
 import StatCard from '../../components/common/StatCard';
 import PlanCard from '../../components/common/PlanCard';
 import PlanDetailModal from '../../components/plans/PlanDetailModal';
+import PlanFormModal from '../../components/plans/PlanFormModal';
 import { useToast } from '../../components/common/Toast';
 import {
   usePlans,
@@ -29,6 +30,8 @@ const Plans: React.FC = () => {
   // Modal state
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -99,6 +102,30 @@ const Plans: React.FC = () => {
     // TODO: Navigate to job creation with plan pre-selected
     showToast(`Creating job from plan ${plan.code}...`, 'info');
     // Future: navigate('/operations/jobs/new', { state: { planId: plan.id } });
+  };
+
+  // Handle add new plan
+  const handleAddPlan = () => {
+    setEditingPlan(null);
+    setIsFormModalOpen(true);
+  };
+
+  // Handle edit plan (from card or detail modal)
+  const handleEditPlan = (plan: Plan) => {
+    setEditingPlan(plan);
+    setIsDetailModalOpen(false);
+    setIsFormModalOpen(true);
+  };
+
+  // Handle close form modal
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
+    setEditingPlan(null);
+  };
+
+  // Handle form success
+  const handleFormSuccess = () => {
+    refetch();
   };
 
   // Handle delete plan (called from modal)
@@ -226,7 +253,7 @@ const Plans: React.FC = () => {
           { label: 'Plans' },
         ]}
         actions={
-          <Button variant="primary">
+          <Button variant="primary" onClick={handleAddPlan}>
             + Add Plan Template
           </Button>
         }
@@ -352,11 +379,13 @@ const Plans: React.FC = () => {
                       bedrooms={plan.bedrooms}
                       bathrooms={plan.bathrooms}
                       garage={plan.garage}
+                      style={plan.style}
                       elevationCount={plan._count?.elevations}
                       templateItemCount={plan._count?.templateItems}
                       jobCount={plan._count?.jobs}
                       isActive={plan.isActive}
                       onClick={() => handlePlanClick(plan)}
+                      onEdit={() => handleEditPlan(plan)}
                     />
                   ))}
                 </div>
@@ -436,7 +465,7 @@ const Plans: React.FC = () => {
                   : 'Get started by adding your first plan template'}
               </p>
               {!search && !typeFilter && (
-                <Button variant="primary">
+                <Button variant="primary" onClick={handleAddPlan}>
                   + Add Plan Template
                 </Button>
               )}
@@ -451,7 +480,16 @@ const Plans: React.FC = () => {
         isOpen={isDetailModalOpen}
         onClose={handleCloseDetailModal}
         onCreateJob={handleCreateJob}
+        onEdit={handleEditPlan}
         onDelete={handleDeletePlan}
+      />
+
+      {/* Plan Form Modal */}
+      <PlanFormModal
+        isOpen={isFormModalOpen}
+        onClose={handleCloseFormModal}
+        plan={editingPlan}
+        onSuccess={handleFormSuccess}
       />
     </div>
   );
