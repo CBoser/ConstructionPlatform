@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Loading from '../common/Loading';
-import { PlanDocument, useVersionHistory, downloadDocument } from '../../services/documentService';
+import type { PlanDocument } from '../../services/documentService';
+import { useVersionHistory, downloadDocument } from '../../services/documentService';
 import { useToast } from '../common/Toast';
 
 interface DocumentVersionHistoryDialogProps {
