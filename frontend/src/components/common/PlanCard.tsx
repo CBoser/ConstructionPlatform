@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from './Button';
 
 interface PlanCardProps {
   code: string;
@@ -16,8 +15,6 @@ interface PlanCardProps {
   isSelected?: boolean;
   selectable?: boolean;
   onClick?: () => void;
-  onDelete?: () => void;
-  onView?: () => void;
 }
 
 // Format plan type for display
@@ -47,19 +44,19 @@ const PlanCard: React.FC<PlanCardProps> = ({
   isSelected = false,
   selectable = false,
   onClick,
-  onDelete,
-  onView,
 }) => {
-  const handleClick = () => {
-    if (onClick && selectable) {
-      onClick();
-    }
-  };
-
   return (
     <div
-      className={`plan-card ${isSelected ? 'plan-card-selected' : ''} ${selectable ? 'plan-card-selectable' : ''}`}
-      onClick={handleClick}
+      className={`plan-card plan-card-clickable ${isSelected ? 'plan-card-selected' : ''} ${selectable ? 'plan-card-selectable' : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
     >
       <div className="plan-card-header">
         <div className="plan-card-title">
@@ -98,30 +95,17 @@ const PlanCard: React.FC<PlanCardProps> = ({
         </div>
       </div>
 
-      {!selectable && (
-        <div className="plan-card-footer">
-          <div className="plan-card-stats">
-            <span className="plan-card-stat">
-              <strong>{templateItemCount}</strong> Items
-            </span>
-            <span className="plan-card-stat">
-              <strong>{jobCount}</strong> Jobs
-            </span>
-          </div>
-          <div className="plan-card-actions">
-            {onView && (
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onView(); }}>
-                View
-              </Button>
-            )}
-            {onDelete && (
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onDelete(); }}>
-                Delete
-              </Button>
-            )}
-          </div>
+      <div className="plan-card-footer">
+        <div className="plan-card-stats">
+          <span className="plan-card-stat">
+            <strong>{templateItemCount}</strong> Items
+          </span>
+          <span className="plan-card-stat">
+            <strong>{jobCount}</strong> Jobs
+          </span>
         </div>
-      )}
+        <span className="plan-card-arrow">→</span>
+      </div>
 
       {selectable && isSelected && (
         <div className="plan-card-check">

@@ -7,6 +7,7 @@ import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
 import StatCard from '../../components/common/StatCard';
 import PlanCard from '../../components/common/PlanCard';
+import PlanDetailModal from '../../components/plans/PlanDetailModal';
 import { useToast } from '../../components/common/Toast';
 import {
   usePlans,
@@ -24,6 +25,10 @@ const Plans: React.FC = () => {
 
   // View mode state
   const [viewMode, setViewMode] = useState<ViewMode>('cards');
+
+  // Modal state
+  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -77,12 +82,27 @@ const Plans: React.FC = () => {
     setPage(1);
   };
 
-  // Handle delete plan
-  const handleDeletePlan = async (plan: Plan) => {
-    if (!confirm(`Are you sure you want to delete plan "${plan.code}"?`)) {
-      return;
-    }
+  // Handle plan card click - open detail modal
+  const handlePlanClick = (plan: Plan) => {
+    setSelectedPlan(plan);
+    setIsDetailModalOpen(true);
+  };
 
+  // Handle close detail modal
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedPlan(null);
+  };
+
+  // Handle create job from plan
+  const handleCreateJob = (plan: Plan) => {
+    // TODO: Navigate to job creation with plan pre-selected
+    showToast(`Creating job from plan ${plan.code}...`, 'info');
+    // Future: navigate('/operations/jobs/new', { state: { planId: plan.id } });
+  };
+
+  // Handle delete plan (called from modal)
+  const handleDeletePlan = async (plan: Plan) => {
     try {
       await deletePlan.mutateAsync(plan.id);
       showToast('Plan deleted successfully', 'success');
@@ -108,13 +128,18 @@ const Plans: React.FC = () => {
     return typeMap[type] || type;
   };
 
-  // Table columns
+  // Table columns - clicking plan code opens detail modal
   const columns = [
     {
       header: 'Plan Code',
       accessor: 'code' as keyof Plan,
       cell: (plan: Plan) => (
-        <span className="font-medium">{plan.code}</span>
+        <button
+          className="table-link"
+          onClick={() => handlePlanClick(plan)}
+        >
+          {plan.code}
+        </button>
       ),
       sortable: true,
     },
@@ -161,21 +186,6 @@ const Plans: React.FC = () => {
         <span className={`badge badge-${plan.isActive ? 'success' : 'secondary'}`}>
           {plan.isActive ? 'Active' : 'Inactive'}
         </span>
-      ),
-    },
-    {
-      header: 'Actions',
-      accessor: 'id' as keyof Plan,
-      cell: (plan: Plan) => (
-        <div className="table-actions">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleDeletePlan(plan)}
-          >
-            Delete
-          </Button>
-        </div>
       ),
     },
   ];
@@ -345,7 +355,7 @@ const Plans: React.FC = () => {
                       templateItemCount={plan._count?.templateItems}
                       jobCount={plan._count?.jobs}
                       isActive={plan.isActive}
-                      onDelete={() => handleDeletePlan(plan)}
+                      onClick={() => handlePlanClick(plan)}
                     />
                   ))}
                 </div>
@@ -433,6 +443,15 @@ const Plans: React.FC = () => {
           )}
         </Card>
       </div>
+
+      {/* Plan Detail Modal */}
+      <PlanDetailModal
+        plan={selectedPlan}
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        onCreateJob={handleCreateJob}
+        onDelete={handleDeletePlan}
+      />
     </div>
   );
 };

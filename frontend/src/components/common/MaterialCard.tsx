@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from './Button';
 
 interface MaterialCardProps {
   sku: string;
@@ -15,8 +14,6 @@ interface MaterialCardProps {
   isSelected?: boolean;
   selectable?: boolean;
   onClick?: () => void;
-  onToggleActive?: () => void;
-  onView?: () => void;
 }
 
 // Format category for display
@@ -60,19 +57,19 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
   isSelected = false,
   selectable = false,
   onClick,
-  onToggleActive,
-  onView,
 }) => {
-  const handleClick = () => {
-    if (onClick && selectable) {
-      onClick();
-    }
-  };
-
   return (
     <div
-      className={`material-card ${isSelected ? 'material-card-selected' : ''} ${selectable ? 'material-card-selectable' : ''}`}
-      onClick={handleClick}
+      className={`material-card material-card-clickable ${isSelected ? 'material-card-selected' : ''} ${selectable ? 'material-card-selectable' : ''}`}
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
     >
       <div className="material-card-header">
         <div className="material-card-title">
@@ -112,27 +109,14 @@ const MaterialCard: React.FC<MaterialCardProps> = ({
         </div>
       </div>
 
-      {!selectable && (
-        <div className="material-card-footer">
-          <div className="material-card-stats">
-            <span className="material-card-stat">
-              <strong>{templateItemCount}</strong> Template Uses
-            </span>
-          </div>
-          <div className="material-card-actions">
-            {onView && (
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onView(); }}>
-                View
-              </Button>
-            )}
-            {onToggleActive && (
-              <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); onToggleActive(); }}>
-                {isActive ? 'Deactivate' : 'Activate'}
-              </Button>
-            )}
-          </div>
+      <div className="material-card-footer">
+        <div className="material-card-stats">
+          <span className="material-card-stat">
+            <strong>{templateItemCount}</strong> Template Uses
+          </span>
         </div>
-      )}
+        <span className="material-card-arrow">→</span>
+      </div>
 
       {selectable && isSelected && (
         <div className="material-card-check">

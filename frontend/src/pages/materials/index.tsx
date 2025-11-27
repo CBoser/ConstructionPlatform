@@ -7,6 +7,7 @@ import Loading from '../../components/common/Loading';
 import Card from '../../components/common/Card';
 import StatCard from '../../components/common/StatCard';
 import MaterialCard from '../../components/common/MaterialCard';
+import MaterialDetailModal from '../../components/materials/MaterialDetailModal';
 import { useToast } from '../../components/common/Toast';
 import {
   useMaterials,
@@ -24,7 +25,11 @@ const Materials: React.FC = () => {
   const { showToast } = useToast();
 
   // View mode state
-  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
+
+  // Modal state
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   // Filter state
   const [search, setSearch] = useState('');
@@ -95,6 +100,18 @@ const Materials: React.FC = () => {
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
     setPage(1);
+  };
+
+  // Handle material card click - open detail modal
+  const handleMaterialClick = (material: Material) => {
+    setSelectedMaterial(material);
+    setIsDetailModalOpen(true);
+  };
+
+  // Handle close detail modal
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setSelectedMaterial(null);
   };
 
   // Handle toggle active status
@@ -169,13 +186,18 @@ const Materials: React.FC = () => {
     { value: 15, label: '15-Special' },
   ];
 
-  // Table columns
+  // Table columns - clicking SKU opens detail modal
   const columns = [
     {
       header: 'SKU',
       accessor: 'sku' as keyof Material,
       cell: (material: Material) => (
-        <span className="font-medium font-mono">{material.sku}</span>
+        <button
+          className="table-link font-mono"
+          onClick={() => handleMaterialClick(material)}
+        >
+          {material.sku}
+        </button>
       ),
       sortable: true,
     },
@@ -231,21 +253,6 @@ const Materials: React.FC = () => {
         <span className={`badge badge-${material.isActive ? 'success' : 'secondary'}`}>
           {material.isActive ? 'Active' : 'Inactive'}
         </span>
-      ),
-    },
-    {
-      header: 'Actions',
-      accessor: 'id' as keyof Material,
-      cell: (material: Material) => (
-        <div className="table-actions">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleToggleActive(material)}
-          >
-            {material.isActive ? 'Deactivate' : 'Activate'}
-          </Button>
-        </div>
       ),
     },
   ];
@@ -449,7 +456,7 @@ const Materials: React.FC = () => {
                       rlTag={material.rlTag}
                       isActive={material.isActive}
                       templateItemCount={material._count?.templateItems}
-                      onToggleActive={() => handleToggleActive(material)}
+                      onClick={() => handleMaterialClick(material)}
                     />
                   ))}
                 </div>
@@ -537,6 +544,14 @@ const Materials: React.FC = () => {
           )}
         </Card>
       </div>
+
+      {/* Material Detail Modal */}
+      <MaterialDetailModal
+        material={selectedMaterial}
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        onToggleActive={handleToggleActive}
+      />
     </div>
   );
 };
