@@ -2384,6 +2384,71 @@ select.input {
   gap: var(--space-md);
 }
 
+/* Form grid with columns on larger screens */
+@media (min-width: 640px) {
+  .form-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .form-grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Form Sections */
+.form-section {
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--gray-border);
+}
+
+.form-section:first-child {
+  padding-top: 0;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.form-section-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 var(--space-md) 0;
+}
+
+/* Form Checkbox */
+.form-checkbox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.checkbox-text {
+  font-weight: 500;
+}
+
+.checkbox-helper {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+  margin-left: 26px;
+}
+
 /* Checkbox Label */
 .checkbox-label {
   display: flex;
@@ -2819,6 +2884,88 @@ select.input {
   font-size: var(--font-size-lg);
   color: var(--gray);
   transition: var(--transition-fast);
+}
+
+/* Plan Card Header Actions */
+.plan-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.plan-card-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  color: var(--gray);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.plan-card-edit-btn:hover {
+  background: var(--background-dark);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.plan-card-edit-btn:active {
+  transform: scale(0.95);
+}
+
+/* Plan Card Style */
+.plan-card-style {
+  display: inline-block;
+  margin-left: var(--space-sm);
+  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  color: var(--gray);
+  background: var(--background-dark);
+  border-radius: var(--radius-sm);
+}
+
+/* Plan Card Elevations */
+.plan-card-elevations {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--gray-border);
+  margin-top: var(--space-sm);
+}
+
+.plan-card-elevations-label {
+  font-size: var(--font-size-xs);
+  color: var(--gray);
+  font-weight: 500;
+}
+
+.plan-card-elevation-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.plan-card-elevation-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
 }
 
 /* ============================================================================
