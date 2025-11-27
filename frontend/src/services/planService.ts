@@ -34,6 +34,12 @@ export interface Plan {
   };
 }
 
+export interface CustomDetail {
+  label: string;
+  value: string;
+  date?: string;
+}
+
 export interface PlanElevation {
   id: string;
   planId: string;
@@ -41,8 +47,43 @@ export interface PlanElevation {
   name: string | null;
   description: string | null;
   imageUrl: string | null;
+
+  // Vendor/Designer Information
+  architectDesigner: string | null;
+  architectDesignerDate: string | null;
+  structuralEngineer: string | null;
+  structuralEngineerDate: string | null;
+  iJoistCompany: string | null;
+  iJoistCompanyDate: string | null;
+  floorTrussCompany: string | null;
+  floorTrussCompanyDate: string | null;
+  roofTrussCompany: string | null;
+  roofTrussCompanyDate: string | null;
+  customDetails: CustomDetail[] | null;
+
+  currentVersion: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ElevationVersion {
+  id: string;
+  elevationId: string;
+  version: number;
+  changeNotes: string | null;
+  changedBy: string | null;
+  architectDesigner: string | null;
+  architectDesignerDate: string | null;
+  structuralEngineer: string | null;
+  structuralEngineerDate: string | null;
+  iJoistCompany: string | null;
+  iJoistCompanyDate: string | null;
+  floorTrussCompany: string | null;
+  floorTrussCompanyDate: string | null;
+  roofTrussCompany: string | null;
+  roofTrussCompanyDate: string | null;
+  customDetails: CustomDetail[] | null;
+  createdAt: string;
 }
 
 export interface PlanFull extends Plan {
@@ -316,6 +357,170 @@ export function useDeletePlan() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: planKeys.lists() });
       queryClient.invalidateQueries({ queryKey: planKeys.stats() });
+    },
+  });
+}
+
+// ============================================================================
+// Elevation Types
+// ============================================================================
+
+export interface CreateElevationInput {
+  code: string;
+  name?: string;
+  description?: string;
+  architectDesigner?: string;
+  architectDesignerDate?: string;
+  structuralEngineer?: string;
+  structuralEngineerDate?: string;
+  iJoistCompany?: string;
+  iJoistCompanyDate?: string;
+  floorTrussCompany?: string;
+  floorTrussCompanyDate?: string;
+  roofTrussCompany?: string;
+  roofTrussCompanyDate?: string;
+  customDetails?: CustomDetail[];
+}
+
+export interface UpdateElevationInput extends Partial<CreateElevationInput> {
+  changeNotes?: string;
+}
+
+// ============================================================================
+// Elevation API Functions
+// ============================================================================
+
+export async function fetchElevationsByPlanId(planId: string): Promise<PlanElevation[]> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanElevation[];
+  }>(`/api/v1/plans/${planId}/elevations`);
+
+  return response.data;
+}
+
+export async function createElevation(planId: string, data: CreateElevationInput): Promise<PlanElevation> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanElevation;
+    message: string;
+  }>(`/api/v1/plans/${planId}/elevations`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+
+  return response.data;
+}
+
+export async function updateElevation(
+  planId: string,
+  elevationId: string,
+  data: UpdateElevationInput
+): Promise<PlanElevation> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: PlanElevation;
+    message: string;
+  }>(`/api/v1/plans/${planId}/elevations/${elevationId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+
+  return response.data;
+}
+
+export async function deleteElevation(planId: string, elevationId: string): Promise<void> {
+  await apiFetch<{
+    success: boolean;
+    message: string;
+  }>(`/api/v1/plans/${planId}/elevations/${elevationId}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function fetchElevationVersions(
+  planId: string,
+  elevationId: string
+): Promise<ElevationVersion[]> {
+  const response = await apiFetch<{
+    success: boolean;
+    data: ElevationVersion[];
+  }>(`/api/v1/plans/${planId}/elevations/${elevationId}/versions`);
+
+  return response.data;
+}
+
+// ============================================================================
+// Elevation React Query Hooks
+// ============================================================================
+
+export const elevationKeys = {
+  all: ['elevations'] as const,
+  byPlan: (planId: string) => [...elevationKeys.all, 'plan', planId] as const,
+  detail: (planId: string, elevationId: string) => [...elevationKeys.byPlan(planId), elevationId] as const,
+  versions: (planId: string, elevationId: string) => [...elevationKeys.detail(planId, elevationId), 'versions'] as const,
+};
+
+export function useElevations(planId: string) {
+  return useQuery({
+    queryKey: elevationKeys.byPlan(planId),
+    queryFn: () => fetchElevationsByPlanId(planId),
+    enabled: !!planId,
+  });
+}
+
+export function useElevationVersions(planId: string, elevationId: string) {
+  return useQuery({
+    queryKey: elevationKeys.versions(planId, elevationId),
+    queryFn: () => fetchElevationVersions(planId, elevationId),
+    enabled: !!planId && !!elevationId,
+  });
+}
+
+export function useCreateElevation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, data }: { planId: string; data: CreateElevationInput }) =>
+      createElevation(planId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: elevationKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.lists() });
+    },
+  });
+}
+
+export function useUpdateElevation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      planId,
+      elevationId,
+      data,
+    }: {
+      planId: string;
+      elevationId: string;
+      data: UpdateElevationInput;
+    }) => updateElevation(planId, elevationId, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: elevationKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
+    },
+  });
+}
+
+export function useDeleteElevation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ planId, elevationId }: { planId: string; elevationId: string }) =>
+      deleteElevation(planId, elevationId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: elevationKeys.byPlan(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.detail(variables.planId) });
+      queryClient.invalidateQueries({ queryKey: planKeys.lists() });
     },
   });
 }

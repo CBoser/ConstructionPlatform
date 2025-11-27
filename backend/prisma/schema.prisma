@@ -234,14 +234,62 @@ model PlanElevation {
   description String?
   imageUrl    String?
 
+  // Vendor/Designer Information
+  architectDesigner       String?
+  architectDesignerDate   DateTime?
+  structuralEngineer      String?
+  structuralEngineerDate  DateTime?
+  iJoistCompany           String?
+  iJoistCompanyDate       DateTime?
+  floorTrussCompany       String?
+  floorTrussCompanyDate   DateTime?
+  roofTrussCompany        String?
+  roofTrussCompanyDate    DateTime?
+
+  // Custom details (JSON array for flexibility)
+  customDetails           Json?     // [{ "label": "Other", "value": "...", "date": "..." }]
+
+  // Current version number
+  currentVersion          Int       @default(1)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
-  jobs Job[]
+  plan            Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  jobs            Job[]
+  versionHistory  ElevationVersion[]
 
   @@unique([planId, code])
   @@index([planId])
+}
+
+// Version history for elevation plan changes
+model ElevationVersion {
+  id              String   @id @default(uuid())
+  elevationId     String
+  version         Int
+  changeNotes     String?          // Description of what changed
+  changedBy       String?          // Who made the change
+
+  // Snapshot of vendor info at this version
+  architectDesigner       String?
+  architectDesignerDate   DateTime?
+  structuralEngineer      String?
+  structuralEngineerDate  DateTime?
+  iJoistCompany           String?
+  iJoistCompanyDate       DateTime?
+  floorTrussCompany       String?
+  floorTrussCompanyDate   DateTime?
+  roofTrussCompany        String?
+  roofTrussCompanyDate    DateTime?
+  customDetails           Json?
+
+  createdAt   DateTime @default(now())
+
+  elevation   PlanElevation @relation(fields: [elevationId], references: [id], onDelete: Cascade)
+
+  @@unique([elevationId, version])
+  @@index([elevationId])
 }
 
 model PlanOption {
