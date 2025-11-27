@@ -99,7 +99,7 @@ export default defineConfig({
         globIgnores: ['**/*.map'],
       },
       devOptions: {
-        enabled: true, // Enable PWA in dev for testing
+        enabled: false, // PWA disabled in dev - works in production build
       },
     }),
   ],
