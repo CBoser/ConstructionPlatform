@@ -6,6 +6,8 @@ import ElevationCard from './ElevationCard';
 import ElevationFormModal from './ElevationFormModal';
 import type { ElevationFormData } from './ElevationFormModal';
 import PlanOptionsSection from './PlanOptionsSection';
+import FileUploadDialog from './FileUploadDialog';
+import DocumentVersionHistoryDialog from './DocumentVersionHistoryDialog';
 import { useToast } from '../common/Toast';
 import type { Plan, PlanElevation } from '../../services/planService';
 import {
@@ -16,6 +18,12 @@ import {
   useAssignedOptions,
 } from '../../services/planService';
 import { exportPlanDetailToExcel } from '../../utils/excelExport';
+import {
+  useDocuments,
+  useUploadDocument,
+  downloadDocument,
+  type DocumentType,
+} from '../../services/documentService';
 
 interface PlanDetailModalProps {
   plan: Plan | null;
@@ -52,6 +60,10 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
   const [isElevationModalOpen, setIsElevationModalOpen] = useState(false);
   const [editingElevation, setEditingElevation] = useState<PlanElevation | null>(null);
 
+  // File upload state
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
+
   // Fetch elevations when modal is open
   const { data: elevations, isLoading: elevationsLoading } = useElevations(
     plan?.id || ''
@@ -60,10 +72,19 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
   // Fetch assigned options
   const { data: options } = useAssignedOptions(plan?.id || '');
 
+  // Fetch documents
+  const { data: documents, isLoading: documentsLoading } = useDocuments({
+    planId: plan?.id || '',
+    elevationId: null, // Plan-level documents only
+  });
+
   // Elevation mutations
   const createElevation = useCreateElevation();
   const updateElevation = useUpdateElevation();
   const deleteElevation = useDeleteElevation();
+
+  // Document mutations
+  const uploadDocument = useUploadDocument();
 
   // Export state
   const [isExporting, setIsExporting] = useState(false);
@@ -160,6 +181,36 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
           apiError?.data?.error || apiError?.message || 'Failed to delete elevation';
         showToast(errorMessage, 'error');
       }
+    }
+  };
+
+  // Document handlers
+  const handleUploadDocument = async (data: {
+    file: File;
+    fileType: DocumentType;
+    documentDate: Date;
+    changeNotes?: string;
+  }) => {
+    try {
+      await uploadDocument.mutateAsync({
+        planId: plan.id,
+        input: data,
+      });
+      showToast('Document uploaded successfully', 'success');
+      setIsUploadDialogOpen(false);
+    } catch (error) {
+      console.error('Upload error:', error);
+      showToast('Failed to upload document', 'error');
+    }
+  };
+
+  const handleDownloadDocument = async (documentId: string) => {
+    try {
+      await downloadDocument(plan.id, documentId);
+      showToast('Document downloaded successfully', 'success');
+    } catch (error) {
+      console.error('Download error:', error);
+      showToast('Failed to download document', 'error');
     }
   };
 
@@ -328,6 +379,80 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
             elevations={elevations || []}
           />
 
+          {/* Documents Section */}
+          <div className="plan-detail-section">
+            <div className="plan-detail-section-header">
+              <h4 className="plan-detail-section-title">
+                Documents ({documents?.length ?? 0})
+              </h4>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsVersionHistoryOpen(true)}
+                >
+                  View History
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsUploadDialogOpen(true)}
+                >
+                  + Upload Document
+                </Button>
+              </div>
+            </div>
+
+            {documentsLoading ? (
+              <div className="document-loading">
+                <Loading size="sm" />
+              </div>
+            ) : documents && documents.length > 0 ? (
+              <div className="document-list">
+                {documents.map((doc) => (
+                  <div key={doc.id} className="document-item">
+                    <div className="document-item-info">
+                      <div className="document-item-name">{doc.fileName}</div>
+                      <div className="document-item-meta">
+                        <span className="document-item-type">
+                          {doc.fileType.replace(/_/g, ' ')}
+                        </span>
+                        <span className="document-item-version">v{doc.version}</span>
+                        <span className="document-item-date">
+                          {new Date(doc.documentDate).toLocaleDateString()}
+                        </span>
+                        <span className="document-item-size">
+                          {(doc.fileSize / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
+                      {doc.changeNotes && (
+                        <div className="document-item-notes">{doc.changeNotes}</div>
+                      )}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDownloadDocument(doc.id)}
+                    >
+                      Download
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="document-empty">
+                <p>No documents uploaded for this plan.</p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setIsUploadDialogOpen(true)}
+                >
+                  Upload First Document
+                </Button>
+              </div>
+            )}
+          </div>
+
           {/* Notes */}
           {plan.notes && (
             <div className="plan-detail-section">
@@ -351,6 +476,22 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
         elevation={editingElevation}
         planCode={plan.code}
         onSave={handleSaveElevation}
+      />
+
+      {/* File Upload Dialog */}
+      <FileUploadDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        onUpload={handleUploadDocument}
+        title="Upload Plan Document"
+      />
+
+      {/* Version History Dialog */}
+      <DocumentVersionHistoryDialog
+        isOpen={isVersionHistoryOpen}
+        onClose={() => setIsVersionHistoryOpen(false)}
+        planId={plan.id}
+        title="Plan Document History"
       />
     </>
   );

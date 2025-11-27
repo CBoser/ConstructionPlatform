@@ -2,6 +2,9 @@ import { Router, Request, Response } from 'express';
 import { planService } from '../services/plan';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole, PlanType } from '@prisma/client';
+import documentRoutes from './document';
+import elevationRoutes from './elevation';
+import optionRoutes from './option';
 
 const router = Router();
 
@@ -565,5 +568,44 @@ router.delete(
     }
   }
 );
+
+// ====== EXPORT ROUTES ======
+
+/**
+ * @route   GET /api/v1/plans/export-all
+ * @desc    Export all plans to Excel (returns JSON that frontend will use to generate Excel)
+ * @access  Private
+ */
+router.get('/export-all', authenticateToken, async (req: Request, res: Response) => {
+  try {
+    const { isActive } = req.query;
+
+    // Fetch all plans with related data
+    const result = await planService.listPlans({
+      page: 1,
+      limit: 10000, // Get all plans
+      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+      sortBy: 'code',
+      sortOrder: 'asc',
+    });
+
+    res.status(200).json({
+      success: true,
+      data: result.data,
+      message: 'Plans data ready for export',
+    });
+  } catch (error) {
+    console.error('Export all plans error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to export plans',
+    });
+  }
+});
+
+// ====== NESTED ROUTES ======
+router.use('/:planId/elevations', elevationRoutes);
+router.use('/:planId/options', optionRoutes);
+router.use('/', documentRoutes);
 
 export default router;
