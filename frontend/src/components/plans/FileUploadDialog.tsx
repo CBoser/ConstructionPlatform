@@ -202,8 +202,8 @@ const FileUploadDialog: React.FC<FileUploadDialogProps> = ({
           <Button
             variant="primary"
             onClick={handleSubmit}
-            disabled={!file || isUploading}
-            loading={isUploading}
+            disabled={!file}
+            isLoading={isUploading}
           >
             {isReplacing ? 'Replace Document' : 'Upload'}
           </Button>

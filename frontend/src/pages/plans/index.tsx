@@ -275,8 +275,7 @@ const Plans: React.FC = () => {
             <Button
               variant="secondary"
               onClick={handleExportAll}
-              disabled={isExporting}
-              loading={isExporting}
+              isLoading={isExporting}
             >
               Export All Plans
             </Button>

@@ -148,8 +148,7 @@ const DocumentVersionHistoryDialog: React.FC<DocumentVersionHistoryDialogProps> 
                             variant="ghost"
                             size="sm"
                             onClick={() => handleDownload(doc)}
-                            disabled={downloadingId === doc.id}
-                            loading={downloadingId === doc.id}
+                            isLoading={downloadingId === doc.id}
                           >
                             Download
                           </Button>
