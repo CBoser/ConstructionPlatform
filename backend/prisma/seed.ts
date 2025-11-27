@@ -2,6 +2,8 @@ import { PrismaClient, CustomerType, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import { seedCustomers } from './seeds/customers.seed';
+import { seedPlans } from './seeds/plans.seed';
+import { seedMaterials } from './seeds/materials.seed';
 
 // Load environment variables
 dotenv.config();
@@ -53,6 +55,11 @@ async function main() {
 
   // Clean existing data (optional - comment out if you want to keep existing data)
   console.log('🗑️  Cleaning existing data...');
+  // Clean in correct order due to foreign key constraints
+  await prisma.planTemplateItem.deleteMany({});
+  await prisma.planElevation.deleteMany({});
+  await prisma.plan.deleteMany({});
+  await prisma.material.deleteMany({});
   await prisma.customerExternalId.deleteMany({});
   await prisma.customerPricingTier.deleteMany({});
   await prisma.customerContact.deleteMany({});
@@ -132,6 +139,16 @@ async function main() {
   await seedCustomers();
 
   // ============================================================================
+  // Materials (Construction Materials by DART Category)
+  // ============================================================================
+  await seedMaterials();
+
+  // ============================================================================
+  // Plans (Floor Plans with Elevations)
+  // ============================================================================
+  await seedPlans();
+
+  // ============================================================================
   // Summary
   // ============================================================================
   console.log('\n📊 Seed Summary:');
@@ -140,12 +157,18 @@ async function main() {
   const totalContacts = await prisma.customerContact.count();
   const totalPricingTiers = await prisma.customerPricingTier.count();
   const totalExternalIds = await prisma.customerExternalId.count();
+  const totalPlans = await prisma.plan.count();
+  const totalElevations = await prisma.planElevation.count();
+  const totalMaterials = await prisma.material.count();
 
   console.log(`   Users: ${totalUsers}`);
   console.log(`   Customers: ${totalCustomers}`);
   console.log(`   Contacts: ${totalContacts}`);
   console.log(`   Pricing Tiers: ${totalPricingTiers}`);
   console.log(`   External IDs: ${totalExternalIds}`);
+  console.log(`   Plans: ${totalPlans}`);
+  console.log(`   Elevations: ${totalElevations}`);
+  console.log(`   Materials: ${totalMaterials}`);
   console.log('\n✨ Seed completed successfully!');
 }
 

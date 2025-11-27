@@ -1,30 +1,30 @@
-import { PrismaClient, Plan, PlanTemplateItem, Prisma } from '@prisma/client';
+import { Plan, PlanTemplateItem, Prisma, PlanType } from '@prisma/client';
 import { db } from './database';
 
 export interface CreatePlanInput {
-  customerId: string;
-  name: string;
-  planNumber?: string;
-  squareFootage?: number;
+  code: string;
+  name?: string;
+  type: PlanType;
+  sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
-  stories?: number;
-  garageSpaces?: number;
-  description?: string;
+  garage?: string;
+  style?: string;
+  pdssUrl?: string;
   notes?: string;
   isActive?: boolean;
 }
 
 export interface UpdatePlanInput {
-  customerId?: string;
+  code?: string;
   name?: string;
-  planNumber?: string;
-  squareFootage?: number;
+  type?: PlanType;
+  sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
-  stories?: number;
-  garageSpaces?: number;
-  description?: string;
+  garage?: string;
+  style?: string;
+  pdssUrl?: string;
   notes?: string;
   isActive?: boolean;
 }
@@ -33,9 +33,9 @@ export interface ListPlansQuery {
   page?: number;
   limit?: number;
   search?: string;
-  customerId?: string;
+  type?: PlanType;
   isActive?: boolean;
-  sortBy?: 'name' | 'createdAt' | 'updatedAt' | 'squareFootage';
+  sortBy?: 'code' | 'name' | 'createdAt' | 'updatedAt' | 'sqft';
   sortOrder?: 'asc' | 'desc';
 }
 
@@ -43,14 +43,18 @@ export interface CreatePlanTemplateItemInput {
   planId: string;
   materialId: string;
   category: string;
+  subcategory?: string;
   quantity: number;
   unit: string;
+  wasteFactor?: number;
   notes?: string;
 }
 
 export interface UpdatePlanTemplateItemInput {
   quantity?: number;
   unit?: string;
+  wasteFactor?: number;
+  subcategory?: string;
   notes?: string;
   averageVariance?: number;
   varianceCount?: number;
@@ -64,26 +68,17 @@ class PlanService {
    */
   async createPlan(input: CreatePlanInput): Promise<Plan> {
     try {
-      // Verify customer exists
-      const customer = await db.customer.findUnique({
-        where: { id: input.customerId },
-      });
-
-      if (!customer) {
-        throw new Error('Customer not found');
-      }
-
       const plan = await db.plan.create({
         data: {
-          customerId: input.customerId,
+          code: input.code,
           name: input.name,
-          planNumber: input.planNumber,
-          squareFootage: input.squareFootage,
+          type: input.type,
+          sqft: input.sqft,
           bedrooms: input.bedrooms,
           bathrooms: input.bathrooms,
-          stories: input.stories,
-          garageSpaces: input.garageSpaces,
-          description: input.description,
+          garage: input.garage,
+          style: input.style,
+          pdssUrl: input.pdssUrl,
           notes: input.notes,
           isActive: input.isActive ?? true,
         },
@@ -93,7 +88,7 @@ class PlanService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw new Error('A plan with this name already exists for this customer');
+          throw new Error('A plan with this code already exists');
         }
       }
       throw error;
@@ -108,48 +103,47 @@ class PlanService {
       where: { id },
       include: includeRelations
         ? {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+            elevations: true,
+            options: true,
             templateItems: {
               include: {
                 material: {
                   select: {
                     id: true,
-                    name: true,
+                    description: true,
                     sku: true,
-                    unit: true,
+                    unitOfMeasure: true,
+                    category: true,
                   },
                 },
               },
               orderBy: { category: 'asc' },
             },
-            communities: {
-              select: {
-                id: true,
-                name: true,
-                isActive: true,
+          }
+        : undefined,
+    });
+
+    return plan;
+  }
+
+  /**
+   * Get plan by code
+   */
+  async getPlanByCode(code: string, includeRelations = false) {
+    const plan = await db.plan.findUnique({
+      where: { code },
+      include: includeRelations
+        ? {
+            elevations: true,
+            options: true,
+            templateItems: {
+              include: {
+                material: true,
               },
-            },
-            lots: {
-              select: {
-                id: true,
-                lotNumber: true,
-                address: true,
-              },
+              orderBy: { category: 'asc' },
             },
           }
-        : {
-            customer: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
+        : undefined,
     });
 
     return plan;
@@ -163,9 +157,9 @@ class PlanService {
       page = 1,
       limit = 50,
       search,
-      customerId,
+      type,
       isActive,
-      sortBy = 'name',
+      sortBy = 'code',
       sortOrder = 'asc',
     } = query;
 
@@ -176,14 +170,15 @@ class PlanService {
 
     if (search) {
       where.OR = [
+        { code: { contains: search, mode: 'insensitive' } },
         { name: { contains: search, mode: 'insensitive' } },
-        { planNumber: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
+        { style: { contains: search, mode: 'insensitive' } },
+        { notes: { contains: search, mode: 'insensitive' } },
       ];
     }
 
-    if (customerId) {
-      where.customerId = customerId;
+    if (type) {
+      where.type = type;
     }
 
     if (isActive !== undefined) {
@@ -198,18 +193,18 @@ class PlanService {
         take: limit,
         orderBy: { [sortBy]: sortOrder },
         include: {
-          customer: {
+          elevations: {
             select: {
               id: true,
+              code: true,
               name: true,
             },
           },
           _count: {
             select: {
               templateItems: true,
-              lots: true,
               jobs: true,
-              communities: true,
+              options: true,
             },
           },
         },
@@ -233,17 +228,6 @@ class PlanService {
    */
   async updatePlan(id: string, input: UpdatePlanInput): Promise<Plan> {
     try {
-      // If customerId is being updated, verify new customer exists
-      if (input.customerId) {
-        const customer = await db.customer.findUnique({
-          where: { id: input.customerId },
-        });
-
-        if (!customer) {
-          throw new Error('Customer not found');
-        }
-      }
-
       const plan = await db.plan.update({
         where: { id },
         data: input,
@@ -256,7 +240,7 @@ class PlanService {
           throw new Error('Plan not found');
         }
         if (error.code === 'P2002') {
-          throw new Error('A plan with this name already exists for this customer');
+          throw new Error('A plan with this code already exists');
         }
       }
       throw error;
@@ -320,7 +304,7 @@ class PlanService {
         }
         if (error.code === 'P2003') {
           throw new Error(
-            'Cannot delete plan with existing lots, jobs, or communities. Deactivate instead.'
+            'Cannot delete plan with existing jobs or template items. Deactivate instead.'
           );
         }
       }
@@ -338,9 +322,9 @@ class PlanService {
         _count: {
           select: {
             templateItems: true,
-            lots: true,
             jobs: true,
-            communities: true,
+            elevations: true,
+            options: true,
           },
         },
         templateItems: {
@@ -371,9 +355,9 @@ class PlanService {
 
     return {
       totalTemplateItems: stats._count.templateItems,
-      totalLots: stats._count.lots,
       totalJobs: stats._count.jobs,
-      totalCommunities: stats._count.communities,
+      totalElevations: stats._count.elevations,
+      totalOptions: stats._count.options,
       avgConfidenceScore: avgConfidence,
       totalVarianceRecords,
     };
@@ -405,10 +389,12 @@ class PlanService {
           planId: input.planId,
           materialId: input.materialId,
           category: input.category,
+          subcategory: input.subcategory,
           quantity: input.quantity,
           unit: input.unit,
+          wasteFactor: input.wasteFactor ?? 0,
           notes: input.notes,
-          confidenceScore: 0.0, // Start with 0 confidence
+          confidenceScore: 0.0,
           varianceCount: 0,
         },
         include: {
@@ -437,8 +423,8 @@ class PlanService {
         plan: {
           select: {
             id: true,
+            code: true,
             name: true,
-            planNumber: true,
           },
         },
         material: true,
@@ -457,7 +443,7 @@ class PlanService {
       include: {
         material: true,
       },
-      orderBy: [{ category: 'asc' }, { material: { name: 'asc' } }],
+      orderBy: [{ category: 'asc' }, { subcategory: 'asc' }],
     });
 
     return items;
