@@ -23,6 +23,7 @@ interface PlanFormModalProps {
 interface FormData {
   code: string;
   name: string;
+  customerPlanCode: string;
   type: PlanType | '';
   builderId: string;
   sqft: string;
@@ -84,6 +85,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
   const [formData, setFormData] = useState<FormData>({
     code: '',
     name: '',
+    customerPlanCode: '',
     type: '',
     builderId: '',
     sqft: '',
@@ -105,6 +107,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
         setFormData({
           code: plan.code,
           name: plan.name || '',
+          customerPlanCode: plan.customerPlanCode || '',
           type: plan.type,
           builderId: plan.builderId || '',
           sqft: plan.sqft?.toString() || '',
@@ -120,6 +123,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
         setFormData({
           code: '',
           name: '',
+          customerPlanCode: '',
           type: '',
           builderId: '',
           sqft: '',
@@ -198,6 +202,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
         const updateData: UpdatePlanInput = {
           code: formData.code,
           name: formData.name || undefined,
+          customerPlanCode: formData.customerPlanCode || null,
           type: formData.type as PlanType,
           builderId: formData.builderId || null,
           sqft: formData.sqft ? Number(formData.sqft) : undefined,
@@ -221,6 +226,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
         const createData: CreatePlanInput = {
           code: formData.code,
           name: formData.name || undefined,
+          customerPlanCode: formData.customerPlanCode || undefined,
           type: formData.type as PlanType,
           builderId: formData.builderId || undefined,
           sqft: formData.sqft ? Number(formData.sqft) : undefined,
@@ -293,6 +299,16 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
               value={formData.name}
               onChange={handleChange}
               placeholder="e.g., The Evergreen"
+              disabled={isLoading}
+            />
+
+            <Input
+              label="Customer Plan Code"
+              name="customerPlanCode"
+              value={formData.customerPlanCode}
+              onChange={handleChange}
+              placeholder="e.g., Builder's plan code"
+              helperText="Optional: Customer's plan code if different from ours"
               disabled={isLoading}
             />
 

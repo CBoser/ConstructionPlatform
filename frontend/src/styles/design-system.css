@@ -3467,6 +3467,215 @@ select.input {
 }
 
 /* ============================================================================
+   PLAN OPTIONS (Mobile-First)
+   ============================================================================ */
+
+.options-loading,
+.options-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  text-align: center;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  border: 1px dashed var(--gray-border);
+}
+
+.options-empty p {
+  margin: 0;
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.options-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.options-group-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--dark);
+  margin: 0;
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--gray-border);
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 640px) {
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.option-card {
+  background: var(--background);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  padding: var(--space-md);
+  transition: var(--transition-fast);
+}
+
+.option-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.option-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.option-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.option-card-name {
+  font-weight: 600;
+  color: var(--dark);
+  font-size: var(--font-size-sm);
+}
+
+.option-card-badge {
+  font-size: var(--font-size-xs);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.option-card-badge.badge-success {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.option-card-badge.badge-secondary {
+  background: var(--background-dark);
+  color: var(--gray);
+}
+
+.option-card-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.option-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  color: var(--gray);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.option-card-btn:hover {
+  background: var(--background-dark);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.option-card-btn-danger:hover {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.option-card-details {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.option-card-category {
+  font-size: var(--font-size-xs);
+  color: var(--gray);
+  padding: 2px 8px;
+  background: var(--background-dark);
+  border-radius: var(--radius-sm);
+}
+
+.option-card-cost {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--success);
+}
+
+.option-card-description {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Form Grid Span */
+.form-grid-span-2 {
+  grid-column: span 2;
+}
+
+@media (max-width: 639px) {
+  .form-grid-span-2 {
+    grid-column: span 1;
+  }
+}
+
+/* Checkbox Field */
+.checkbox-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  cursor: pointer;
+}
+
+.checkbox-field input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: var(--space-sm);
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.checkbox-label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-helper {
+  font-size: var(--font-size-xs);
+  color: var(--gray);
+  padding-left: 26px;
+}
+
+/* ============================================================================
    PLAN DETAIL MODAL (Mobile-First)
    ============================================================================ */
 

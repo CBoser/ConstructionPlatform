@@ -181,6 +181,7 @@ model Plan {
   id          String   @id @default(uuid())
   code        String   @unique // e.g., "2400", "G21D"
   name        String?              // Human-readable name
+  customerPlanCode String? @map("customer_plan_code") // Customer's plan code if different from our code
 
   // Builder/Customer ownership
   builderId   String?  @map("builder_id")  // Which builder owns this plan
@@ -208,6 +209,7 @@ model Plan {
   builder          Customer?  @relation(fields: [builderId], references: [id])
   elevations       PlanElevation[]
   options          PlanOption[]
+  assignedOptions  PlanAssignedOption[]  // Options assigned to this plan
   templateItems    PlanTemplateItem[] // BOM template
   jobs             Job[]
   variancePatterns VariancePattern[]
@@ -258,6 +260,7 @@ model PlanElevation {
   plan            Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
   jobs            Job[]
   versionHistory  ElevationVersion[]
+  assignedOptions PlanAssignedOption[]  // Options specific to this elevation
 
   @@unique([planId, code])
   @@index([planId])
@@ -316,6 +319,35 @@ model PlanOption {
   jobOptions  JobOption[]
 
   @@index([code])
+  @@index([category])
+}
+
+// Plan-specific options (assigned options to a specific plan or elevation)
+model PlanAssignedOption {
+  id          String   @id @default(uuid())
+  planId      String   @map("plan_id")
+  elevationId String?  @map("elevation_id") // null = plan-level, set = elevation-specific
+
+  name        String          // Option name (e.g., "Extended Deck", "Sunroom Addition")
+  description String?         // Additional details
+  category    OptionCategory  @default(OTHER)
+
+  // Pricing (optional - may not apply)
+  estimatedCost Decimal? @db.Decimal(10, 2) @map("estimated_cost")
+
+  // Additional metadata
+  notes       String?  @db.Text
+  isStandard  Boolean  @default(false) @map("is_standard") // Standard option vs upgrade
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relationships
+  plan        Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  elevation   PlanElevation? @relation(fields: [elevationId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([elevationId])
   @@index([category])
 }
 

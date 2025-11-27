@@ -5,6 +5,7 @@ import Loading from '../common/Loading';
 import ElevationCard from './ElevationCard';
 import ElevationFormModal from './ElevationFormModal';
 import type { ElevationFormData } from './ElevationFormModal';
+import PlanOptionsSection from './PlanOptionsSection';
 import { useToast } from '../common/Toast';
 import type { Plan, PlanElevation } from '../../services/planService';
 import {
@@ -12,7 +13,9 @@ import {
   useCreateElevation,
   useUpdateElevation,
   useDeleteElevation,
+  useAssignedOptions,
 } from '../../services/planService';
+import { exportPlanDetailToExcel } from '../../utils/excelExport';
 
 interface PlanDetailModalProps {
   plan: Plan | null;
@@ -54,12 +57,36 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
     plan?.id || ''
   );
 
+  // Fetch assigned options
+  const { data: options } = useAssignedOptions(plan?.id || '');
+
   // Elevation mutations
   const createElevation = useCreateElevation();
   const updateElevation = useUpdateElevation();
   const deleteElevation = useDeleteElevation();
 
+  // Export state
+  const [isExporting, setIsExporting] = useState(false);
+
   if (!plan) return null;
+
+  // Export handler
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await exportPlanDetailToExcel(
+        plan,
+        elevations || [],
+        options || []
+      );
+      showToast('Plan exported successfully', 'success');
+    } catch (error) {
+      console.error('Export failed:', error);
+      showToast('Failed to export plan', 'error');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleCreateJob = () => {
     onCreateJob?.(plan);
@@ -158,6 +185,13 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
               )}
             </div>
             <div className="modal-footer-right">
+              <Button
+                variant="secondary"
+                onClick={handleExport}
+                isLoading={isExporting}
+              >
+                Export
+              </Button>
               <Button variant="secondary" onClick={onClose}>
                 Close
               </Button>
@@ -222,6 +256,12 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
                 <span className="plan-detail-item-label">Builder</span>
                 <span className="plan-detail-item-value">{plan.builder?.customerName || '—'}</span>
               </div>
+              {plan.customerPlanCode && (
+                <div className="plan-detail-item">
+                  <span className="plan-detail-item-label">Customer Plan Code</span>
+                  <span className="plan-detail-item-value">{plan.customerPlanCode}</span>
+                </div>
+              )}
               <div className="plan-detail-item">
                 <span className="plan-detail-item-label">Version</span>
                 <span className="plan-detail-item-value">{plan.version}</span>
@@ -286,6 +326,12 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
               </div>
             )}
           </div>
+
+          {/* Plan Options Section */}
+          <PlanOptionsSection
+            planId={plan.id}
+            elevations={elevations || []}
+          />
 
           {/* Notes */}
           {plan.notes && (
