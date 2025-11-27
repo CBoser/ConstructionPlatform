@@ -213,18 +213,19 @@ async function importPlans(): Promise<void> {
 
   if (records.length === 0) {
     console.log('No plan data found. Please ensure Plans.csv exists in backend/data/');
-    console.log('Expected columns: code/Code/Plan, name/Name, type/Type/Stories, sqft/SqFt/SquareFootage, bedrooms/Bedrooms, bathrooms/Bathrooms, garage/Garage, style/Style');
+    console.log('Expected columns: Plan Sheet, Model, Elevations, Garage, Living Area Total, etc.');
     return;
   }
 
   let imported = 0;
   let skipped = 0;
   let errors = 0;
+  let elevationsCreated = 0;
 
   for (const record of records) {
     try {
-      // Try different column name variations
-      const code = record.code || record.Code || record.Plan || record.plan_code || record.PlanCode;
+      // Support actual column names from Plans.csv
+      const code = record['Plan Sheet'] || record.code || record.Code || record.Plan || record.plan_code || record.PlanCode;
 
       if (!code) {
         console.log('Skipping record with no code:', record);
@@ -232,21 +233,40 @@ async function importPlans(): Promise<void> {
         continue;
       }
 
-      const name = record.name || record.Name || record.PlanName || record.plan_name;
-      const typeStr = record.type || record.Type || record.Stories || record.stories || record.plan_type;
-      const sqftStr = record.sqft || record.SqFt || record.SquareFootage || record.square_footage || record.sq_ft;
+      // Model column contains the plan name (e.g., "1670 - Coyote Ridge")
+      const name = record.Model || record.name || record.Name || record.PlanName || record.plan_name;
+
+      // Determine plan type based on living areas
+      const livingMain = record['Living Area Main'] ? parseInt(record['Living Area Main']) : 0;
+      const livingUpper = record['Living Area Upper'] ? parseInt(record['Living Area Upper']) : 0;
+      let typeStr = record.type || record.Type || record.Stories || record.stories || record.plan_type || '';
+
+      // If no explicit type, infer from living areas
+      if (!typeStr && livingMain > 0 && livingUpper > 0) {
+        typeStr = 'two_story';
+      } else if (!typeStr) {
+        typeStr = 'single_story';
+      }
+
+      // Living Area Total for sqft
+      const sqftStr = record['Living Area Total'] || record.sqft || record.SqFt || record.SquareFootage || record.square_footage || record.sq_ft;
       const bedroomsStr = record.bedrooms || record.Bedrooms || record.Beds || record.beds;
       const bathroomsStr = record.bathrooms || record.Bathrooms || record.Baths || record.baths;
-      const garage = record.garage || record.Garage || record.GarageType || record.garage_type;
+      const garage = record.Garage || record.garage || record.GarageType || record.garage_type;
       const style = record.style || record.Style || record.ArchStyle || record.arch_style;
+      const elevationsStr = record.Elevations || record.elevations || '';
+      const bidNumber = record['Bid Number'] || record.BidNumber || '';
 
       // Check if plan already exists
-      const existing = await prisma.plan.findUnique({ where: { code } });
+      const existing = await prisma.plan.findUnique({ where: { code: code.trim() } });
       if (existing) {
         console.log(`  Plan ${code} already exists, skipping`);
         skipped++;
         continue;
       }
+
+      // Build notes from bid number if present
+      const notes = bidNumber ? `Bid Number: ${bidNumber}` : null;
 
       const plan = await prisma.plan.create({
         data: {
@@ -258,12 +278,34 @@ async function importPlans(): Promise<void> {
           bathrooms: bathroomsStr ? parseFloat(bathroomsStr) : null,
           garage: garage?.trim() || null,
           style: style?.trim() || null,
+          notes: notes,
           isActive: true,
         },
       });
 
-      console.log(`  Imported plan: ${plan.code}`);
+      console.log(`  Imported plan: ${plan.code} - ${plan.name || 'unnamed'}`);
       imported++;
+
+      // Parse and create elevations if present
+      if (elevationsStr) {
+        const elevations = parseElevations(elevationsStr);
+        for (const elev of elevations) {
+          try {
+            await prisma.planElevation.create({
+              data: {
+                planId: plan.id,
+                code: elev.code,
+                name: elev.name || null,
+                description: elev.description || null,
+              },
+            });
+            elevationsCreated++;
+          } catch (elevError) {
+            // Elevation might already exist, skip
+            console.log(`    Elevation ${elev.code} skipped`);
+          }
+        }
+      }
     } catch (error) {
       console.error(`  Error importing plan:`, error);
       errors++;
@@ -271,6 +313,39 @@ async function importPlans(): Promise<void> {
   }
 
   console.log(`\nPlans import complete: ${imported} imported, ${skipped} skipped, ${errors} errors`);
+  console.log(`Elevations created: ${elevationsCreated}`);
+}
+
+/**
+ * Parse elevation string like "A (Northwest), B (Prairie), C (Modern)"
+ * Returns array of { code, name, description }
+ */
+function parseElevations(elevationsStr: string): Array<{ code: string; name: string | null; description: string | null }> {
+  const elevations: Array<{ code: string; name: string | null; description: string | null }> = [];
+
+  // Handle different formats:
+  // "A (Northwest), B (Prairie), C (Modern)"
+  // "A, B, C, D"
+  // "F,C,G,J,K"
+
+  const parts = elevationsStr.split(/[,;]/);
+
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+
+    // Match patterns like "A (Northwest)" or just "A"
+    const match = trimmed.match(/^([A-Z])\s*(?:\(([^)]+)\))?/i);
+    if (match) {
+      elevations.push({
+        code: match[1].toUpperCase(),
+        name: match[2]?.trim() || null,
+        description: null,
+      });
+    }
+  }
+
+  return elevations;
 }
 
 async function importMaterials(): Promise<void> {
