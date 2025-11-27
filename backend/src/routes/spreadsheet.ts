@@ -383,7 +383,7 @@ router.post(
       }
 
       const analyzer = new SpreadsheetAnalyzer();
-      analyzer.parseBuffer(req.file.buffer, req.file.originalname);
+      await analyzer.parseBuffer(req.file.buffer, req.file.originalname);
 
       const analysis = analyzer.analyze();
       const contextualPrompts = analyzer.generateContextualPrompts(analysis);
@@ -430,7 +430,7 @@ router.post(
       }
 
       const analyzer = new SpreadsheetAnalyzer();
-      analyzer.parseBuffer(req.file.buffer, req.file.originalname);
+      await analyzer.parseBuffer(req.file.buffer, req.file.originalname);
 
       const cells = analyzer.getCellDetails(sheetName, range);
       const data = analyzer.getSheetData(sheetName);
@@ -533,7 +533,7 @@ router.post(
       }
 
       const analyzer = new SpreadsheetAnalyzer();
-      analyzer.parseBuffer(req.file.buffer, req.file.originalname);
+      await analyzer.parseBuffer(req.file.buffer, req.file.originalname);
       const analysis = analyzer.analyze();
 
       // Generate markdown documentation

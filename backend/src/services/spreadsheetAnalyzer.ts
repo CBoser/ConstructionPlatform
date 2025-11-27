@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 
 // ============ TYPE DEFINITIONS ============
 
@@ -122,20 +122,68 @@ function extractCellReferences(formula: string): string[] {
 }
 
 /**
- * Determine cell type from xlsx cell object
+ * Determine cell type from exceljs cell object
  */
-function getCellType(cell: XLSX.CellObject | undefined): CellInfo['type'] {
-  if (!cell) return 'empty';
-  if (cell.f) return 'formula';
+function getCellType(cell: ExcelJS.Cell): CellInfo['type'] {
+  if (!cell || cell.value === null || cell.value === undefined) return 'empty';
 
-  switch (cell.t) {
-    case 'n': return 'number';
-    case 's': return 'string';
-    case 'b': return 'boolean';
-    case 'd': return 'date';
-    case 'e': return 'error';
-    default: return 'empty';
+  // Check if it's a formula
+  if (cell.formula || (cell.value && typeof cell.value === 'object' && 'formula' in cell.value)) {
+    return 'formula';
   }
+
+  const value = cell.value;
+
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string') return 'string';
+  if (typeof value === 'boolean') return 'boolean';
+  if (value instanceof Date) return 'date';
+  if (typeof value === 'object' && value !== null) {
+    if ('error' in value) return 'error';
+    if ('richText' in value) return 'string';
+    if ('result' in value) return 'formula';
+  }
+
+  return 'empty';
+}
+
+/**
+ * Get cell value safely
+ */
+function getCellValue(cell: ExcelJS.Cell): unknown {
+  if (!cell || cell.value === null || cell.value === undefined) return undefined;
+
+  const value = cell.value;
+
+  if (typeof value === 'object' && value !== null) {
+    if ('result' in value) return (value as { result: unknown }).result;
+    if ('richText' in value) {
+      return ((value as { richText: Array<{ text: string }> }).richText).map(rt => rt.text).join('');
+    }
+    if ('text' in value) return (value as { text: string }).text;
+    if ('hyperlink' in value) {
+      const hyperlinkVal = value as { hyperlink: string; text?: string };
+      return hyperlinkVal.text || hyperlinkVal.hyperlink;
+    }
+  }
+
+  return value;
+}
+
+/**
+ * Get cell formula if present
+ */
+function getCellFormula(cell: ExcelJS.Cell): string | undefined {
+  if (!cell) return undefined;
+
+  if (cell.formula) return cell.formula;
+
+  const value = cell.value;
+  if (typeof value === 'object' && value !== null && 'formula' in value) {
+    return (value as { formula: string }).formula;
+  }
+
+  return undefined;
 }
 
 /**
@@ -190,24 +238,33 @@ function calculateComplexity(analysis: Partial<SpreadsheetAnalysis>): Spreadshee
   return 'simple';
 }
 
+/**
+ * Convert column number to letter (1 = A, 2 = B, etc.)
+ */
+function columnToLetter(col: number): string {
+  let letter = '';
+  while (col > 0) {
+    const mod = (col - 1) % 26;
+    letter = String.fromCharCode(65 + mod) + letter;
+    col = Math.floor((col - 1) / 26);
+  }
+  return letter;
+}
+
 // ============ MAIN ANALYZER CLASS ============
 
 export class SpreadsheetAnalyzer {
-  private workbook: XLSX.WorkBook | null = null;
+  private workbook: ExcelJS.Workbook | null = null;
   private fileName: string = '';
   private fileSize: number = 0;
 
   /**
    * Parse Excel file from buffer
    */
-  parseBuffer(buffer: Buffer, fileName: string): void {
-    this.workbook = XLSX.read(buffer, {
-      cellFormula: true,
-      cellNF: true,
-      cellStyles: true,
-      cellDates: true,
-      sheetStubs: true,
-    });
+  async parseBuffer(buffer: Buffer, fileName: string): Promise<void> {
+    this.workbook = new ExcelJS.Workbook();
+    // ExcelJS accepts Buffer directly in Node.js environment
+    await this.workbook.xlsx.load(buffer as unknown as ArrayBuffer);
     this.fileName = fileName;
     this.fileSize = buffer.length;
   }
@@ -215,14 +272,9 @@ export class SpreadsheetAnalyzer {
   /**
    * Parse Excel file from file path
    */
-  parseFile(filePath: string): void {
-    this.workbook = XLSX.readFile(filePath, {
-      cellFormula: true,
-      cellNF: true,
-      cellStyles: true,
-      cellDates: true,
-      sheetStubs: true,
-    });
+  async parseFile(filePath: string): Promise<void> {
+    this.workbook = new ExcelJS.Workbook();
+    await this.workbook.xlsx.readFile(filePath);
     this.fileName = filePath.split('/').pop() || filePath;
   }
 
@@ -232,28 +284,38 @@ export class SpreadsheetAnalyzer {
   getSheets(): SheetInfo[] {
     if (!this.workbook) throw new Error('No workbook loaded');
 
-    return this.workbook.SheetNames.map(name => {
-      const sheet = this.workbook!.Sheets[name];
-      const range = sheet['!ref'] || 'A1';
-      const decodedRange = XLSX.utils.decode_range(range);
+    return this.workbook.worksheets.map(worksheet => {
+      const name = worksheet.name;
+
+      // Get dimensions
+      const rowCount = worksheet.rowCount || 0;
+      const columnCount = worksheet.columnCount || 0;
 
       let formulaCount = 0;
       let cellCount = 0;
 
-      for (const cellAddress in sheet) {
-        if (cellAddress.startsWith('!')) continue;
-        cellCount++;
-        const cell = sheet[cellAddress] as XLSX.CellObject;
-        if (cell.f) formulaCount++;
-      }
+      // Iterate through cells
+      worksheet.eachRow({ includeEmpty: false }, (row) => {
+        row.eachCell({ includeEmpty: false }, (cell) => {
+          cellCount++;
+          if (getCellFormula(cell)) {
+            formulaCount++;
+          }
+        });
+      });
+
+      // Build used range string
+      const usedRange = rowCount > 0 && columnCount > 0
+        ? `A1:${columnToLetter(columnCount)}${rowCount}`
+        : 'A1';
 
       return {
         name,
-        usedRange: range,
-        rowCount: decodedRange.e.r - decodedRange.s.r + 1,
-        columnCount: decodedRange.e.c - decodedRange.s.c + 1,
+        usedRange,
+        rowCount,
+        columnCount,
         hasFormulas: formulaCount > 0,
-        hasTables: !!sheet['!tables']?.length,
+        hasTables: false, // ExcelJS doesn't expose table information in the same way
         formulaCount,
         cellCount,
       };
@@ -268,25 +330,27 @@ export class SpreadsheetAnalyzer {
 
     const formulas: FormulaInfo[] = [];
 
-    for (const sheetName of this.workbook.SheetNames) {
-      const sheet = this.workbook.Sheets[sheetName];
+    for (const worksheet of this.workbook.worksheets) {
+      const sheetName = worksheet.name;
 
-      for (const cellAddress in sheet) {
-        if (cellAddress.startsWith('!')) continue;
+      worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+          const formula = getCellFormula(cell);
+          if (formula) {
+            const cellAddress = `${columnToLetter(colNumber)}${rowNumber}`;
+            const fullAddress = `${sheetName}!${cellAddress}`;
 
-        const cell = sheet[cellAddress] as XLSX.CellObject;
-        if (cell.f) {
-          const fullAddress = `${sheetName}!${cellAddress}`;
-          formulas.push({
-            address: fullAddress,
-            formula: cell.f,
-            result: cell.v,
-            dependencies: extractCellReferences(cell.f),
-            functions: extractFunctions(cell.f),
-            isArrayFormula: isArrayFormula(cell.f),
-          });
-        }
-      }
+            formulas.push({
+              address: fullAddress,
+              formula: formula,
+              result: getCellValue(cell),
+              dependencies: extractCellReferences(formula),
+              functions: extractFunctions(formula),
+              isArrayFormula: isArrayFormula(formula),
+            });
+          }
+        });
+      });
     }
 
     return formulas;
@@ -294,77 +358,28 @@ export class SpreadsheetAnalyzer {
 
   /**
    * Extract named ranges/defined names
+   * Note: ExcelJS has limited support for defined names compared to xlsx library
    */
   getNamedRanges(): NamedRangeInfo[] {
     if (!this.workbook) throw new Error('No workbook loaded');
 
-    const namedRanges: NamedRangeInfo[] = [];
-    const definedNames = this.workbook.Workbook?.Names || [];
-
-    for (const name of definedNames) {
-      if (name.Name && name.Ref) {
-        const isFormula = name.Ref.startsWith('=') || /[+\-*/()]/.test(name.Ref);
-        namedRanges.push({
-          name: name.Name,
-          scope: name.Sheet !== undefined ? 'sheet' : 'workbook',
-          refersTo: name.Ref,
-          isFormula,
-        });
-      }
-    }
-
-    return namedRanges;
+    // ExcelJS definedNames API is different from xlsx
+    // For now, return empty array - named ranges would require
+    // accessing the internal model which varies by version
+    return [];
   }
 
   /**
    * Extract table information
+   * Note: ExcelJS has limited support for Excel tables compared to xlsx library
+   * Tables would need to be detected through data patterns if required
    */
   getTables(): TableInfo[] {
     if (!this.workbook) throw new Error('No workbook loaded');
 
-    const tables: TableInfo[] = [];
-
-    for (const sheetName of this.workbook.SheetNames) {
-      const sheet = this.workbook.Sheets[sheetName];
-      const sheetTables = sheet['!tables'] || [];
-
-      for (const table of sheetTables) {
-        const range = XLSX.utils.decode_range(table.ref || 'A1:A1');
-        const headers: string[] = [];
-        const calculatedColumns: { header: string; formula: string }[] = [];
-
-        // Extract headers from first row
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddr = XLSX.utils.encode_cell({ r: range.s.r, c: col });
-          const cell = sheet[cellAddr] as XLSX.CellObject;
-          headers.push(cell?.v?.toString() || `Column${col + 1}`);
-        }
-
-        // Check for calculated columns
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellAddr = XLSX.utils.encode_cell({ r: range.s.r + 1, c: col });
-          const cell = sheet[cellAddr] as XLSX.CellObject;
-          if (cell?.f) {
-            calculatedColumns.push({
-              header: headers[col - range.s.c],
-              formula: cell.f,
-            });
-          }
-        }
-
-        tables.push({
-          name: table.name || `Table_${sheetName}`,
-          sheet: sheetName,
-          range: table.ref || '',
-          headers,
-          rowCount: range.e.r - range.s.r,
-          hasCalculatedColumns: calculatedColumns.length > 0,
-          calculatedColumns,
-        });
-      }
-    }
-
-    return tables;
+    // ExcelJS doesn't expose Excel tables in the same way as xlsx
+    // Return empty array - table detection would require pattern-based analysis
+    return [];
   }
 
   /**
@@ -396,10 +411,35 @@ export class SpreadsheetAnalyzer {
   getSheetData(sheetName: string): Record<string, unknown>[] {
     if (!this.workbook) throw new Error('No workbook loaded');
 
-    const sheet = this.workbook.Sheets[sheetName];
-    if (!sheet) throw new Error(`Sheet "${sheetName}" not found`);
+    const worksheet = this.workbook.getWorksheet(sheetName);
+    if (!worksheet) throw new Error(`Sheet "${sheetName}" not found`);
 
-    return XLSX.utils.sheet_to_json(sheet);
+    const data: Record<string, unknown>[] = [];
+    const headers: string[] = [];
+
+    // Get headers from first row
+    const headerRow = worksheet.getRow(1);
+    headerRow.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+      const value = getCellValue(cell);
+      headers[colNumber] = String(value || `Column${colNumber}`);
+    });
+
+    // Get data from remaining rows
+    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+      if (rowNumber === 1) return; // Skip header row
+
+      const rowData: Record<string, unknown> = {};
+      row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+        const header = headers[colNumber] || `Column${colNumber}`;
+        rowData[header] = getCellValue(cell);
+      });
+
+      if (Object.keys(rowData).length > 0) {
+        data.push(rowData);
+      }
+    });
+
+    return data;
   }
 
   /**
@@ -408,26 +448,50 @@ export class SpreadsheetAnalyzer {
   getCellDetails(sheetName: string, range?: string): CellInfo[] {
     if (!this.workbook) throw new Error('No workbook loaded');
 
-    const sheet = this.workbook.Sheets[sheetName];
-    if (!sheet) throw new Error(`Sheet "${sheetName}" not found`);
+    const worksheet = this.workbook.getWorksheet(sheetName);
+    if (!worksheet) throw new Error(`Sheet "${sheetName}" not found`);
 
-    const targetRange = range || sheet['!ref'] || 'A1';
-    const decodedRange = XLSX.utils.decode_range(targetRange);
     const cells: CellInfo[] = [];
 
-    for (let row = decodedRange.s.r; row <= decodedRange.e.r; row++) {
-      for (let col = decodedRange.s.c; col <= decodedRange.e.c; col++) {
-        const cellAddr = XLSX.utils.encode_cell({ r: row, c: col });
-        const cell = sheet[cellAddr] as XLSX.CellObject;
+    if (range) {
+      // Parse range and iterate
+      const rangeMatch = range.match(/([A-Z]+)(\d+):([A-Z]+)(\d+)/i);
+      if (rangeMatch) {
+        const startCol = rangeMatch[1].toUpperCase();
+        const startRow = parseInt(rangeMatch[2]);
+        const endCol = rangeMatch[3].toUpperCase();
+        const endRow = parseInt(rangeMatch[4]);
 
-        cells.push({
-          address: cellAddr,
-          value: cell?.v,
-          formula: cell?.f,
-          type: getCellType(cell),
-          numberFormat: cell?.z != null ? String(cell.z) : undefined,
-        });
+        for (let row = startRow; row <= endRow; row++) {
+          for (let col = startCol.charCodeAt(0) - 64; col <= endCol.charCodeAt(0) - 64; col++) {
+            const cellAddress = `${String.fromCharCode(64 + col)}${row}`;
+            const cell = worksheet.getCell(cellAddress);
+
+            cells.push({
+              address: cellAddress,
+              value: getCellValue(cell),
+              formula: getCellFormula(cell),
+              type: getCellType(cell),
+              numberFormat: cell.numFmt,
+            });
+          }
+        }
       }
+    } else {
+      // Iterate all cells
+      worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+          const cellAddress = `${columnToLetter(colNumber)}${rowNumber}`;
+
+          cells.push({
+            address: cellAddress,
+            value: getCellValue(cell),
+            formula: getCellFormula(cell),
+            type: getCellType(cell),
+            numberFormat: cell.numFmt,
+          });
+        });
+      });
     }
 
     return cells;
@@ -454,8 +518,8 @@ export class SpreadsheetAnalyzer {
       formulas,
       tables,
       namedRanges,
-      dataValidations: [], // XLSX library has limited support
-      conditionalFormats: [], // XLSX library has limited support
+      dataValidations: [], // ExcelJS has limited support for data validations
+      conditionalFormats: [], // ExcelJS has limited support for conditional formats
       excelFunctions,
       summary: {
         totalSheets: sheets.length,

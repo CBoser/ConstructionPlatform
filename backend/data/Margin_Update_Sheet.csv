@@ -1,0 +1,147 @@
+CUSTOMER,HERITAGE HMS OF MOLALLA OR*,,,,,,,,,,,,,,,"03
+ENGINEERED WOOD PRODUCTS","04
+TRUSSES AND WALL PANELS","05
+MILLWORK","06
+WINDOWS","07
+DOORS","08
+CABINETS & TOPS","09
+SIDINGS, METAL AND CONCRETE","10
+INSULATION, WEATHERPROOFING","11
+ROOFING","12
+GYPSUM & ACCESSORIES","13
+HARDWARE, TOOLS, FASTENERS","14
+HOME CENTER PRODUCTS",special
+MARGIN CHANGES TO APPLY,,,,,,,,,,,,,,,,3,4,5,6,7,8,9,10,11,12,13,14,15
+"Enter your margin changes below. Use ""ALL"" in Item ID to apply to entire category.",,,,,,,,,,,,,,,,10,01,11,12,10,09,09,08,06,08,05,01,l5
+Pricing Zone,Product Category,Minor Category,Item ID,Description,New Margin %,Apply to ALL?,Multiple Items,Single Item,Price Level,Status,Target Column,Notes,Category,Dart_Category_No,Minor_Category_No
+PORTOR,20 - ENGINEERED LBR,2001 - I JOISTS,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 13 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2003 - LVL (LAMINATED VENEER LUMBER),ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 22 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2005 - RIM BOARDS,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 7 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2006 - GLULAM,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 51 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2011 - WEYERHAEUSER - I JOIST,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 8 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2012 - WEYERHAEUSER - LVL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 3 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2013 - WEYERHAEUSER - LSL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 29 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2031 - LOUISIANA-PACIFIC - I JOIST,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 13 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2032 - LOUISIANA-PACIFIC - LVL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 15 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2033 - LOUISIANA-PACIFIC - LSL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 7 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2041 - BOISE CASCADE - I JOIST,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 11 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2042 - BOISE CASCADE - LVL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 24 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,20 - ENGINEERED LBR,2043 - BOISE CASCADE - LSL,ALL,,15.00%,YES,TRUE,FALSE,10,OK - Updated 9 items @ PL10,AU,Will update PL10 → Column AU,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2210WWP,"2""X2""-10' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2220WWP,"2""X2""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2420WWP,"2""X4""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2616WWP,"2""X6""-16' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2620WWP,"2""X6""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2816WWP,"2""X8""-16' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,2820WWP,"2""X8""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,21016WWP,"2""X10""-16' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,21020WWP,"2""X10""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,25 - LUMBER,2510 - MISC. LUMBER,21220WWP,"2""X12""-20' WW PRIMED",14.00%,NO,FALSE,TRUE,09,OK - Updated 1 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,37 - INSULATION,3704 - MISC. INSULATION,SS350,"SILL SEALER 3.5"" X 50'",20.00%,NO,FALSE,TRUE,08,OK - Updated 1 items @ PL08,AO,Will update PL08 → Column AO,#N/A,1,#N/A
+PORTOR,37 - INSULATION,3704 - MISC. INSULATION,SS550,"SILL SEALER 5.5"" X 50'",20.00%,NO,FALSE,TRUE,08,OK - Updated 1 items @ PL08,AO,Will update PL08 → Column AO,#N/A,1,#N/A
+PORTOR,37 - INSULATION,3704 - MISC. INSULATION,SS750,"SILL SEALER 7.5"" X 50'",20.00%,NO,FALSE,TRUE,08,OK - Updated 1 items @ PL08,AO,Will update PL08 → Column AO,#N/A,1,#N/A
+PORTOR,37 - INSULATION,3704 - MISC. INSULATION,SS850,"SILL SEALER 8"" X 50'",20.00%,NO,FALSE,TRUE,08,OK - Updated 1 items @ PL08,AO,Will update PL08 → Column AO,#N/A,1,#N/A
+PORTOR,39 - SIDING,3901 - PLYWOOD SIDINGS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 27 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,39 - SIDING,3902 - LUMBER SIDINGS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 40 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,39 - SIDING,3903 - VINYL/ALUMINUM SIDINGS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 58 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,39 - SIDING,3904 - FIBER CEMENT SIDING/HARDI,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 84 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,39 - SIDING,3905 - HARDBOARD SIDINGS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 22 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,39 - SIDING,3906 - MISC. SIDINGS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 25 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4001 - SPRUCE BOARDS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 52 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4002 - FIR/LARCH BOARDS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 71 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4003 - PINE BOARDS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 56 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4005 - HARDWOOD BOARDS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 50 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4006 - SYNBOARD/PVC TRIM,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 3 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4009 - CEDAR/CYPRESS BOARDS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 156 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4011 - EXTERIOR LOUVERS,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 7 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,40 - EXTERIOR TRIM,4015 - MISC. EXTERIOR TRIM,ALL,,15.00%,YES,TRUE,FALSE,09,OK - Updated 24 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,42 - MISC BUILDING MATERIALS,4203 - ADHESIVES & SEALANTS,ALL,,17.00%,YES,TRUE,FALSE,01,OK - Updated 242 items @ PL01,T,Will update PL01 → Column T,#N/A,1,#N/A
+PORTOR,42 - MISC BUILDING MATERIALS,4206 - VENTS/FLASHING/GUTTER,ALL,,22.00%,YES,TRUE,FALSE,09,OK - Updated 286 items @ PL09,AR,Will update PL09 → Column AR,#N/A,1,#N/A
+PORTOR,45 - HARDWARE/TOOLS,"4502 - CONNECTR,HANGERS,TIES,ANCHORS",ALL,,22.00%,YES,TRUE,FALSE,05,OK - Updated 667 items @ PL05,AF,Will update PL05 → Column AF,#N/A,1,#N/A
+PORTOR,45 - HARDWARE/TOOLS,"4504 - HAND DRIVN FASTNR (NAILS,SCRW",ALL,,22.00%,YES,TRUE,FALSE,05,OK - Updated 1577 items @ PL05,AF,Will update PL05 → Column AF,#N/A,1,#N/A
+PORTOR,45 - HARDWARE/TOOLS,"4505 - PNEUMATIC FASTENERS, ACCESSORI",ALL,,22.00%,YES,TRUE,FALSE,05,OK - Updated 177 items @ PL05,AF,Will update PL05 → Column AF,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,2,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#N/A,1,#N/A
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
+,,,,,,,,,,,,,#VALUE!,#VALUE!,#VALUE!
