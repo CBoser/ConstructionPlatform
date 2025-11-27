@@ -108,7 +108,8 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
 
   // Don't set Content-Type for FormData - browser will set it with boundary
   if (options.body instanceof FormData) {
-    delete (headers as any)['Content-Type'];
+    const mutableHeaders = headers as Record<string, string>;
+    delete mutableHeaders['Content-Type'];
   } else if (!headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
@@ -216,7 +217,11 @@ export async function updateDocument(
   documentId: string,
   input: UpdateDocumentInput
 ): Promise<PlanDocument> {
-  const body: any = {};
+  const body: {
+    fileType?: DocumentType;
+    documentDate?: string;
+    changeNotes?: string;
+  } = {};
   if (input.fileType) body.fileType = input.fileType;
   if (input.documentDate) body.documentDate = input.documentDate.toISOString();
   if (input.changeNotes !== undefined) body.changeNotes = input.changeNotes;
@@ -299,13 +304,44 @@ export async function getVersionHistory(
   return response.data;
 }
 
-export async function exportAllPlans(isActive?: boolean): Promise<any[]> {
+// Plan interface for export (simplified version)
+interface ExportPlan {
+  id: string;
+  code: string;
+  name: string | null;
+  customerPlanCode: string | null;
+  type: string;
+  builderId: string | null;
+  builder?: {
+    id: string;
+    customerName: string;
+  } | null;
+  sqft: number | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  garage: string | null;
+  style: string | null;
+  version: number;
+  isActive: boolean;
+  pdssUrl: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    elevations: number;
+    templateItems: number;
+    jobs: number;
+    assignedOptions?: number;
+  };
+}
+
+export async function exportAllPlans(isActive?: boolean): Promise<ExportPlan[]> {
   const params = new URLSearchParams();
   if (isActive !== undefined) params.append('isActive', isActive.toString());
 
   const response = await apiFetch<{
     success: boolean;
-    data: any[];
+    data: ExportPlan[];
     message: string;
   }>(`/api/v1/plans/export-all?${params}`);
 
