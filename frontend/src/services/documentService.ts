@@ -101,15 +101,14 @@ export class ApiError extends Error {
 
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const token = getAuthToken();
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     ...(token && { Authorization: `Bearer ${token}` }),
-    ...options.headers,
+    ...(options.headers as Record<string, string> | undefined),
   };
 
   // Don't set Content-Type for FormData - browser will set it with boundary
   if (options.body instanceof FormData) {
-    const mutableHeaders = headers as Record<string, string>;
-    delete mutableHeaders['Content-Type'];
+    delete headers['Content-Type'];
   } else if (!headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }

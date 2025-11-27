@@ -1,6 +1,9 @@
 import ExcelJS from 'exceljs';
 import type { Plan, PlanElevation, PlanAssignedOption } from '../services/planService';
 
+// Exportable plan type - allows string for type field (for API responses)
+type ExportablePlan = Omit<Plan, 'type'> & { type: string };
+
 // Format plan type for display
 const formatPlanType = (type: string): string => {
   const typeMap: Record<string, string> = {
@@ -40,7 +43,7 @@ const formatCurrency = (amount: number | null | undefined): string => {
  * Export plans data to Excel
  */
 export async function exportPlansToExcel(
-  plans: Plan[],
+  plans: ExportablePlan[],
   filename = 'plans-export'
 ): Promise<void> {
   const workbook = new ExcelJS.Workbook();

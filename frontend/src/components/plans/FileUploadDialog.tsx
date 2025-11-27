@@ -177,7 +177,7 @@ const FileUploadDialog: React.FC<FileUploadDialogProps> = ({
             value={documentDate}
             onChange={(e) => setDocumentDate(e.target.value)}
             required
-            helpText="The effective date of this document version"
+            helperText="The effective date of this document version"
           />
 
           <Input
@@ -190,7 +190,6 @@ const FileUploadDialog: React.FC<FileUploadDialogProps> = ({
                 ? 'Describe the changes in this version...'
                 : 'Add any notes about this document...'
             }
-            rows={3}
           />
         </div>
 
