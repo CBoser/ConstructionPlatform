@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import Input from '../common/Input';
-import { DocumentType } from '../../services/documentService';
+import type { DocumentType } from '../../services/documentService';
 
 interface FileUploadDialogProps {
   isOpen: boolean;
