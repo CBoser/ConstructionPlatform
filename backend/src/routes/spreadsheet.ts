@@ -1,8 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { SpreadsheetAnalyzer, SpreadsheetAnalysis } from '../services/spreadsheetAnalyzer';
+import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
+
+// Apply authentication to all spreadsheet routes
+router.use(authenticateToken);
 
 // Configure multer for file uploads (memory storage for processing)
 const upload = multer({

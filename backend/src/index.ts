@@ -79,9 +79,9 @@ app.use(applySecurityMiddleware);
 // CORS Middleware (hardened with whitelist-based origin checking)
 app.use(corsMiddleware);
 
-// Body parsing middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body parsing middleware with size limits to prevent DoS attacks
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Rate Limiting Middleware (protects all API endpoints)
 // Applied globally to /api routes - 100 requests per 15 minutes per IP

@@ -4,9 +4,24 @@ import { db } from './database';
 import { UserRole } from '@prisma/client';
 
 const SALT_ROUNDS = 10;
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '30d';
+
+// Get JWT_SECRET - validated at startup in index.ts for production
+// In development, use a development-only default (still logged as warning in index.ts)
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET must be set in production');
+    }
+    // Development-only fallback - warning is logged in index.ts
+    return 'development-only-secret-do-not-use-in-production';
+  }
+  return secret;
+}
+
+const JWT_SECRET = getJwtSecret();
 
 export interface RegisterInput {
   email: string;
