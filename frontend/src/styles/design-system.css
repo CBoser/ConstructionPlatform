@@ -2969,6 +2969,340 @@ select.input {
 }
 
 /* ============================================================================
+   ELEVATION CARDS (Mobile-First)
+   ============================================================================ */
+
+.elevation-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 640px) {
+  .elevation-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .elevation-cards-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.elevation-card {
+  background: white;
+  border: 2px solid var(--gray-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.elevation-card:hover {
+  border-color: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.elevation-card:active {
+  transform: scale(0.99);
+}
+
+.elevation-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.elevation-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.elevation-card-code {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.elevation-card-name {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+}
+
+.elevation-card-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.elevation-card-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  color: var(--gray);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.elevation-card-edit-btn:hover {
+  background: var(--background-dark);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.elevation-card-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--gray-border);
+  border-radius: var(--radius);
+  color: var(--gray);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.elevation-card-delete-btn:hover {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.elevation-card-version {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--gray);
+  background: var(--background-dark);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.elevation-card-description {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+  margin: 0 0 var(--space-sm) 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.elevation-card-vendors {
+  border-top: 1px solid var(--gray-border);
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.elevation-card-vendor-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.elevation-card-vendor-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: white;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+.elevation-card-vendor-label {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+}
+
+.elevation-card-vendor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.elevation-card-vendor-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+}
+
+.elevation-card-vendor-type {
+  color: var(--gray);
+  min-width: 70px;
+}
+
+.elevation-card-vendor-name {
+  color: var(--dark);
+  font-weight: 500;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.elevation-card-vendor-date {
+  color: var(--gray);
+  flex-shrink: 0;
+}
+
+.elevation-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--gray-border);
+}
+
+.elevation-card-updated {
+  font-size: var(--font-size-xs);
+  color: var(--gray);
+}
+
+.elevation-card-arrow {
+  font-size: var(--font-size-lg);
+  color: var(--gray);
+  transition: var(--transition-fast);
+}
+
+.elevation-card:hover .elevation-card-arrow {
+  color: var(--primary);
+  transform: translateX(4px);
+}
+
+/* Elevation Loading and Empty States */
+.elevation-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: var(--background-light);
+  border-radius: var(--radius);
+  border: 1px dashed var(--gray-border);
+}
+
+.elevation-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  padding: var(--space-xl);
+  text-align: center;
+  background: var(--background-light);
+  border-radius: var(--radius);
+  border: 1px dashed var(--gray-border);
+}
+
+.elevation-empty p {
+  margin: 0;
+  color: var(--gray);
+  font-size: var(--font-size-sm);
+}
+
+/* Elevation Form Styles */
+.vendor-row {
+  margin-bottom: var(--space-md);
+}
+
+.vendor-row-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-md);
+}
+
+@media (min-width: 640px) {
+  .vendor-row-fields {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.form-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.form-section-header .form-section-title {
+  margin-bottom: 0;
+}
+
+.custom-details-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.custom-detail-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--background-dark);
+  border-radius: var(--radius);
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .custom-detail-row {
+    grid-template-columns: 1fr 1fr 120px 32px;
+    align-items: end;
+  }
+}
+
+.custom-detail-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  color: var(--danger);
+  font-size: 18px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.custom-detail-remove:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.custom-details-empty {
+  font-size: var(--font-size-sm);
+  color: var(--gray);
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--background-dark);
+  border-radius: var(--radius);
+  margin: 0;
+}
+
+/* ============================================================================
    PLAN DETAIL MODAL (Mobile-First)
    ============================================================================ */
 
@@ -3074,6 +3408,22 @@ select.input {
   margin: 0 0 var(--space-md) 0;
   padding-bottom: var(--space-sm);
   border-bottom: 1px solid var(--gray-border);
+}
+
+.plan-detail-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--gray-border);
+}
+
+.plan-detail-section-header .plan-detail-section-title {
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
 .plan-detail-grid {

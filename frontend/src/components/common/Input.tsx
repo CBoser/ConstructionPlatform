@@ -9,6 +9,10 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement | H
   inputType?: 'text' | 'number' | 'date' | 'email' | 'password' | 'tel' | 'select' | 'textarea';
   options?: { value: string; label: string }[];
   /**
+   * Placeholder text for select inputs (defaults to "Select...")
+   */
+  selectPlaceholder?: string;
+  /**
    * Mobile keyboard hint - tells the browser which keyboard to show
    * - 'numeric': Number pad (0-9)
    * - 'decimal': Number pad with decimal point
@@ -40,6 +44,7 @@ const Input: React.FC<InputProps> = ({
   helperText,
   inputType = 'text',
   options = [],
+  selectPlaceholder,
   inputMode,
   size = 'md',
   className = '',
@@ -77,9 +82,11 @@ const Input: React.FC<InputProps> = ({
     };
 
     if (inputType === 'select') {
+      // Generate default placeholder based on label if not provided
+      const placeholder = selectPlaceholder || (label ? `Select ${label}...` : 'Select...');
       return (
         <select {...commonProps} {...(props as React.SelectHTMLAttributes<HTMLSelectElement>)}>
-          <option value="">Select...</option>
+          <option value="">{placeholder}</option>
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}

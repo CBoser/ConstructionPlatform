@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Modal from '../common/Modal';
 import Input from '../common/Input';
 import Button from '../common/Button';
@@ -11,6 +11,7 @@ import {
   type CreatePlanInput,
   type UpdatePlanInput,
 } from '../../services/planService';
+import { useCustomers } from '../../services/customerService';
 
 interface PlanFormModalProps {
   isOpen: boolean;
@@ -23,6 +24,7 @@ interface FormData {
   code: string;
   name: string;
   type: PlanType | '';
+  builderId: string;
   sqft: string;
   bedrooms: string;
   bathrooms: string;
@@ -70,10 +72,20 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
   const createPlan = useCreatePlan();
   const updatePlan = useUpdatePlan();
 
+  // Fetch builders for dropdown
+  const { data: customersResponse } = useCustomers({ isActive: true, limit: 100 });
+  const builderOptions = useMemo(() => {
+    return customersResponse?.data.map(c => ({
+      value: c.id,
+      label: c.customerName
+    })) || [];
+  }, [customersResponse]);
+
   const [formData, setFormData] = useState<FormData>({
     code: '',
     name: '',
     type: '',
+    builderId: '',
     sqft: '',
     bedrooms: '',
     bathrooms: '',
@@ -94,6 +106,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
           code: plan.code,
           name: plan.name || '',
           type: plan.type,
+          builderId: plan.builderId || '',
           sqft: plan.sqft?.toString() || '',
           bedrooms: plan.bedrooms?.toString() || '',
           bathrooms: plan.bathrooms?.toString() || '',
@@ -108,6 +121,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
           code: '',
           name: '',
           type: '',
+          builderId: '',
           sqft: '',
           bedrooms: '',
           bathrooms: '',
@@ -185,6 +199,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
           code: formData.code,
           name: formData.name || undefined,
           type: formData.type as PlanType,
+          builderId: formData.builderId || null,
           sqft: formData.sqft ? Number(formData.sqft) : undefined,
           bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
           bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
@@ -207,6 +222,7 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
           code: formData.code,
           name: formData.name || undefined,
           type: formData.type as PlanType,
+          builderId: formData.builderId || undefined,
           sqft: formData.sqft ? Number(formData.sqft) : undefined,
           bedrooms: formData.bedrooms ? Number(formData.bedrooms) : undefined,
           bathrooms: formData.bathrooms ? Number(formData.bathrooms) : undefined,
@@ -289,6 +305,17 @@ const PlanFormModal: React.FC<PlanFormModalProps> = ({
               error={errors.type}
               options={PLAN_TYPES}
               required
+              disabled={isLoading}
+            />
+
+            <Input
+              label="Builder"
+              name="builderId"
+              inputType="select"
+              value={formData.builderId}
+              onChange={handleChange}
+              options={builderOptions}
+              helperText="Assign this plan to a specific builder"
               disabled={isLoading}
             />
 
