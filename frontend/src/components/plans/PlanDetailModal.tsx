@@ -75,7 +75,7 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
   // Fetch documents
   const { data: documents, isLoading: documentsLoading } = useDocuments({
     planId: plan?.id || '',
-    elevationId: null, // Plan-level documents only
+    elevationId: undefined, // Plan-level documents only
   });
 
   // Elevation mutations
