@@ -200,15 +200,21 @@ const PlanImportDialog: React.FC<PlanImportDialogProps> = ({
           <h4>Instructions:</h4>
           <ol>
             <li>Export your plans to Excel using the "Export All Plans" button</li>
-            <li>Make any necessary changes to the Excel file</li>
+            <li>Make any necessary changes to the Excel file (keep the header row!)</li>
             <li>Upload the modified file here to import the plans</li>
             <li>
-              Plans with matching codes will be <strong>updated</strong>
+              Plans with matching <strong>Plan Code</strong> will be <strong>updated</strong>
             </li>
             <li>
               New plan codes will be <strong>created</strong>
             </li>
+            <li>
+              The import uses columns A-R. Columns M-P (Elevations, Jobs, Created, Updated) are skipped.
+            </li>
           </ol>
+          <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: '#78350f' }}>
+            <strong>Tip:</strong> You can delete rows you don't want to import, but don't modify the header row.
+          </p>
         </div>
       </div>
 

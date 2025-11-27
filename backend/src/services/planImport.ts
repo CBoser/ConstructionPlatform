@@ -150,6 +150,11 @@ class PlanImportService {
 
   /**
    * Parse a single row into plan data
+   * Columns match the export format:
+   * A(1): Plan Code, B(2): Customer Plan Code, C(3): Name, D(4): Builder,
+   * E(5): Type, F(6): Sq Ft, G(7): Bedrooms, H(8): Bathrooms, I(9): Garage,
+   * J(10): Style, K(11): Version, L(12): Status, M(13): Elevations, N(14): Jobs,
+   * O(15): Created, P(16): Updated, Q(17): Notes, R(18): PDSS URL
    */
   private parsePlanRow(row: ExcelJS.Row): PlanImportData {
     const getCellValue = (colNumber: number): any => {
@@ -157,12 +162,14 @@ class PlanImportService {
       return cell.value;
     };
 
+    // Column A (1): Plan Code - REQUIRED
     const code = String(getCellValue(1) || '').trim();
     if (!code) {
       throw new Error('Plan code is required');
     }
 
-    const typeValue = String(getCellValue(4) || '').trim();
+    // Column E (5): Type - parse from display format or technical format
+    const typeValue = String(getCellValue(5) || '').trim();
     const validTypes: PlanType[] = [
       'SINGLE_STORY',
       'TWO_STORY',
@@ -171,7 +178,7 @@ class PlanImportService {
       'TOWNHOME',
     ];
 
-    // Try to match type, default to SINGLE_STORY if not valid
+    // Try to match type
     let planType: PlanType = 'SINGLE_STORY';
     if (validTypes.includes(typeValue as PlanType)) {
       planType = typeValue as PlanType;
@@ -183,21 +190,27 @@ class PlanImportService {
       }
     }
 
+    // Column L (12): Status - convert "Active"/"Inactive" to boolean
+    const statusValue = String(getCellValue(12) || '').trim().toLowerCase();
+    const isActive = statusValue === 'active';
+
     return {
-      code,
-      name: getCellValue(2) ? String(getCellValue(2)).trim() : null,
-      customerPlanCode: getCellValue(3) ? String(getCellValue(3)).trim() : null,
-      type: planType,
-      builderName: getCellValue(5) ? String(getCellValue(5)).trim() : null,
-      sqft: getCellValue(6) ? Number(getCellValue(6)) : null,
-      bedrooms: getCellValue(7) ? Number(getCellValue(7)) : null,
-      bathrooms: getCellValue(8) ? Number(getCellValue(8)) : null,
-      garage: getCellValue(9) ? String(getCellValue(9)).trim() : null,
-      style: getCellValue(10) ? String(getCellValue(10)).trim() : null,
-      version: getCellValue(11) ? Number(getCellValue(11)) : 1,
-      isActive: getCellValue(12) ? String(getCellValue(12)).toLowerCase() === 'yes' : true,
-      pdssUrl: getCellValue(13) ? String(getCellValue(13)).trim() : null,
-      notes: getCellValue(14) ? String(getCellValue(14)).trim() : null,
+      code, // Column A (1)
+      customerPlanCode: getCellValue(2) ? String(getCellValue(2)).trim() : null, // Column B (2)
+      name: getCellValue(3) ? String(getCellValue(3)).trim() : null, // Column C (3)
+      builderName: getCellValue(4) ? String(getCellValue(4)).trim() : null, // Column D (4)
+      type: planType, // Column E (5)
+      sqft: getCellValue(6) ? Number(getCellValue(6)) : null, // Column F (6)
+      bedrooms: getCellValue(7) ? Number(getCellValue(7)) : null, // Column G (7)
+      bathrooms: getCellValue(8) ? Number(getCellValue(8)) : null, // Column H (8)
+      garage: getCellValue(9) ? String(getCellValue(9)).trim() : null, // Column I (9)
+      style: getCellValue(10) ? String(getCellValue(10)).trim() : null, // Column J (10)
+      version: getCellValue(11) ? Number(getCellValue(11)) : 1, // Column K (11)
+      isActive, // Column L (12) - "Active" or "Inactive"
+      // Skip Elevations (M/13) and Jobs (N/14) - these are counts, not imported
+      // Skip Created (O/15) and Updated (P/16) - these are managed by database
+      notes: getCellValue(17) ? String(getCellValue(17)).trim() : null, // Column Q (17)
+      pdssUrl: getCellValue(18) ? String(getCellValue(18)).trim() : null, // Column R (18)
     };
   }
 
@@ -214,12 +227,12 @@ class PlanImportService {
         return { valid: false, error: 'Plans worksheet not found' };
       }
 
-      // Check for required header
+      // Check for required header (should be "Plan Code" in column A)
       const headerRow = worksheet.getRow(1);
       const codeHeader = headerRow.getCell(1).value;
 
-      if (!codeHeader || String(codeHeader).toLowerCase() !== 'code') {
-        return { valid: false, error: 'Invalid file format: Code column not found' };
+      if (!codeHeader || String(codeHeader).toLowerCase() !== 'plan code') {
+        return { valid: false, error: 'Invalid file format: "Plan Code" column not found in column A' };
       }
 
       return { valid: true };
