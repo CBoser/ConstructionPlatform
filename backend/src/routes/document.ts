@@ -4,7 +4,6 @@ import path from 'path';
 import { documentService } from '../services/document';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole, DocumentType } from '@prisma/client';
-import { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -63,7 +62,7 @@ router.post(
   authenticateToken,
   requireRole(UserRole.ADMIN, UserRole.ESTIMATOR),
   upload.single('file'),
-  async (req: AuthRequest, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({
@@ -276,7 +275,7 @@ router.post(
   authenticateToken,
   requireRole(UserRole.ADMIN, UserRole.ESTIMATOR),
   upload.single('file'),
-  async (req: AuthRequest, res: Response) => {
+  async (req: Request, res: Response) => {
     try {
       if (!req.file) {
         return res.status(400).json({
