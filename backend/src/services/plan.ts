@@ -5,6 +5,7 @@ export interface CreatePlanInput {
   code: string;
   name?: string;
   type: PlanType;
+  builderId?: string;  // Which builder owns this plan
   sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -19,6 +20,7 @@ export interface UpdatePlanInput {
   code?: string;
   name?: string;
   type?: PlanType;
+  builderId?: string | null;  // Allow null to unassign
   sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
@@ -34,6 +36,7 @@ export interface ListPlansQuery {
   limit?: number;
   search?: string;
   type?: PlanType;
+  builderId?: string;  // Filter by builder
   isActive?: boolean;
   sortBy?: 'code' | 'name' | 'createdAt' | 'updatedAt' | 'sqft';
   sortOrder?: 'asc' | 'desc';
@@ -73,6 +76,7 @@ class PlanService {
           code: input.code,
           name: input.name,
           type: input.type,
+          builderId: input.builderId,
           sqft: input.sqft,
           bedrooms: input.bedrooms,
           bathrooms: input.bathrooms,
@@ -158,6 +162,7 @@ class PlanService {
       limit = 50,
       search,
       type,
+      builderId,
       isActive,
       sortBy = 'code',
       sortOrder = 'asc',
@@ -181,6 +186,10 @@ class PlanService {
       where.type = type;
     }
 
+    if (builderId) {
+      where.builderId = builderId;
+    }
+
     if (isActive !== undefined) {
       where.isActive = isActive;
     }
@@ -193,6 +202,12 @@ class PlanService {
         take: limit,
         orderBy: { [sortBy]: sortOrder },
         include: {
+          builder: {
+            select: {
+              id: true,
+              customerName: true,
+            },
+          },
           elevations: {
             select: {
               id: true,
@@ -205,6 +220,7 @@ class PlanService {
               templateItems: true,
               jobs: true,
               options: true,
+              elevations: true,
             },
           },
         },

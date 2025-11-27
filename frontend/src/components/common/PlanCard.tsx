@@ -4,6 +4,7 @@ interface PlanCardProps {
   code: string;
   name?: string | null;
   type: string;
+  builderName?: string | null;
   sqft?: number | null;
   bedrooms?: number | null;
   bathrooms?: number | null;
@@ -33,6 +34,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
   code,
   name,
   type,
+  builderName,
   sqft,
   bedrooms,
   bathrooms,
@@ -70,6 +72,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
       <div className="plan-card-type">
         {formatPlanType(type)}
+        {builderName && (
+          <span className="plan-card-builder">{builderName}</span>
+        )}
       </div>
 
       <div className="plan-card-details">

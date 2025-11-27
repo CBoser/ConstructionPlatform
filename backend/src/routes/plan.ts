@@ -22,6 +22,7 @@ router.post(
         code,
         name,
         type,
+        builderId,
         sqft,
         bedrooms,
         bathrooms,
@@ -51,6 +52,7 @@ router.post(
         code: code.trim(),
         name: name?.trim(),
         type: type as PlanType,
+        builderId: builderId?.trim(),
         sqft: sqft ? parseInt(sqft) : undefined,
         bedrooms: bedrooms ? parseInt(bedrooms) : undefined,
         bathrooms: bathrooms ? parseFloat(bathrooms) : undefined,
@@ -87,6 +89,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       limit = '50',
       search,
       type,
+      builderId,
       isActive,
       sortBy = 'code',
       sortOrder = 'asc',
@@ -97,6 +100,7 @@ router.get('/', authenticateToken, async (req: Request, res: Response) => {
       limit: parseInt(limit as string),
       search: search as string,
       type: type as PlanType | undefined,
+      builderId: builderId as string | undefined,
       isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
       sortBy: sortBy as 'code' | 'name' | 'createdAt' | 'updatedAt' | 'sqft',
       sortOrder: sortOrder as 'asc' | 'desc',
@@ -241,6 +245,7 @@ router.put(
         code,
         name,
         type,
+        builderId,
         sqft,
         bedrooms,
         bathrooms,
@@ -256,6 +261,7 @@ router.put(
       if (code !== undefined) updateData.code = code.trim();
       if (name !== undefined) updateData.name = name.trim();
       if (type !== undefined) updateData.type = type as PlanType;
+      if (builderId !== undefined) updateData.builderId = builderId?.trim() || null;
       if (sqft !== undefined) updateData.sqft = parseInt(sqft);
       if (bedrooms !== undefined) updateData.bedrooms = parseInt(bedrooms);
       if (bathrooms !== undefined) updateData.bathrooms = parseFloat(bathrooms);
