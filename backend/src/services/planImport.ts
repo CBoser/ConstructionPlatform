@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { db } from './database';
-import { PlanType } from '@prisma/client';
+import { PlanType, CustomerType } from '@prisma/client';
 
 interface ImportResult {
   success: boolean;
@@ -100,9 +100,11 @@ class PlanImportService {
 
               if (!builder) {
                 // Create new builder/customer
+                // Default to PRODUCTION type for imported builders
                 builder = await db.customer.create({
                   data: {
                     customerName: planData.builderName,
+                    customerType: CustomerType.PRODUCTION,
                     isActive: true,
                   },
                 });
