@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePlanStats } from '../../services/planService';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -7,7 +9,12 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showQuickStats, setShowQuickStats] = useState(false);
+
+  // Fetch plan stats for quick access
+  const { data: planStats } = usePlanStats();
 
   const getInitials = () => {
     if (user?.firstName && user?.lastName) {
@@ -36,6 +43,60 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
         {/* Right side - User menu and notifications */}
         <div className="app-header-actions">
+          {/* Quick Stats - Plans */}
+          <div className="header-quick-stats">
+            <button
+              className="header-icon-btn"
+              title="Plans Overview"
+              onClick={() => setShowQuickStats(!showQuickStats)}
+            >
+              <span className="stats-icon">📋</span>
+              {planStats && planStats.total > 0 && (
+                <span className="stats-badge">{planStats.total}</span>
+              )}
+            </button>
+
+            {showQuickStats && (
+              <div className="quick-stats-dropdown">
+                <div className="quick-stats-header">
+                  <span>Plans Overview</span>
+                </div>
+                <div className="quick-stats-content">
+                  <div className="quick-stat-item">
+                    <span className="quick-stat-label">Total Plans</span>
+                    <span className="quick-stat-value">{planStats?.total ?? 0}</span>
+                  </div>
+                  <div className="quick-stat-item">
+                    <span className="quick-stat-label">Active Plans</span>
+                    <span className="quick-stat-value">{planStats?.activeCount ?? 0}</span>
+                  </div>
+                  {planStats?.byType && planStats.byType.length > 0 && (
+                    <div className="quick-stats-breakdown">
+                      <span className="quick-stat-sublabel">By Type:</span>
+                      {planStats.byType.slice(0, 3).map((item) => (
+                        <div key={item.type} className="quick-stat-type">
+                          <span>{item.type.replace(/_/g, ' ')}</span>
+                          <span>{item.count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="quick-stats-actions">
+                  <button
+                    className="quick-stats-link"
+                    onClick={() => {
+                      navigate('/plans');
+                      setShowQuickStats(false);
+                    }}
+                  >
+                    View All Plans
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Notifications */}
           <button
             type="button"

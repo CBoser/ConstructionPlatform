@@ -158,6 +158,7 @@ class CustomerService {
             select: {
               jobs: true,
               communities: true,
+              plans: true,
             },
           },
         },

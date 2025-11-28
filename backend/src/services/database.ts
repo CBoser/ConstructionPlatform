@@ -15,6 +15,7 @@ class DatabaseService {
   private static instance: DatabaseService;
   private prisma: PrismaClient;
   private connectionLimit: number;
+  private poolTimeout: number;
   private isConnected: boolean = false;
 
   private constructor() {
@@ -23,10 +24,21 @@ class DatabaseService {
       ? parseInt(process.env.DATABASE_CONNECTION_LIMIT, 10)
       : 10;
 
+    // Parse pool timeout from environment (default: 10 seconds)
+    this.poolTimeout = process.env.DATABASE_POOL_TIMEOUT
+      ? parseInt(process.env.DATABASE_POOL_TIMEOUT, 10)
+      : 10;
+
     // Validate connection limit
     if (this.connectionLimit < 1 || this.connectionLimit > 100) {
       console.warn(`⚠️  DATABASE_CONNECTION_LIMIT (${this.connectionLimit}) outside recommended range (1-100). Using 10.`);
       this.connectionLimit = 10;
+    }
+
+    // Validate pool timeout
+    if (this.poolTimeout < 1 || this.poolTimeout > 60) {
+      console.warn(`⚠️  DATABASE_POOL_TIMEOUT (${this.poolTimeout}) outside recommended range (1-60s). Using 10s.`);
+      this.poolTimeout = 10;
     }
 
     // Initialize Prisma Client with connection pooling
@@ -62,7 +74,7 @@ class DatabaseService {
 
     // Add connection pool parameters
     const separator = baseUrl.includes('?') ? '&' : '?';
-    const poolParams = `connection_limit=${this.connectionLimit}&pool_timeout=10`;
+    const poolParams = `connection_limit=${this.connectionLimit}&pool_timeout=${this.poolTimeout}`;
 
     return `${baseUrl}${separator}${poolParams}`;
   }
@@ -84,7 +96,7 @@ class DatabaseService {
       this.isConnected = true;
       console.log('✓ Database connected successfully');
       console.log(`  Connection pool: ${this.connectionLimit} max connections`);
-      console.log(`  Pool timeout: 10 seconds`);
+      console.log(`  Pool timeout: ${this.poolTimeout} seconds`);
     } catch (error) {
       this.isConnected = false;
       console.error('✗ Database connection failed:', error);
@@ -143,7 +155,7 @@ class DatabaseService {
   public getPoolConfig() {
     return {
       connectionLimit: this.connectionLimit,
-      poolTimeout: 10,
+      poolTimeout: this.poolTimeout,
       isConnected: this.isConnected,
     };
   }
