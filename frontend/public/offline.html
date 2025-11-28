@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline | MindFlow</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #2d5a3d 0%, #1a3625 100%);
+      color: white;
+      padding: 1rem;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    button {
+      background: #4a8f5c;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #3d7a4d;
+    }
+    button:focus {
+      outline: 2px solid white;
+      outline-offset: 2px;
+    }
+    .status {
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">MindFlow</div>
+    <div class="icon" aria-hidden="true">📡</div>
+    <h1>You're Offline</h1>
+    <p>
+      It looks like you've lost your internet connection.
+      Some features may be unavailable until you're back online.
+    </p>
+    <button onclick="window.location.reload()" type="button">
+      Try Again
+    </button>
+    <p class="status" id="status" aria-live="polite"></p>
+  </div>
+
+  <script>
+    function updateStatus() {
+      var status = document.getElementById('status');
+      if (navigator.onLine) {
+        status.textContent = 'Connection restored! Refreshing...';
+        setTimeout(function() { window.location.reload(); }, 1000);
+      } else {
+        status.textContent = 'Still offline...';
+      }
+    }
+
+    window.addEventListener('online', updateStatus);
+    window.addEventListener('offline', updateStatus);
+  </script>
+</body>
+</html>

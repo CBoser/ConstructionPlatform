@@ -23,6 +23,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   return (
     <div className="app-layout">
+      {/* Skip Navigation Link - for keyboard/screen reader users */}
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
+
       {/* Network Status Banner - shows when offline */}
       <NetworkStatusIndicator />
 
@@ -38,7 +43,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
 
         {/* Page Content */}
-        <main className="app-content">
+        <main id="main-content" className="app-content" tabIndex={-1}>
           {children}
         </main>
       </div>
