@@ -45,7 +45,7 @@
               ▼                               ▼
 ┌─────────────────────────┐     ┌─────────────────────────────────┐
 │        VERCEL           │     │           RAILWAY               │
-│   app.mindflow.construction   │     │                                 │
+│app.mindflow.construction│     │                                 │
 │                         │     │  ┌───────────┐  ┌───────────┐   │
 │  • React/Vite frontend  │     │  │  Backend  │  │  Worker   │   │
 │  • PWA enabled          │     │  │ (Express) │  │ (BullMQ)  │   │
