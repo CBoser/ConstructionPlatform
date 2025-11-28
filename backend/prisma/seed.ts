@@ -53,7 +53,38 @@ console.log('');
 async function main() {
   console.log('🌱 Starting seed...');
 
-  // Clean existing data (optional - comment out if you want to keep existing data)
+  // ============================================================================
+  // SAFETY CHECK: Prevent accidental data loss
+  // ============================================================================
+  const existingPlans = await prisma.plan.count();
+  const existingCustomers = await prisma.customer.count();
+
+  if (existingPlans > 0 || existingCustomers > 0) {
+    if (process.env.SEED_FORCE !== 'true') {
+      console.error('');
+      console.error('═══════════════════════════════════════════════════════════════');
+      console.error('  ⚠️  WARNING: Existing data detected!');
+      console.error('═══════════════════════════════════════════════════════════════');
+      console.error('');
+      console.error(`  Found ${existingPlans} plans and ${existingCustomers} customers.`);
+      console.error('  Running seed will DELETE all existing data!');
+      console.error('');
+      console.error('  If you are sure you want to reset the database, run:');
+      console.error('    SEED_FORCE=true npm run prisma:seed');
+      console.error('');
+      console.error('  To preserve your data, simply restart the backend without seeding.');
+      console.error('');
+      console.error('═══════════════════════════════════════════════════════════════');
+      console.error('');
+      process.exit(1);
+    } else {
+      console.warn('');
+      console.warn('⚠️  SEED_FORCE=true detected. Proceeding to delete existing data...');
+      console.warn('');
+    }
+  }
+
+  // Clean existing data (only runs if database is empty or SEED_FORCE=true)
   console.log('🗑️  Cleaning existing data...');
   // Clean in correct order due to foreign key constraints
   await prisma.planTemplateItem.deleteMany({});

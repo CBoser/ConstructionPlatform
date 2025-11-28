@@ -18,6 +18,7 @@ import type {
   Customer,
   CustomerFull,
   CustomerType,
+  CustomerWithCounts,
   ListCustomersQuery,
 } from '../../../../shared/types/customer';
 
@@ -371,6 +372,9 @@ const CustomerList: React.FC = () => {
                       customerType={customer.customerType}
                       pricingTier={customer.pricingTier}
                       isActive={customer.isActive}
+                      communityCount={customer._count?.communities ?? 0}
+                      planCount={customer._count?.plans ?? 0}
+                      jobCount={customer._count?.jobs ?? 0}
                       onClick={() => handleCustomerClick(customer)}
                     />
                   ))}

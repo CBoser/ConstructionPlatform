@@ -165,8 +165,17 @@ export interface ListCustomersQuery {
   isActive?: boolean;
 }
 
+// Customer with count of related entities (returned by list queries)
+export interface CustomerWithCounts extends Customer {
+  _count?: {
+    jobs: number;
+    communities: number;
+    plans: number;
+  };
+}
+
 export interface ListCustomersResponse {
-  data: Customer[];
+  data: CustomerWithCounts[];
   pagination: {
     page: number;
     limit: number;

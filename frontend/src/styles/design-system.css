@@ -1923,6 +1923,121 @@ select.input {
   text-align: center;
 }
 
+/* Quick Stats Dropdown */
+.header-quick-stats {
+  position: relative;
+}
+
+.stats-icon {
+  display: block;
+}
+
+.stats-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--primary);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.quick-stats-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: var(--space-xs);
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  min-width: 220px;
+  z-index: var(--z-dropdown);
+}
+
+.quick-stats-header {
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  color: var(--text);
+  font-size: var(--font-size-sm);
+}
+
+.quick-stats-content {
+  padding: var(--space-sm) var(--space-md);
+}
+
+.quick-stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+}
+
+.quick-stat-label {
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.quick-stat-value {
+  font-weight: 600;
+  color: var(--text);
+  font-size: var(--font-size-base);
+}
+
+.quick-stats-breakdown {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-light);
+}
+
+.quick-stat-sublabel {
+  display: block;
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+  margin-bottom: var(--space-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.quick-stat-type {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--font-size-sm);
+  padding: 2px 0;
+  color: var(--text-muted);
+}
+
+.quick-stat-type span:first-child {
+  text-transform: capitalize;
+}
+
+.quick-stats-actions {
+  padding: var(--space-sm) var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.quick-stats-link {
+  width: 100%;
+  padding: var(--space-sm);
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.quick-stats-link:hover {
+  background: var(--primary-dark);
+}
+
 .user-menu {
   position: relative;
 }
