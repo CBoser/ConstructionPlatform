@@ -147,6 +147,57 @@ echo "  Documentation Lines: $DOC_LINES"
 echo ""
 
 # ============================================================================
+# HEALTH CHECK METRICS
+# ============================================================================
+
+echo -e "${BLUE}🏥 Platform Health Check${NC}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HEALTH_CHECK_SCRIPT="$SCRIPT_DIR/health-check.sh"
+
+if [ -f "$HEALTH_CHECK_SCRIPT" ]; then
+    echo "  Running comprehensive health analysis..."
+
+    # Run health check and capture JSON output
+    HEALTH_JSON=$("$HEALTH_CHECK_SCRIPT" --json 2>/dev/null || echo '{"overall_score":0}')
+
+    # Extract scores
+    HEALTH_OVERALL=$(echo "$HEALTH_JSON" | grep -o '"overall_score":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_CODE=$(echo "$HEALTH_JSON" | grep -o '"code_quality":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_SECURITY=$(echo "$HEALTH_JSON" | grep -o '"security":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_PERFORMANCE=$(echo "$HEALTH_JSON" | grep -o '"performance":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_TEST=$(echo "$HEALTH_JSON" | grep -o '"test_coverage":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_DOC=$(echo "$HEALTH_JSON" | grep -o '"documentation":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+    HEALTH_SCALE=$(echo "$HEALTH_JSON" | grep -o '"scalability":\s*[0-9]*' | head -1 | grep -o '[0-9]*' || echo "0")
+
+    echo "  Overall Health Score: $HEALTH_OVERALL/100"
+    echo "  ├─ Code Quality:  $HEALTH_CODE/100"
+    echo "  ├─ Security:      $HEALTH_SECURITY/100"
+    echo "  ├─ Performance:   $HEALTH_PERFORMANCE/100"
+    echo "  ├─ Test Coverage: $HEALTH_TEST/100"
+    echo "  ├─ Documentation: $HEALTH_DOC/100"
+    echo "  └─ Scalability:   $HEALTH_SCALE/100"
+
+    # Generate full health report
+    if [ -f "$SCRIPT_DIR/generate-health-report.sh" ]; then
+        "$SCRIPT_DIR/generate-health-report.sh" >/dev/null 2>&1 || true
+        HEALTH_REPORT="docs/health-reports/health-report-$(date +%Y-%m-%d).md"
+        echo "  Health report: $HEALTH_REPORT"
+    fi
+else
+    HEALTH_OVERALL="N/A"
+    HEALTH_CODE="N/A"
+    HEALTH_SECURITY="N/A"
+    HEALTH_PERFORMANCE="N/A"
+    HEALTH_TEST="N/A"
+    HEALTH_DOC="N/A"
+    HEALTH_SCALE="N/A"
+    echo "  Health check system not found. Run from project root."
+fi
+
+echo ""
+
+# ============================================================================
 # GENERATE REPORT
 # ============================================================================
 
@@ -179,6 +230,13 @@ printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Total Files:" "$TOTAL_FIL
 printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Commits This Week:" "$COMMITS_THIS_WEEK"
 printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Files Changed:" "$FILES_CHANGED"
 printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Database Models:" "$MODELS"
+echo -e "${BLUE}╠════════════════════════════════════════════════════════╣${NC}"
+echo -e "${BLUE}║${NC}             ${GREEN}PLATFORM HEALTH${NC}                           ${BLUE}║${NC}"
+echo -e "${BLUE}╠════════════════════════════════════════════════════════╣${NC}"
+printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Overall Health Score:" "$HEALTH_OVERALL/100"
+printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Code Quality:" "$HEALTH_CODE/100"
+printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Security:" "$HEALTH_SECURITY/100"
+printf "${BLUE}║${NC} %-30s %25s ${BLUE}║${NC}\n" "Test Coverage:" "$HEALTH_TEST/100"
 echo -e "${BLUE}╚════════════════════════════════════════════════════════╝${NC}"
 echo ""
 
