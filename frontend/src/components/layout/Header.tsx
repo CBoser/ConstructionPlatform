@@ -20,8 +20,13 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
     <header className="app-header">
       <div className="app-header-content">
         {/* Left side - Menu button */}
-        <button className="menu-toggle" onClick={onMenuClick}>
-          <span className="menu-icon">☰</span>
+        <button
+          type="button"
+          className="menu-toggle"
+          onClick={onMenuClick}
+          aria-label="Toggle navigation menu"
+        >
+          <span className="menu-icon" aria-hidden="true">☰</span>
         </button>
 
         {/* Center - Logo and title */}
@@ -32,16 +37,24 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
         {/* Right side - User menu and notifications */}
         <div className="app-header-actions">
           {/* Notifications */}
-          <button className="header-icon-btn" title="Notifications">
-            <span className="notification-icon">🔔</span>
-            <span className="notification-badge">3</span>
+          <button
+            type="button"
+            className="header-icon-btn"
+            aria-label="Notifications, 3 unread"
+          >
+            <span className="notification-icon" aria-hidden="true">🔔</span>
+            <span className="notification-badge" aria-hidden="true">3</span>
           </button>
 
           {/* User menu */}
           <div className="user-menu">
             <button
+              type="button"
               className="user-menu-trigger"
               onClick={() => setShowUserMenu(!showUserMenu)}
+              aria-expanded={showUserMenu}
+              aria-haspopup="true"
+              aria-label={`User menu for ${user?.firstName || 'Guest'}`}
             >
               <div className="user-avatar">{getInitials()}</div>
               <div className="user-info">

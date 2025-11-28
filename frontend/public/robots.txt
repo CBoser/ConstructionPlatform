@@ -1,0 +1,11 @@
+# MindFlow Construction Management Platform
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_/
+
+# Sitemap location (update with your production URL)
+# Sitemap: https://mindflow.construction/sitemap.xml

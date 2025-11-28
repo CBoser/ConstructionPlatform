@@ -6620,3 +6620,137 @@ button:focus:not(:focus-visible),
 a:focus:not(:focus-visible) {
   outline: none;
 }
+
+/* ============================================================================
+   SKIP NAVIGATION LINK (Accessibility)
+   ============================================================================ */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 var(--radius) 0;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: 2px solid white;
+  outline-offset: -2px;
+}
+
+/* ============================================================================
+   ERROR BOUNDARY (Error Fallback UI)
+   ============================================================================ */
+.error-boundary {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  padding: var(--space-lg);
+}
+
+.error-boundary-content {
+  max-width: 400px;
+  width: 100%;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-2xl);
+  text-align: center;
+}
+
+.error-boundary-icon {
+  font-size: 4rem;
+  margin-bottom: var(--space-lg);
+}
+
+.error-boundary-title {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.error-boundary-message {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+  line-height: 1.5;
+}
+
+.error-boundary-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+}
+
+.error-boundary-details {
+  margin-top: var(--space-lg);
+  text-align: left;
+}
+
+.error-boundary-details summary {
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+}
+
+.error-boundary-stack {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--background);
+  border-radius: var(--radius);
+  font-size: var(--font-size-xs);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================================================
+   PWA UPDATE PROMPT
+   ============================================================================ */
+.pwa-update-prompt {
+  position: fixed;
+  bottom: calc(var(--space-lg) + var(--safe-area-inset-bottom));
+  right: var(--space-lg);
+  z-index: 9998;
+  max-width: 320px;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--gray-border);
+  padding: var(--space-lg);
+}
+
+.pwa-update-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.pwa-update-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.pwa-update-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+/* On mobile, position above bottom nav */
+@media (max-width: 767px) {
+  .pwa-update-prompt {
+    bottom: calc(70px + var(--space-lg) + var(--safe-area-inset-bottom));
+    left: var(--space-lg);
+    right: var(--space-lg);
+    max-width: none;
+  }
+}
