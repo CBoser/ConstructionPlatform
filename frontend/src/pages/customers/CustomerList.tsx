@@ -18,7 +18,6 @@ import type {
   Customer,
   CustomerFull,
   CustomerType,
-  CustomerWithCounts,
   ListCustomersQuery,
 } from '../../../../shared/types/customer';
 
