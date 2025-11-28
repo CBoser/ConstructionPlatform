@@ -1,0 +1,284 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "MindFlow Platform",
+    "type": "monorepo"
+  },
+  "paths": {
+    "frontend": "frontend/src",
+    "backend": "backend/src",
+    "shared": "shared",
+    "prisma": "backend/prisma",
+    "docs": "docs",
+    "scripts": "scripts",
+    "ignore": [
+      "node_modules",
+      "dist",
+      "build",
+      "dev-dist",
+      ".git",
+      "coverage",
+      "*.min.js",
+      "*.bundle.js"
+    ]
+  },
+  "thresholds": {
+    "codeQuality": {
+      "complexity": {
+        "max": 10,
+        "weight": 0.20,
+        "description": "Maximum cyclomatic complexity per function"
+      },
+      "maintainability": {
+        "min": 70,
+        "weight": 0.20,
+        "description": "Minimum maintainability index (0-100)"
+      },
+      "duplication": {
+        "max": 5,
+        "weight": 0.20,
+        "description": "Maximum code duplication percentage"
+      },
+      "functionLength": {
+        "max": 50,
+        "weight": 0.15,
+        "description": "Maximum lines per function"
+      },
+      "fileLength": {
+        "max": 500,
+        "weight": 0.10,
+        "description": "Maximum lines per file"
+      },
+      "eslintErrors": {
+        "max": 0,
+        "weight": 0.15,
+        "description": "Maximum ESLint errors allowed"
+      }
+    },
+    "security": {
+      "criticalVulns": {
+        "max": 0,
+        "weight": 0.40,
+        "description": "No critical vulnerabilities allowed"
+      },
+      "highVulns": {
+        "max": 2,
+        "weight": 0.25,
+        "description": "Maximum high-severity vulnerabilities"
+      },
+      "mediumVulns": {
+        "max": 10,
+        "weight": 0.15,
+        "description": "Maximum medium-severity vulnerabilities"
+      },
+      "secretsFound": {
+        "max": 0,
+        "weight": 0.20,
+        "description": "No secrets/credentials in code"
+      }
+    },
+    "performance": {
+      "bundleSize": {
+        "max": 500,
+        "unit": "KB",
+        "weight": 0.30,
+        "description": "Maximum gzipped bundle size"
+      },
+      "buildTime": {
+        "max": 60,
+        "unit": "seconds",
+        "weight": 0.25,
+        "description": "Maximum build time"
+      },
+      "largeFiles": {
+        "max": 5,
+        "sizeThreshold": 100,
+        "unit": "KB",
+        "weight": 0.25,
+        "description": "Maximum files over 100KB"
+      },
+      "dependencies": {
+        "max": 100,
+        "weight": 0.20,
+        "description": "Maximum total dependencies"
+      }
+    },
+    "testCoverage": {
+      "line": {
+        "min": 80,
+        "weight": 0.30,
+        "description": "Minimum line coverage percentage"
+      },
+      "branch": {
+        "min": 70,
+        "weight": 0.25,
+        "description": "Minimum branch coverage percentage"
+      },
+      "function": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "Minimum function coverage percentage"
+      },
+      "statement": {
+        "min": 80,
+        "weight": 0.20,
+        "description": "Minimum statement coverage percentage"
+      }
+    },
+    "documentation": {
+      "readmeCompleteness": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "README sections present"
+      },
+      "codeComments": {
+        "min": 10,
+        "weight": 0.25,
+        "description": "Minimum comment ratio (%)"
+      },
+      "apiDocumentation": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "API endpoints documented (%)"
+      },
+      "typeDocumentation": {
+        "min": 70,
+        "weight": 0.25,
+        "description": "TypeScript types documented (%)"
+      }
+    },
+    "scalability": {
+      "databaseIndexes": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "Database index coverage (%)"
+      },
+      "pagination": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "Paginated endpoints (%)"
+      },
+      "caching": {
+        "min": 50,
+        "weight": 0.25,
+        "description": "Caching implementation score"
+      },
+      "rateLimiting": {
+        "min": 80,
+        "weight": 0.25,
+        "description": "Rate-limited endpoints (%)"
+      }
+    },
+    "technicalDebt": {
+      "criticalItems": {
+        "max": 0,
+        "weight": 0.35,
+        "description": "FIXME items"
+      },
+      "highItems": {
+        "max": 10,
+        "weight": 0.25,
+        "description": "TODO with priority"
+      },
+      "mediumItems": {
+        "max": 30,
+        "weight": 0.20,
+        "description": "Regular TODOs"
+      },
+      "lowItems": {
+        "max": 50,
+        "weight": 0.20,
+        "description": "Console.log, commented code"
+      }
+    }
+  },
+  "scoring": {
+    "weights": {
+      "codeQuality": 0.20,
+      "security": 0.25,
+      "performance": 0.15,
+      "testCoverage": 0.15,
+      "documentation": 0.10,
+      "scalability": 0.10,
+      "technicalDebt": 0.05
+    },
+    "statusThresholds": {
+      "excellent": 90,
+      "good": 75,
+      "fair": 60,
+      "poor": 0
+    },
+    "statusIcons": {
+      "excellent": "green",
+      "good": "yellow",
+      "fair": "orange",
+      "poor": "red"
+    }
+  },
+  "alerts": {
+    "critical": {
+      "enabled": true,
+      "conditions": [
+        "security.criticalVulns > 0",
+        "security.secretsFound > 0",
+        "testCoverage.line < 20"
+      ]
+    },
+    "warning": {
+      "enabled": true,
+      "conditions": [
+        "security.highVulns > 5",
+        "technicalDebt.criticalItems > 5",
+        "performance.bundleSize > 1000"
+      ]
+    }
+  },
+  "output": {
+    "reportDir": "docs/health-reports",
+    "historyDir": "data/health-history",
+    "formats": ["cli", "json", "markdown"],
+    "retention": {
+      "reports": 52,
+      "history": 365
+    }
+  },
+  "secrets": {
+    "patterns": [
+      "(?i)(api[_-]?key|apikey)[\"']?\\s*[:=]\\s*[\"']?[a-zA-Z0-9_-]{20,}",
+      "(?i)(secret|password|passwd|pwd)[\"']?\\s*[:=]\\s*[\"']?[^\\s]{8,}",
+      "(?i)(token)[\"']?\\s*[:=]\\s*[\"']?[a-zA-Z0-9_-]{20,}",
+      "(?i)bearer\\s+[a-zA-Z0-9_-]{20,}",
+      "(?i)(aws[_-]?access[_-]?key[_-]?id)[\"']?\\s*[:=]\\s*[\"']?[A-Z0-9]{20}",
+      "(?i)(aws[_-]?secret[_-]?access[_-]?key)[\"']?\\s*[:=]\\s*[\"']?[a-zA-Z0-9/+=]{40}",
+      "ghp_[a-zA-Z0-9]{36}",
+      "gho_[a-zA-Z0-9]{36}",
+      "-----BEGIN (RSA |DSA |EC |OPENSSH )?PRIVATE KEY-----",
+      "(?i)(database[_-]?url|db[_-]?url)[\"']?\\s*[:=]\\s*[\"']?postgres(ql)?://[^\\s]+"
+    ],
+    "allowedFiles": [
+      ".env.example",
+      "*.example",
+      "*.sample",
+      "*.template",
+      "*.md"
+    ]
+  },
+  "tools": {
+    "eslint": {
+      "enabled": true,
+      "command": "npx eslint"
+    },
+    "typescript": {
+      "enabled": true,
+      "command": "npx tsc --noEmit"
+    },
+    "npmAudit": {
+      "enabled": true,
+      "command": "npm audit --json"
+    },
+    "bundleAnalyzer": {
+      "enabled": true,
+      "command": "npx vite build --mode analyze"
+    }
+  }
+}
