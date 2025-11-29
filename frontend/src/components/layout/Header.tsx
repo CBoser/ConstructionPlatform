@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { usePlanStats } from '../../services/planService';
+import mindflowLogo from '../../assets/mindflow-logo.svg';
+import mindflowIcon from '../../assets/mindflow-icon.svg';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -38,7 +40,18 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
 
         {/* Center - Logo and title */}
         <div className="app-header-brand">
-          <h1 className="app-header-title">MindFlow Construction Platform</h1>
+          <a href="/" className="app-header-logo-link" aria-label="MindFlow AS - Home">
+            <img
+              src={mindflowLogo}
+              alt="MindFlow AS Construction Management"
+              className="app-header-logo"
+            />
+            <img
+              src={mindflowIcon}
+              alt="MindFlow"
+              className="app-header-logo-icon"
+            />
+          </a>
         </div>
 
         {/* Right side - User menu and notifications */}

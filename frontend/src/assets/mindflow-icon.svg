@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80">
+  <!-- Brain-House Icon -->
+  <g fill="none" stroke="#2D5F2E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Brain curves (left side) -->
+    <path d="M25 65 C5 65 0 50 5 40 C0 30 5 15 20 15 C20 5 35 0 45 10"/>
+    <path d="M20 50 C10 50 10 40 15 35"/>
+    <path d="M20 35 C15 30 17 23 23 23"/>
+
+    <!-- House shape (right side, integrated with brain) -->
+    <path d="M45 10 L70 30 L70 70 L40 70 L40 50 L50 50 L50 70"/>
+    <path d="M45 10 L45 70"/>
+
+    <!-- House roof peak -->
+    <path d="M40 35 L57 23 L75 35"/>
+
+    <!-- Window dots -->
+    <circle cx="53" cy="43" r="3" fill="#2D5F2E"/>
+    <circle cx="63" cy="43" r="3" fill="#2D5F2E"/>
+    <circle cx="53" cy="53" r="3" fill="#2D5F2E"/>
+    <circle cx="63" cy="53" r="3" fill="#2D5F2E"/>
+  </g>
+</svg>
