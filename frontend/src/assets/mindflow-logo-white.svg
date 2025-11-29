@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100">
+  <defs>
+    <style>
+      .logo-text { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+      .main-text { font-weight: 600; font-size: 36px; }
+      .sub-text { font-weight: 500; font-size: 14px; letter-spacing: 2px; }
+    </style>
+  </defs>
+
+  <!-- Brain-House Icon -->
+  <g fill="none" stroke="#D4D4CA" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Brain curves (left side) -->
+    <path d="M30 70 C10 70 5 55 10 45 C5 35 10 20 25 20 C25 10 40 5 50 15"/>
+    <path d="M25 55 C15 55 15 45 20 40"/>
+    <path d="M25 40 C20 35 22 28 28 28"/>
+
+    <!-- House shape (right side, integrated with brain) -->
+    <path d="M50 15 L75 35 L75 75 L45 75 L45 55 L55 55 L55 75"/>
+    <path d="M50 15 L50 75"/>
+
+    <!-- House roof peak -->
+    <path d="M45 40 L62 28 L80 40"/>
+
+    <!-- Window dots -->
+    <circle cx="58" cy="48" r="3" fill="#D4D4CA"/>
+    <circle cx="68" cy="48" r="3" fill="#D4D4CA"/>
+    <circle cx="58" cy="58" r="3" fill="#D4D4CA"/>
+    <circle cx="68" cy="58" r="3" fill="#D4D4CA"/>
+  </g>
+
+  <!-- MindFlow AS Text -->
+  <text x="100" y="52" fill="#D4D4CA" class="logo-text main-text">
+    <tspan font-weight="700">MindFlow</tspan>
+    <tspan font-weight="400" dx="5">AS</tspan>
+  </text>
+
+  <!-- CONSTRUCTION MANAGEMENT Text -->
+  <text x="100" y="72" fill="#D4D4CA" class="logo-text sub-text">CONSTRUCTION MANAGEMENT</text>
+</svg>

@@ -1847,6 +1847,43 @@ select.input {
   min-width: 0; /* Allow text truncation */
 }
 
+.app-header-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.app-header-logo {
+  height: 36px;
+  width: auto;
+  display: none;
+}
+
+.app-header-logo-icon {
+  height: 32px;
+  width: 32px;
+  display: block;
+}
+
+/* Show full logo on tablet and up */
+@media (min-width: 640px) {
+  .app-header-logo {
+    display: block;
+    height: 40px;
+  }
+
+  .app-header-logo-icon {
+    display: none;
+  }
+}
+
+/* Larger logo on desktop */
+@media (min-width: 1024px) {
+  .app-header-logo {
+    height: 44px;
+  }
+}
+
 .app-header-title {
   font-size: var(--font-size-base);
   color: var(--primary);
