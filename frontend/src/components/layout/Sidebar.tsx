@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import mindflowLogoWhite from '../../assets/mindflow-logo-white.svg';
 
 interface NavItem {
   path: string;
@@ -122,7 +123,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <h2 className="sidebar-title">MindFlow</h2>
+          <Link to="/" className="sidebar-logo-link" onClick={onClose}>
+            <img
+              src={mindflowLogoWhite}
+              alt="MindFlow AS"
+              className="sidebar-logo"
+            />
+          </Link>
           <button className="sidebar-close" onClick={onClose}>
             ×
           </button>
