@@ -1633,6 +1633,23 @@ select.input {
   color: white;
 }
 
+.sidebar-logo-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.sidebar-logo {
+  height: 36px;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .sidebar-logo {
+    height: 42px;
+  }
+}
+
 .sidebar-close {
   /* Mobile: always show close button */
   display: flex;
