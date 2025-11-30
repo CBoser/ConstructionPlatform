@@ -67,3 +67,9 @@
 ### 11/28/25
 - 08:40-10:50 - Health Check System (7 modules), weekly-valuation integration, financial/planning docs
 - 17:49-18:07 - Weekly/Monthly/Quarterly Review Templates, daily shutdown documentation
+
+### 11/29/25
+- ~4h estimated - Sprint 2 Code System research (CSI MasterFormat, Uniformat II, integration analysis)
+
+### 11/30/25
+- ~2h estimated - Sprint 2 Decision (use existing two-layer system), Week 48 review, time summary
