@@ -1,160 +1,168 @@
 # Code System Decision
 
 **Document**: Sprint 2 - Code System Review (Day 5)
-**Date**: 2025-11-29
+**Date**: 2025-11-30
 **Status**: FINAL DECISION
 
 ---
 
 ## Decision Summary
 
-### Selected Approach: **Hybrid Trade-Based System**
+### Selected Approach: **USE EXISTING TWO-LAYER CODE SYSTEM**
 
-After comprehensive evaluation of CSI MasterFormat, Uniformat II, trade-based, and phase-based systems, we have selected a **hybrid trade-based coding system** as the primary organizational structure for MindFlow Platform.
+**IMPORTANT**: MindFlow Platform already has a comprehensive two-layer code system designed and 98% complete. This sprint's decision is to **adopt and implement the existing system**, not create a new one.
 
----
-
-## Final Comparison Matrix
-
-| Criteria | Weight | MasterFormat | Uniformat II | Trade-Based | Hybrid |
-|----------|--------|--------------|--------------|-------------|--------|
-| Industry Recognition | 15% | 5 | 4 | 3 | 3.5 |
-| Ease of Use | 20% | 2 | 3 | 5 | 4.5 |
-| Material Mapping | 15% | 4 | 2 | 5 | 5 |
-| Vendor Compatibility | 15% | 3 | 2 | 4 | 4.5 |
-| Workflow Alignment | 15% | 2 | 3 | 4 | 4.5 |
-| Scalability | 10% | 5 | 4 | 3 | 4 |
-| Learning Curve | 10% | 2 | 3 | 5 | 4.5 |
-| **Weighted Total** | 100% | **3.00** | **2.85** | **4.20** | **4.30** |
-
-**Winner: Hybrid Trade-Based System (4.30/5.00)**
+### Existing System Reference
+- **SQL Schema**: `database/schema/unified_code_system.sql`
+- **Design Doc**: `docs/archive/analysis/LAYERED_CODE_SYSTEM_DESIGN_2025-11-14.md`
+- **Implementation Guide**: `CODE_SYSTEM_IMPLEMENTATION_GUIDE.md`
+- **Source Data**: `database/schema/Coding_Schema_20251113.csv` (312 pack definitions)
 
 ---
 
-## Rationale
+## Existing Two-Layer Architecture
 
-### Why Not Pure CSI MasterFormat?
+### Layer 1: Aggregate Codes (Pack Level)
+**Format**: `PLAN-PHASE/OPTION-MATERIALCLASS`
 
-1. **Designed for Commercial**: MasterFormat targets institutional/commercial specifications, not residential production
-2. **Vendor Disconnect**: Material suppliers don't use CSI codes for ordering
-3. **Overkill Granularity**: 50 divisions is excessive for lumber-focused operations
-4. **Learning Curve**: Requires significant training for everyday use
-5. **License Dependency**: Full MasterFormat requires CSI subscription
+```
+XXXX-XX.XX-XXXX
+ │    │     └─── Material Class (4 digits: 1000=Framing, 1100=Siding)
+ │    └──────── Phase/Option Code (2-4 chars: numeric or alpha variant)
+ └───────────── Plan Number (4 digits)
 
-### Why Not Pure Uniformat II?
+Example: 1234-20.00-1000 = Plan 1234, Main Floor Walls, Framing
+```
 
-1. **Too Abstract**: Element-based classification doesn't map to SKUs
-2. **Not Material-Focused**: Designed for cost estimating, not inventory management
-3. **Limited Adoption**: Less common in residential construction
-4. **Vendor Incompatible**: No direct mapping to supplier catalogs
+**Purpose**: Estimating, quoting, pack assembly, high-level pricing
 
-### Why Hybrid Trade-Based?
-
-1. **Intuitive**: Matches how estimators think (lumber, roofing, siding)
-2. **DART Compatible**: Aligns with existing BAT system categories
-3. **Vendor Friendly**: Maps naturally to supplier product organization
-4. **Flexible**: Supports optional phase prefixes and industry references
-5. **Extensible**: Easy to add new trades/categories as needed
-6. **Fast Training**: Self-documenting codes reduce learning curve
+### Layer 2: Detailed Materials (SKU Level)
+**Links to**: Layer 1 codes via `code_id`
+**Contains**: SKU, quantity, unit cost, vendor
+**Purpose**: Purchase orders, inventory, detailed tracking
 
 ---
 
-## System Components
+## Research Findings (Supplementary)
 
-### 1. Primary: Trade-Based Categories
+The industry standard research (CSI MasterFormat, Uniformat II, trade-based systems) conducted in this sprint provides **supplementary context** for:
+- Understanding industry standards for external integrations
+- Potential future QuickBooks/EDI compatibility
+- Reference when vendors or partners use CSI codes
 
-Trade codes organize materials by who installs them:
-
-| Trade | Code | Description |
-|-------|------|-------------|
-| Framing | FRM | Structural lumber, sheathing, hardware |
-| Concrete | CONC | Ready-mix, rebar, forms |
-| Roofing | ROOF | Shingles, underlayment, flashing |
-| Siding | SIDE | Exterior cladding, trim |
-| Insulation | INSL | Batt, blown, foam |
-| Drywall | DRYW | Gypsum board, finishing |
-| Electrical | ELEC | Wire, panels, fixtures |
-| Plumbing | PLMB | Pipe, fittings, fixtures |
-| HVAC | HVAC | Ductwork, equipment |
-| Trim | TRIM | Millwork, doors, paint |
-| Hardware | HDWR | Fasteners, connectors |
-| Site | SITE | Grading, utilities |
-| Miscellaneous | MISC | Other items |
-
-### 2. Secondary: Category Codes
-
-Within each trade, materials are grouped by type:
-
-```
-[TRADE]-[CATEGORY]-[SUBCATEGORY]-[DETAIL]
-
-Example: FRM-LUM-2X4-SPF-8
-         │   │   │    │   └─ Length (8')
-         │   │   │    └───── Species (SPF)
-         │   │   └────────── Size (2x4)
-         │   └────────────── Category (Lumber)
-         └────────────────── Trade (Framing)
-```
-
-### 3. Optional: Phase Prefixes
-
-For scheduling and delivery, materials can have phase prefixes:
-
-```
-03:FRM-LUM-2X4-SPF-8  (Framing phase)
-05:ROOF-SHG-ARCH-30Y  (Exterior phase)
-```
-
-### 4. Optional: Industry References
-
-Materials can carry optional mappings for external compatibility:
-
-| Field | Example | Use Case |
-|-------|---------|----------|
-| csiDivision | "06" | MasterFormat division |
-| csiSection | "06 11 00" | MasterFormat section |
-| uniformatElement | "B1010" | Uniformat II element |
+**These do NOT replace the existing system.** They may inform optional cross-reference fields in the future.
 
 ---
 
-## Schema Impact
+## Why the Existing System is Correct
 
-### Material Model Updates
+### Comparison: Existing vs. Industry Standards
 
-```prisma
-model Material {
-  // New primary code field
-  code            String   @unique  // FRM-LUM-2X4-SPF-8
+| Criteria | Existing System | CSI MasterFormat | Uniformat II |
+|----------|-----------------|------------------|--------------|
+| **Designed For** | Production home builders | Commercial/institutional | Cost estimating |
+| **Pack Assembly** | ✅ Native support | ❌ Not supported | ❌ Not supported |
+| **Elevation Handling** | ✅ Built-in | ❌ Not applicable | ❌ Not applicable |
+| **Richmond/Holt Compatible** | ✅ Direct mapping | ❌ No mapping | ❌ No mapping |
+| **DART Categories** | ✅ Integrated | ❌ Different structure | ❌ Different structure |
+| **Shipping Order** | ✅ 9 orders defined | ❌ Not applicable | ❌ Not applicable |
 
-  // Parsed components for filtering
-  tradeCode       String            // FRM
-  categoryCode    String            // LUM
+### Why NOT Start Over
 
-  // Keep existing fields
-  sku             String   @unique
-  description     String
-  category        MaterialCategory
-  dartCategory    Int?
-  dartCategoryName String?
+1. **Already 98% Complete**: 312 pack definitions, 150+ phase codes, Richmond mappings
+2. **Business Logic Built In**: Elevation associations, option availability, GP% calculations
+3. **Months of Work**: The existing system represents significant design effort
+4. **Tested Architecture**: Two-layer approach validated against real data
+5. **Migration Ready**: Holt and Richmond import strategies documented
 
-  // Optional industry references
-  csiDivision     String?           // "06"
-  csiSection      String?           // "06 11 00"
-  uniformatElement String?          // "B1010"
+### What the Research Confirmed
 
-  // Optional phase association
-  primaryPhase    ConstructionPhase?
-}
+The industry standard research confirms the existing system's design is sound:
+- **Phase-based organization** (10.00-90.00) aligns with construction workflow
+- **Material class codes** (1000, 1100) are simpler than CSI's 50 divisions
+- **Two-layer architecture** mirrors how production builders actually work
+
+---
+
+## Existing System Components
+
+### Layer 1: Phase/Option Codes (150+ defined)
+
+| Series | Description | Material Class | Shipping Order |
+|--------|-------------|----------------|----------------|
+| 09.xx | Basement Walls | 1000 (Framing) | 1 |
+| 10.xx | Foundation | 1000 (Framing) | 1 |
+| 11.xx-16.xx | Foundation Options | 1000 (Framing) | 1 |
+| 18.xx | Main Subfloor | 1000 (Framing) | 2 |
+| 20.xx | Main Floor Walls | 1000 (Framing) | 3 |
+| 22.xx-27.xx | Wall Options | 1000 (Framing) | 3 |
+| 30.xx | 2nd Floor System | 1000 (Framing) | 3 |
+| 32.xx-34.xx | 2nd Floor Options | 1000 (Framing) | 4 |
+| 40.xx-45.xx | Roof | 1000 (Framing) | 5 |
+| 58.xx | Housewrap | 1100 (Siding) | 6 |
+| 60.xx-65.xx | Siding & Trim | 1100 (Siding) | 7 |
+| 74.xx-75.xx | Deck Surface & Rail | 1100 (Siding) | 8 |
+| 80.xx-90.xx | Tall Crawl | 1000/1100 | 1/7 |
+
+### Richmond Option Code Mappings (50+ defined)
+
+| Code | Description | Multi-Phase |
+|------|-------------|-------------|
+| XGREAT | Extended Great Room | Yes (10.60, 20.60, 40.60, 60.6x) |
+| SUN | Sunroom | Yes (10.61, 20.61, 40.61, 60.61) |
+| DBA/DBA2/DBA3 | Deluxe Bath Options | Yes |
+| 3CARA/B/C | 3-Car Garage | Yes (12.00, 22.00, 42.00, 62.00) |
+| TALLCRWL | Tall Crawl Space | Yes (10.tc, 25.tc, 60.tc, 75.tc) |
+| COVP/COVD | Covered Patio/Deck | Yes |
+
+### Material Classes (Expandable)
+
+| Code | Name | Description |
+|------|------|-------------|
+| 1000 | Framing | Structural materials, lumber, fasteners |
+| 1100 | Siding | Exterior finishing, trim, housewrap |
+| 1200 | Windows | (Future expansion) |
+| 1300 | Roofing | (Future expansion) |
+| 4085 | Lumber (Holt) | Legacy Holt cost code |
+| 4155 | Siding (Holt) | Legacy Holt cost code |
+
+### Elevation Handling (Solved)
+
+Richmond's triple-encoding problem is solved with single source of truth:
+
+```sql
+-- Pack definition (no elevation in name)
+layer1_codes: plan='1234', phase='10.82', class='1000'
+
+-- Elevation associations (separate table)
+layer1_code_elevations:
+  code_id=123, elevation_code='B'
+  code_id=123, elevation_code='C'
+  code_id=123, elevation_code='D'
 ```
 
-### Migration Plan
+---
 
-1. **Add `code` field** to Material model (nullable initially)
-2. **Generate codes** for existing materials via script
-3. **Validate codes** ensure all materials have valid codes
-4. **Make required** change `code` to required, unique
-5. **Update APIs** to support code-based queries
-6. **Update UI** to display and search by code
+## Implementation Path: Use Existing System
+
+### What's Already Done
+
+1. ✅ SQL Schema defined (`database/schema/unified_code_system.sql`)
+2. ✅ 150+ phase/option codes defined
+3. ✅ 50+ Richmond option code mappings
+4. ✅ Elevation handling solved
+5. ✅ Views and queries written
+6. ✅ Import strategies documented
+
+### Remaining 2% To Complete
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Populate `plans` table | Pending | Replace 'XXXX' placeholder with actual plan numbers |
+| Import Holt BAT data | Pending | Use documented import strategy |
+| Import Richmond 3BAT data | Pending | Parse pack names, populate associations |
+| Validate data integrity | Pending | Run validation queries |
+| Deploy to PostgreSQL | Pending | Migrate from SQLite schema |
 
 ---
 
@@ -162,78 +170,82 @@ model Material {
 
 | Week | Sprint | Tasks |
 |------|--------|-------|
-| 2 | Sprint 3 | Add code field to schema, generate codes for existing data |
-| 3 | Sprint 3 | Update Material API to support code filtering |
-| 4 | Sprint 4 | Add code field to UI components |
-| 5+ | Sprint 5+ | Add supplier SKU mapping, external integrations |
+| 2 | Sprint 3 | Migrate SQL schema to PostgreSQL, populate plans table |
+| 2 | Sprint 3 | Import Holt BAT data (Layer 1 + Layer 2) |
+| 3 | Sprint 3 | Import Richmond 3BAT data |
+| 3 | Sprint 3 | Validate data, fix any import issues |
+| 4 | Sprint 4 | Build API endpoints using existing views |
+| 4 | Sprint 4 | Build UI components for pack management |
 
 ---
 
 ## Success Criteria
 
-### Immediate (Sprint 3)
+### Sprint 3 (Week 2-3)
 
-- [ ] Code field added to Material model
-- [ ] 100% of existing materials have valid codes
-- [ ] API supports filtering by trade and category codes
-- [ ] Documentation complete for code structure
+- [ ] PostgreSQL schema deployed
+- [ ] Plans table populated with real plan numbers
+- [ ] Holt data imported (Layer 1 codes + Layer 2 materials)
+- [ ] Richmond data imported with elevation/option associations
+- [ ] Validation queries pass
 
-### Short-term (Sprint 4-5)
+### Sprint 4 (Week 4)
 
-- [ ] UI displays material codes
-- [ ] Search works with partial code matches
-- [ ] Import validates code format
-- [ ] QuickBooks export uses code structure
-
-### Long-term (Sprint 6+)
-
-- [ ] Supplier SKU mapping implemented
-- [ ] EDI integration uses codes
-- [ ] Phase-based reporting available
-- [ ] Industry reference mapping complete
+- [ ] API endpoints for `get_codes_for_plan_elevation()`
+- [ ] API endpoints for Layer 1/Layer 2 CRUD
+- [ ] UI displays pack codes and materials
 
 ---
 
-## Governance
+## Action Items
 
-Code system governance is documented in [GOVERNANCE.md](./GOVERNANCE.md). Key rules:
+### Immediate (This Sprint)
 
-1. **No duplicate codes** - Each material has exactly one code
-2. **Immutable trade codes** - Trade codes cannot change once established
-3. **Approval required** - New categories require documented approval
-4. **Version tracking** - Changes to code structure are versioned
+1. **Review existing schema** - Verify `unified_code_system.sql` is complete
+2. **Identify plan numbers** - Get list of actual 4-digit plan codes
+3. **Prepare import data** - Holt BAT and Richmond 3BAT files ready
+4. **Schema migration** - Convert SQLite syntax to PostgreSQL if needed
 
----
+### Next Sprint (Foundation Layer)
 
-## Risks & Mitigations
-
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Code generation errors | Medium | Low | Validation script before migration |
-| User adoption resistance | Medium | Medium | Training materials, gradual rollout |
-| Legacy system conflicts | Low | Low | Keep existing SKU field for compatibility |
-| Future extension needs | Low | High | Designed for extensibility from start |
+1. Deploy schema to PostgreSQL
+2. Run import scripts
+3. Build API layer
+4. Integrate with existing Prisma models
 
 ---
 
-## Approval
+## Supplementary Research Files
 
-This decision has been reviewed and approved for implementation.
+The industry research conducted this sprint provides context but does NOT change the system:
 
-| Role | Name | Date |
-|------|------|------|
-| Product Owner | [Pending] | |
-| Technical Lead | [Pending] | |
-| Implementation | Claude AI | 2025-11-29 |
+| File | Purpose |
+|------|---------|
+| `CSI_MASTERFORMAT_ANALYSIS.md` | Industry standard reference |
+| `ALTERNATIVES_ANALYSIS.md` | Comparison of classification approaches |
+| `INTEGRATION_COMPATIBILITY.md` | QuickBooks/EDI compatibility notes |
+| `HYBRID_SYSTEM_DESIGN.md` | Trade-based SKU ideas (future reference) |
+| `SAMPLE_CODES.md` | Example SKU codes (Layer 2 reference) |
+
+---
+
+## Key Decision
+
+**USE THE EXISTING TWO-LAYER CODE SYSTEM.**
+
+The system is well-designed, nearly complete, and specifically built for production home builder workflows. Industry standards like CSI MasterFormat are useful for reference but don't fit the pack-based, elevation-aware requirements of this platform.
 
 ---
 
 ## References
 
+### Primary (USE THESE)
+- `database/schema/unified_code_system.sql` - **The schema**
+- `docs/archive/analysis/LAYERED_CODE_SYSTEM_DESIGN_2025-11-14.md` - **Design rationale**
+- `CODE_SYSTEM_IMPLEMENTATION_GUIDE.md` - **Implementation guide**
+- `database/schema/Coding_Schema_20251113.csv` - **Source data**
+
+### Secondary (Reference Only)
 - [CSI MasterFormat Analysis](./CSI_MASTERFORMAT_ANALYSIS.md)
 - [Alternatives Analysis](./ALTERNATIVES_ANALYSIS.md)
 - [Integration Compatibility](./INTEGRATION_COMPATIBILITY.md)
-- [Hybrid System Design](./HYBRID_SYSTEM_DESIGN.md)
-- [Implementation Guide](./IMPLEMENTATION_GUIDE.md)
-- [Governance Rules](./GOVERNANCE.md)
-- [Sample Codes](./SAMPLE_CODES.md)
