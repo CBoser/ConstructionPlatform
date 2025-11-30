@@ -1,0 +1,305 @@
+{
+    "timestamp": "2025-11-30T00:56:59Z",
+    "date": "2025-11-30",
+    "overall_score": 82,
+    "scores": {
+        "code_quality": 100,
+        "security": 100,
+        "performance": 100,
+        "test_coverage": 0,
+        "documentation": 94,
+        "scalability": 100,
+        "technical_debt": 65
+    },
+    "details": {
+        "code_quality": {
+    "category": "code_quality",
+    "timestamp": "2025-11-30T00:56:35Z",
+    "overall_score": 100,
+    "subscores": {
+        "complexity": 100,
+        "maintainability": 100,
+        "duplication": 100,
+        "style_compliance": 100,
+        "type_safety": 100
+    },
+    "issues": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0
+    },
+    "details": {
+        "complexity": {
+            "score": 100,
+            "high_complexity_files": ,
+            "very_high_complexity_files": ,
+            "max_complexity": 
+        },
+        "maintainability": {
+            "score": 100,
+            "long_files": 11,
+            "very_long_files": 0,
+            "long_functions": 0
+        },
+        "duplication": {
+            "score": 100,
+            "duplicate_blocks": 640,
+            "duplication_percentage": 98
+        },
+        "style": {
+            "score": 100,
+            "eslint_errors": 0,
+            "eslint_warnings": 0
+        },
+        "type_safety": {
+            "score": 100,
+            "typescript_errors": ,
+            "any_usage": ,
+            "strict_mode": 
+        }
+    }
+},
+        "security": {
+    "category": "security",
+    "timestamp": "2025-11-30T00:56:40Z",
+    "overall_score": 100,
+    "subscores": {
+        "dependency_vulnerabilities": 100,
+        "secret_detection": 100,
+        "code_security": 100,
+        "configuration_security": 100,
+        "authentication_security": 100
+    },
+    "vulnerabilities": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 0
+    },
+    "details": {
+        "dependencies": {
+            "score": 100,
+            "critical": ,
+            "high": ,
+            "medium": ,
+            "low": ,
+            "outdated_packages": 
+        },
+        "secrets": {
+            "score": 100,
+            "secrets_found": 0,
+            "potential_secrets": 0
+        },
+        "code_security": {
+            "score": 100,
+            "sql_injection_risks": 0,
+            "xss_risks": 0,
+            "eval_usage": 0
+        },
+        "config_security": {
+            "score": 100,
+            "helmet_configured": true,
+            "cors_configured": true,
+            "rate_limiting": true
+        },
+        "auth_security": {
+            "score": 100,
+            "bcrypt_used": true,
+            "jwt_implemented": true
+        }
+    }
+},
+        "performance": {
+    "category": "performance",
+    "timestamp": "2025-11-30T00:56:47Z",
+    "overall_score": 100,
+    "subscores": {
+        "bundle_size": 100,
+        "build_time": 100,
+        "dependencies": 100,
+        "database_efficiency": 100,
+        "load_time_estimate": 100
+    },
+    "metrics": {
+        "bundle_size_kb": 0,
+        "build_time_seconds": 0,
+        "total_dependencies": 0,
+        "large_files_count": 0
+    },
+    "details": {
+        "bundle": {
+            "total_kb": 346,
+            "gzipped_kb": 103,
+            "chunk_count": 0,
+            "large_chunks": 0
+        },
+        "build": {
+            "frontend_seconds": error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
+1,
+            "backend_seconds": error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
+2,
+            "total_seconds": error TS2688: Cannot find type definition file for 'node'.
+  The file is in the program because:
+    Entry point of type library 'node' specified in compilerOptions
+3
+        },
+        "dependencies": {
+            "frontend": 9,
+            "backend": 13,
+            "total": 54,
+            "duplicates": 1
+        },
+        "database": {
+            "model_count": ,
+            "missing_indexes": ,
+            "n_plus_one_risk": 
+        }
+    }
+},
+        "test_coverage": {
+    "category": "test_coverage",
+    "timestamp": "2025-11-30T00:56:55Z",
+    "overall_score": 0,
+    "coverage": {
+        "line": 0,
+        "branch": 0,
+        "function": 0,
+        "statement": 0
+    },
+    "subscores": {
+        "line_coverage": 0,
+        "branch_coverage": 0,
+        "function_coverage": 0,
+        "statement_coverage": 0
+    },
+    "metrics": {
+        "total_tests": 0,
+        "test_files": 0,
+        "untested_files": 0,
+        "test_framework": "none"
+    },
+    "details": {
+        "infrastructure": {
+            "framework": "none",
+            "test_files": 1,
+            "has_config": false
+        },
+        "quality": {
+            "assertions": ,
+            "mocks": ,
+            "async_tests": ,
+            "describe_blocks": 
+        },
+        "untested_critical": []
+    }
+},
+        "documentation": {
+    "category": "documentation",
+    "timestamp": "2025-11-30T00:56:56Z",
+    "overall_score": 94,
+    "subscores": {
+        "readme_quality": 100,
+        "code_comments": 100,
+        "api_documentation": 100,
+        "type_documentation": 100,
+        "architecture_docs": 40
+    },
+    "metrics": {
+        "readme_sections": 0,
+        "comment_ratio": 0,
+        "documented_endpoints": 0,
+        "total_endpoints": 0,
+        "documented_types": 0,
+        "total_exports": 0
+    },
+    "details": {
+        "readme": {
+            "sections_found": 10,
+            "sections_expected": 10
+        },
+        "comments": {
+            "ratio_percent": ,
+            "jsdoc_count": ,
+            "files_without_comments": 
+        },
+        "api": {
+            "documented": ,
+            "total": ,
+            "has_swagger": 
+        }
+    },
+    "missing_documentation": []
+},
+        "scalability": {
+    "category": "scalability",
+    "timestamp": "2025-11-30T00:56:56Z",
+    "overall_score": 100,
+    "subscores": {
+        "database_optimization": 100,
+        "caching_strategy": 100,
+        "api_design": 100,
+        "infrastructure_ready": 100
+    },
+    "metrics": {
+        "indexed_relations": 0,
+        "total_relations": 0,
+        "paginated_endpoints": 0,
+        "rate_limited_routes": 0
+    },
+    "details": {
+        "database": {
+            "indexes": 91,
+            "relations": 45,
+            "composite_indexes": 70,
+            "unique_constraints": 21
+        },
+        "caching": {
+            "has_redis": false,
+            "has_in_memory": false,
+            "has_http_cache": false
+        },
+        "api": {
+            "paginated": 133,
+            "total_list_endpoints": 0,
+            "rate_limited": 1,
+            "versioned": true
+        },
+        "infrastructure": {
+            "has_docker": true,
+            "has_ci_cd": true,
+            "has_health_check": true
+        }
+    },
+    "issues": []
+},
+        "technical_debt": {
+    "category": "technical_debt",
+    "timestamp": "2025-11-30T00:56:58Z",
+    "overall_score": 65,
+    "inventory": {
+        "critical": 0,
+        "high": 0,
+        "medium": 4,
+        "low": 11,
+        "total": 15
+    },
+    "breakdown": {
+        "fixme": 0,
+        "todo_high_priority": 0,
+        "todo": 2,
+        "hack": 0,
+        "xxx": 0,
+        "deprecated": 1,
+        "console_log": 33,
+        "commented_code": 9
+    },
+    "critical_items": [],
+    "high_items": []
+}
+    }
+}
