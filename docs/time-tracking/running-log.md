@@ -73,3 +73,8 @@
 
 ### 11/30/25
 - 08:40-09:40 - Planning and document review
+
+## December 2025
+
+### 12/1/25
+- 06:30-07:50 - Sprint 3 Day 1: PostgreSQL database setup, Prisma schema extension with unified code system (8 new models), seed data for material classes/phases/Richmond options, CSV import script for Coding_Schema
