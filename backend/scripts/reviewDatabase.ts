@@ -63,26 +63,27 @@ async function reviewDatabase() {
   console.log('───────────────────────────────────────────────────────────────');
 
   // Try to access code system tables - they may not exist yet
+  // Note: Table and column names use snake_case due to @@map directives in schema
   try {
     // Use raw query to check if tables exist and get counts
-    const materialClassCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "MaterialClass"`;
+    const materialClassCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM material_classes`;
     console.log(`   Material Classes: ${materialClassCount[0].count}`);
 
-    const phaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "PhaseOptionDefinition"`;
-    const basePhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "PhaseOptionDefinition" WHERE "isBasePhase" = true`;
-    const optionPhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "PhaseOptionDefinition" WHERE "isOption" = true`;
+    const phaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM phase_option_definitions`;
+    const basePhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM phase_option_definitions WHERE is_base_phase = true`;
+    const optionPhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM phase_option_definitions WHERE is_option = true`;
     console.log(`   Phase Definitions: ${phaseCount[0].count}`);
     console.log(`     - Base phases: ${basePhaseCount[0].count}`);
     console.log(`     - Option phases: ${optionPhaseCount[0].count}`);
 
-    const richmondCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "RichmondOptionCode"`;
-    const multiPhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "RichmondOptionCode" WHERE "isMultiPhase" = true`;
+    const richmondCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM richmond_option_codes`;
+    const multiPhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM richmond_option_codes WHERE is_multi_phase = true`;
     console.log(`   Richmond Options: ${richmondCount[0].count}`);
     console.log(`     - Multi-phase: ${multiPhaseCount[0].count}`);
     console.log(`     - Single-phase: ${Number(richmondCount[0].count) - Number(multiPhaseCount[0].count)}`);
 
-    const suffixCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "OptionSuffix"`;
-    const activeSuffixCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "OptionSuffix" WHERE "isActive" = true`;
+    const suffixCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM option_suffixes`;
+    const activeSuffixCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM option_suffixes WHERE is_active = true`;
     console.log(`   Option Suffixes: ${suffixCount[0].count}`);
     console.log(`     - Active: ${activeSuffixCount[0].count}`);
 
@@ -93,25 +94,25 @@ async function reviewDatabase() {
     console.log('LAYER 1 CODES (Imported from CSV)');
     console.log('───────────────────────────────────────────────────────────────');
 
-    const layer1Count = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Layer1Code"`;
+    const layer1Count = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer1_codes`;
     console.log(`   Layer1 Codes: ${layer1Count[0].count}`);
 
-    const elevAssocCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Layer1CodeElevation"`;
+    const elevAssocCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer1_code_elevations`;
     console.log(`   Elevation Associations: ${elevAssocCount[0].count}`);
 
-    const richLinkCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Layer1CodeRichmondOption"`;
+    const richLinkCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer1_code_richmond_options`;
     console.log(`   Richmond Option Links: ${richLinkCount[0].count}`);
 
     // Sample Layer1 codes with raw query
-    const sampleCodes = await prisma.$queryRaw<Array<{fullCode: string, phaseName: string | null}>>`
-      SELECT l."fullCode", p."phaseName"
-      FROM "Layer1Code" l
-      LEFT JOIN "PhaseOptionDefinition" p ON l."phaseId" = p.id
+    const sampleCodes = await prisma.$queryRaw<Array<{full_code: string, phase_name: string | null}>>`
+      SELECT l.full_code, p.phase_name
+      FROM layer1_codes l
+      LEFT JOIN phase_option_definitions p ON l.phase_option_id = p.id
       LIMIT 5
     `;
     console.log('\n   Sample Layer1 Codes:');
     for (const code of sampleCodes) {
-      console.log(`     - ${code.fullCode} (Phase: ${code.phaseName || 'N/A'})`);
+      console.log(`     - ${code.full_code} (Phase: ${code.phase_name || 'N/A'})`);
     }
 
     // ============================================================================
@@ -123,9 +124,9 @@ async function reviewDatabase() {
 
     // Group phases by series using raw query
     const phasesBySeries = await prisma.$queryRaw<Array<{series: string, count: bigint}>>`
-      SELECT SUBSTRING("phaseCode", 1, 3) as series, COUNT(*) as count
-      FROM "PhaseOptionDefinition"
-      GROUP BY SUBSTRING("phaseCode", 1, 3)
+      SELECT SUBSTRING(phase_code, 1, 3) as series, COUNT(*) as count
+      FROM phase_option_definitions
+      GROUP BY SUBSTRING(phase_code, 1, 3)
       ORDER BY series
     `;
     console.log('   Phases by Series:');
@@ -141,11 +142,11 @@ async function reviewDatabase() {
     console.log('───────────────────────────────────────────────────────────────');
 
     // Layer1 codes without phase
-    const codesNoPhase = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "Layer1Code" WHERE "phaseId" IS NULL`;
+    const codesNoPhase = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer1_codes WHERE phase_option_id IS NULL`;
     console.log(`   Layer1 codes without phase: ${codesNoPhase[0].count}`);
 
     // Richmond options without phase link (single-phase only)
-    const optsNoPhase = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM "RichmondOptionCode" WHERE "phaseId" IS NULL AND "isMultiPhase" = false`;
+    const optsNoPhase = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM richmond_option_codes WHERE phase_id IS NULL AND is_multi_phase = false`;
     console.log(`   Single-phase Richmond options without phase link: ${optsNoPhase[0].count}`);
 
   } catch (error) {
