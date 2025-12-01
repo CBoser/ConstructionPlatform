@@ -12,6 +12,11 @@ export type CustomerWithRelations = Customer & {
   pricingTiers?: any[];
   externalIds?: any[];
   jobs?: any[];
+  _count?: {
+    communities?: number;
+    plans?: number;
+    jobs?: number;
+  };
 };
 
 // Repository interface for dependency injection
@@ -109,6 +114,15 @@ export class CustomerRepository implements ICustomerRepository {
         skip,
         take: limit,
         orderBy: { customerName: 'asc' },
+        include: {
+          _count: {
+            select: {
+              communities: true,
+              plans: true,
+              jobs: true,
+            },
+          },
+        },
       }),
       this.prisma.customer.count({ where }),
     ]);
