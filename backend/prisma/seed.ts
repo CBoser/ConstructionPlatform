@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { seedCustomers } from './seeds/customers.seed';
 import { seedPlans } from './seeds/plans.seed';
 import { seedMaterials } from './seeds/materials.seed';
+import { seedCodeSystem } from './seeds/codeSystem.seed';
 
 // Load environment variables
 dotenv.config();
@@ -180,6 +181,11 @@ async function main() {
   await seedPlans();
 
   // ============================================================================
+  // Code System (Material Classes, Phase Definitions, Richmond Options)
+  // ============================================================================
+  await seedCodeSystem();
+
+  // ============================================================================
   // Summary
   // ============================================================================
   console.log('\n📊 Seed Summary:');
@@ -192,6 +198,12 @@ async function main() {
   const totalElevations = await prisma.planElevation.count();
   const totalMaterials = await prisma.material.count();
 
+  // Code System counts
+  const totalMaterialClasses = await prisma.materialClass.count();
+  const totalPhaseDefinitions = await prisma.phaseOptionDefinition.count();
+  const totalRichmondOptions = await prisma.richmondOptionCode.count();
+  const totalOptionSuffixes = await prisma.optionSuffix.count();
+
   console.log(`   Users: ${totalUsers}`);
   console.log(`   Customers: ${totalCustomers}`);
   console.log(`   Contacts: ${totalContacts}`);
@@ -200,6 +212,11 @@ async function main() {
   console.log(`   Plans: ${totalPlans}`);
   console.log(`   Elevations: ${totalElevations}`);
   console.log(`   Materials: ${totalMaterials}`);
+  console.log('   --- Code System ---');
+  console.log(`   Material Classes: ${totalMaterialClasses}`);
+  console.log(`   Phase Definitions: ${totalPhaseDefinitions}`);
+  console.log(`   Richmond Options: ${totalRichmondOptions}`);
+  console.log(`   Option Suffixes: ${totalOptionSuffixes}`);
   console.log('\n✨ Seed completed successfully!');
 }
 

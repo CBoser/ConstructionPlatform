@@ -1108,3 +1108,236 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
 }
+
+// ============================================================================
+// UNIFIED CODE SYSTEM
+// ============================================================================
+// Two-layer hierarchical code system for construction material management
+// Layer 1: Aggregate codes for estimating/quoting (Plan-Phase/Option-MaterialClass)
+// Layer 2: Detailed material SKUs for purchasing/inventory
+// Source: Coding_Schema_v2_NEW_FORMAT.csv
+
+// Material Class Definitions (high-level categories)
+model MaterialClass {
+  id          String   @id @default(uuid())
+  classCode   String   @unique @map("class_code")  // "1000", "1100"
+  className   String   @map("class_name")          // "Framing", "Siding"
+  description String?
+  sortOrder   Int?     @map("sort_order")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  phaseOptions PhaseOptionDefinition[]
+  layer1Codes  Layer1Code[]
+
+  @@index([classCode])
+  @@map("material_classes")
+}
+
+// Phase and Option Code Definitions
+model PhaseOptionDefinition {
+  id              String   @id @default(uuid())
+  phaseCode       String   @unique @map("phase_code")  // "10.00", "20.rf", "60.ec"
+  phaseName       String   @map("phase_name")
+
+  // Phase Classification
+  isBasePhase     Boolean  @default(false) @map("is_base_phase")
+  isOption        Boolean  @default(true) @map("is_option")
+  isAlphaVariant  Boolean  @default(false) @map("is_alpha_variant")  // Uses letter suffix (rf, tc, etc.)
+
+  // Material Class Reference
+  materialClassId String   @map("material_class_id")
+
+  // Shipping/Construction Order
+  shippingOrder   Int?     @map("shipping_order")
+
+  description     String?
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  materialClass   MaterialClass @relation(fields: [materialClassId], references: [id])
+  layer1Codes     Layer1Code[]
+  richmondOptions RichmondOptionCode[]
+
+  @@index([phaseCode])
+  @@index([materialClassId])
+  @@index([shippingOrder])
+  @@map("phase_option_definitions")
+}
+
+// Richmond Option Code Mappings
+// Maps Richmond builder's mnemonic codes to phase codes
+model RichmondOptionCode {
+  id                String   @id @default(uuid())
+  optionCode        String   @unique @map("option_code")  // "XGREAT", "SUN", "TALLCRWL"
+  optionDescription String?  @map("option_description")
+
+  // Link to phase (optional for multi-phase options)
+  phaseId           String?  @map("phase_id")
+  isMultiPhase      Boolean  @default(false) @map("is_multi_phase")
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  phase             PhaseOptionDefinition? @relation(fields: [phaseId], references: [id])
+  layer1CodeOptions Layer1CodeRichmondOption[]
+
+  @@index([optionCode])
+  @@map("richmond_option_codes")
+}
+
+// Layer 1: Aggregate Codes for Estimating
+// Format: PLAN-PHASE/OPTION-ELEVATION-MATERIALCLASS (e.g., "PPPP-020.000-ABC-1000")
+model Layer1Code {
+  id              String   @id @default(uuid())
+
+  // Code Components
+  planCode        String   @map("plan_code")        // "PPPP" (placeholder) or actual plan code
+  phaseOptionId   String   @map("phase_option_id")
+  materialClassId String   @map("material_class_id")
+
+  // Full Generated Code (for display/lookup)
+  fullCode        String   @unique @map("full_code")  // "PPPP-020.000-**-1000"
+
+  // Original Richmond Pack ID (for reference)
+  richmondPackId  String?  @map("richmond_pack_id")
+  packName        String?  @map("pack_name")
+
+  // Item Information
+  itemNo          String?  @map("item_no")          // "1000", "1100"
+  itemType        String?  @map("item_type")        // "Framing", "Siding"
+
+  // Shipping Order
+  shippingOrder   Int?     @map("shipping_order")
+
+  description     String?
+
+  // Pricing (for estimating)
+  estimatedPrice  Decimal? @db.Decimal(10, 2) @map("estimated_price")
+  estimatedCost   Decimal? @db.Decimal(10, 2) @map("estimated_cost")
+
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  phaseOption     PhaseOptionDefinition @relation(fields: [phaseOptionId], references: [id])
+  materialClass   MaterialClass @relation(fields: [materialClassId], references: [id])
+
+  // Many-to-many: Elevations and Richmond Options
+  elevations      Layer1CodeElevation[]
+  richmondOptions Layer1CodeRichmondOption[]
+  layer2Materials Layer2Material[]
+
+  @@index([fullCode])
+  @@index([planCode])
+  @@index([phaseOptionId])
+  @@index([materialClassId])
+  @@index([richmondPackId])
+  @@map("layer1_codes")
+}
+
+// Layer 1 Code Elevation Associations
+// Solves Richmond's triple-encoding problem: single source of truth for elevations
+model Layer1CodeElevation {
+  id            String   @id @default(uuid())
+  layer1CodeId  String   @map("layer1_code_id")
+  elevationCode String   @map("elevation_code")  // "A", "B", "C", "D", or "**" for all
+
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  layer1Code    Layer1Code @relation(fields: [layer1CodeId], references: [id], onDelete: Cascade)
+
+  @@unique([layer1CodeId, elevationCode])
+  @@index([layer1CodeId])
+  @@index([elevationCode])
+  @@map("layer1_code_elevations")
+}
+
+// Layer 1 Code Richmond Option Associations
+// Links Richmond option codes to Layer 1 codes for cross-referencing
+model Layer1CodeRichmondOption {
+  id              String   @id @default(uuid())
+  layer1CodeId    String   @map("layer1_code_id")
+  richmondOptionId String  @map("richmond_option_id")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  // Relationships
+  layer1Code      Layer1Code @relation(fields: [layer1CodeId], references: [id], onDelete: Cascade)
+  richmondOption  RichmondOptionCode @relation(fields: [richmondOptionId], references: [id], onDelete: Cascade)
+
+  @@unique([layer1CodeId, richmondOptionId])
+  @@index([layer1CodeId])
+  @@index([richmondOptionId])
+  @@map("layer1_code_richmond_options")
+}
+
+// Layer 2: Detailed Materials (SKU-level)
+// Links to existing Material model for purchasing and inventory
+model Layer2Material {
+  id              String   @id @default(uuid())
+  layer1CodeId    String   @map("layer1_code_id")
+
+  // Item Details
+  itemCode        String   @map("item_code")
+  itemDescription String?  @map("item_description")
+
+  // Quantity and Units
+  quantity        Decimal  @db.Decimal(10, 3) @default(0)
+  unit            String
+
+  // Costing
+  unitCost        Decimal? @db.Decimal(10, 2) @map("unit_cost")
+
+  // Vendor Information
+  vendorCode      String?  @map("vendor_code")
+  manufacturerPartNumber String? @map("manufacturer_part_number")
+
+  // Link to main Material catalog (optional)
+  materialId      String?  @map("material_id")
+
+  notes           String?
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relationships
+  layer1Code      Layer1Code @relation(fields: [layer1CodeId], references: [id], onDelete: Cascade)
+
+  @@unique([layer1CodeId, itemCode])
+  @@index([layer1CodeId])
+  @@index([itemCode])
+  @@index([materialId])
+  @@map("layer2_materials")
+}
+
+// Option Suffix Definitions
+// Defines the .x01, .x02, etc. suffixes for option codes
+model OptionSuffix {
+  id              String   @id @default(uuid())
+  suffixCode      String   @unique @map("suffix_code")  // "01", "03", "04", etc.
+  abbreviation    String                                  // "rf", "l", "nl", "x", etc.
+  fullName        String   @map("full_name")             // "ReadyFrame", "Loft", etc.
+  description     String?
+
+  // Category for grouping
+  category        String?                                 // "structural", "exterior", etc.
+
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([suffixCode])
+  @@index([abbreviation])
+  @@map("option_suffixes")
+}

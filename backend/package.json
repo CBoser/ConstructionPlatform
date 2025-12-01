@@ -16,6 +16,8 @@
     "import:data": "ts-node scripts/importData.ts",
     "import:plans": "ts-node scripts/importData.ts --plans",
     "import:materials": "ts-node scripts/importData.ts --materials",
+    "import:coding-schema": "ts-node scripts/importCodingSchema.ts",
+    "import:coding-schema:dry-run": "ts-node scripts/importCodingSchema.ts --dry-run",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "prisma": {
