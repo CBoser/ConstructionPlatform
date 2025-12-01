@@ -19,6 +19,7 @@
     "import:coding-schema": "ts-node scripts/importCodingSchema.ts",
     "import:coding-schema:dry-run": "ts-node scripts/importCodingSchema.ts --dry-run",
     "seed:code-system": "ts-node scripts/seedCodeSystemOnly.ts",
+    "link:plans-to-builder": "ts-node scripts/linkPlansToBuilder.ts",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "prisma": {
