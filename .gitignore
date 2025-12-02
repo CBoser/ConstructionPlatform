@@ -80,6 +80,8 @@ env/
 # Database
 *.db
 *.sqlite
+backend/backups/
+*.dump
 
 # Temporary
 tmp/

@@ -20,6 +20,10 @@
     "import:coding-schema:dry-run": "ts-node scripts/importCodingSchema.ts --dry-run",
     "seed:code-system": "ts-node scripts/seedCodeSystemOnly.ts",
     "link:plans-to-builder": "ts-node scripts/linkPlansToBuilder.ts",
+    "db:backup": "ts-node scripts/backup.ts",
+    "db:restore": "ts-node scripts/restore.ts",
+    "db:validate": "ts-node scripts/validateDatabase.ts",
+    "db:review": "ts-node scripts/reviewDatabase.ts",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "prisma": {
