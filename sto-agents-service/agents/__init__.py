@@ -8,6 +8,7 @@ This module contains the agent implementations:
 - PlanManager: Manages plan creation, versioning, and document association
 - DocumentTracker: Monitors document status and completeness
 - JobTracker: Tracks job lifecycle, start dates, and progress
+- ExcelImporter: Imports data from Excel files (Pride Board, PDSS, EPO, etc.)
 """
 
 from .supplypro_reporter import SupplyProReporter
@@ -16,6 +17,7 @@ from .completeness_checker import CompletenessChecker
 from .plan_manager import PlanManager
 from .document_tracker import DocumentTracker
 from .job_tracker import JobTracker
+from .excel_importer import ExcelImporter
 
 __all__ = [
     "SupplyProReporter",
@@ -24,4 +26,5 @@ __all__ = [
     "PlanManager",
     "DocumentTracker",
     "JobTracker",
+    "ExcelImporter",
 ]

@@ -752,4 +752,233 @@ router.get('/jobs/summary', validateServiceToken, async (req: Request, res: Resp
   }
 });
 
+// ============================================================================
+// JOB AND COMMUNITY SYNC ROUTES (for Excel imports)
+// ============================================================================
+
+/**
+ * POST /api/v1/portal-sync/jobs
+ *
+ * Creates or updates jobs from Excel imports or Python agents
+ */
+router.post('/jobs', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const job = req.body;
+
+    if (!job.jobNumber) {
+      return res.status(400).json({ error: 'jobNumber is required' });
+    }
+
+    // Try to find existing job by job number
+    const existing = await prisma.job.findFirst({
+      where: { jobNumber: job.jobNumber },
+    });
+
+    let result;
+    if (existing) {
+      // Update existing job
+      result = await prisma.job.update({
+        where: { id: existing.id },
+        data: {
+          status: job.status || existing.status,
+          startDate: job.startDate ? new Date(job.startDate) : existing.startDate,
+          notes: job.notes || existing.notes,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Find or create related records
+      let customerId = job.customerId;
+      let communityId = job.communityId;
+      let planId = job.planId;
+
+      // Look up customer by builder code if not provided
+      if (!customerId && job.builder) {
+        const customer = await prisma.customer.findFirst({
+          where: {
+            OR: [
+              { customerName: { contains: job.builder, mode: 'insensitive' } },
+              { shortName: { equals: job.builder, mode: 'insensitive' } },
+            ],
+          },
+        });
+        if (customer) customerId = customer.id;
+      }
+
+      // Look up community by name if not provided
+      if (!communityId && job.subdivision) {
+        const community = await prisma.community.findFirst({
+          where: { name: { contains: job.subdivision, mode: 'insensitive' } },
+        });
+        if (community) communityId = community.id;
+      }
+
+      // Look up plan by code if not provided
+      if (!planId && job.planCode) {
+        const plan = await prisma.plan.findFirst({
+          where: { code: { equals: job.planCode, mode: 'insensitive' } },
+        });
+        if (plan) planId = plan.id;
+      }
+
+      // Create new job
+      result = await prisma.job.create({
+        data: {
+          jobNumber: job.jobNumber,
+          customerId: customerId,
+          communityId: communityId,
+          planId: planId,
+          status: job.status || 'DRAFT',
+          startDate: job.startDate ? new Date(job.startDate) : null,
+          notes: job.notes,
+        },
+      });
+    }
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        activityType: 'job_sync',
+        title: `Job ${job.jobNumber} ${existing ? 'updated' : 'created'}`,
+        detail: job.subdivision || null,
+        icon: '🏗️',
+      },
+    });
+
+    res.json({ success: true, job: result, created: !existing });
+  } catch (error) {
+    console.error('Job sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * POST /api/v1/portal-sync/communities
+ *
+ * Creates or updates communities from Excel imports
+ */
+router.post('/communities', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const community = req.body;
+
+    if (!community.name) {
+      return res.status(400).json({ error: 'community name is required' });
+    }
+
+    // Find customer by builder code if provided
+    let customerId = community.customerId;
+    if (!customerId && community.builder) {
+      const customer = await prisma.customer.findFirst({
+        where: {
+          OR: [
+            { customerName: { contains: community.builder, mode: 'insensitive' } },
+            { shortName: { equals: community.builder, mode: 'insensitive' } },
+          ],
+        },
+      });
+      if (customer) customerId = customer.id;
+    }
+
+    // Upsert community
+    const result = await prisma.community.upsert({
+      where: { name: community.name },
+      update: {
+        city: community.city || undefined,
+        county: community.county || undefined,
+        shippingYard: community.shippingYard || undefined,
+        lotPrefix: community.lotPrefix || undefined,
+        isActive: community.isActive ?? true,
+        updatedAt: new Date(),
+      },
+      create: {
+        name: community.name,
+        customerId: customerId,
+        city: community.city,
+        county: community.county,
+        shippingYard: community.shippingYard,
+        lotPrefix: community.lotPrefix,
+        isActive: community.isActive ?? true,
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        activityType: 'community_sync',
+        title: `Community ${community.name} synced`,
+        detail: community.city || null,
+        icon: '🏘️',
+      },
+    });
+
+    res.json({ success: true, community: result });
+  } catch (error) {
+    console.error('Community sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * POST /api/v1/portal-sync/excel-import
+ *
+ * Receives Excel import results from Python agent
+ * This is called after the Python agent processes an Excel file
+ */
+router.post('/excel-import', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const { sourceType, recordsFound, recordsImported, recordsUpdated, recordsSkipped, errors, warnings } = req.body;
+
+    // Log the import
+    await prisma.portalSyncLog.create({
+      data: {
+        portal: `excel_${sourceType}`,
+        syncType: 'import',
+        status: errors && errors.length > 0 ? 'completed_with_errors' : 'completed',
+        itemsFound: recordsFound || 0,
+        itemsProcessed: recordsImported || 0,
+        errors: errors && errors.length > 0 ? errors : null,
+        completedAt: new Date(),
+      },
+    });
+
+    // Create activity log entry
+    await prisma.activityLog.create({
+      data: {
+        activityType: 'excel_import',
+        title: `Excel import: ${sourceType}`,
+        detail: `${recordsImported || 0} records imported from ${sourceType}`,
+        icon: '📊',
+      },
+    });
+
+    // Create alert if there were errors
+    if (errors && errors.length > 0) {
+      await prisma.systemAlert.create({
+        data: {
+          alertType: 'warning',
+          source: 'excel_import',
+          title: `Excel import completed with ${errors.length} errors`,
+          message: `Import of ${sourceType} completed but had ${errors.length} errors`,
+          details: { sourceType, errors, warnings },
+        },
+      });
+    }
+
+    res.json({
+      success: true,
+      summary: {
+        sourceType,
+        recordsFound,
+        recordsImported,
+        recordsUpdated,
+        recordsSkipped,
+        errorCount: errors?.length || 0,
+      },
+    });
+  } catch (error) {
+    console.error('Excel import log error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
 export default router;
