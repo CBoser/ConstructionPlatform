@@ -1,0 +1,74 @@
+2025-12-10 16:39:52 | orchestrator | INFO | Starting evening routine
+2025-12-10 16:39:52 | orchestrator | INFO | Step 1: Final PDSS sync...
+2025-12-10 16:39:52 | pdss_sync | INFO | Starting PDSS sync
+2025-12-10 16:39:52 | pdss_sync | INFO | Starting PDSS sync with folder structure
+2025-12-10 16:39:52 | pdss_sync | INFO | PDSS data saved to C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\Operations\PDSS\pdss_tracker.json
+2025-12-10 16:39:52 | orchestrator | INFO | Step 2: Running nightly backup...
+2025-12-10 16:39:52 | backup_agent | INFO | Starting nightly backup
+2025-12-10 16:39:54 | backup_agent | INFO | Backing up: C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\Operations
+2025-12-10 16:39:56 | backup_agent | INFO | Backing up: C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\BATs
+2025-12-10 16:39:57 | backup_agent | INFO | Backup complete: 1 files, 0.0 MB
+2025-12-10 16:39:58 | orchestrator | INFO | Evening routine complete in 5 seconds
+2025-12-10 16:40:08 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:40:08 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:40:08 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:40:08 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:40:08 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:40:08 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:40:08 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 16:43:45 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:43:45 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:43:45 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:43:45 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:43:45 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:43:45 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:43:45 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 16:46:35 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:46:35 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:46:35 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:46:35 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:46:35 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:46:35 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:46:35 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 16:52:30 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:52:30 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:52:30 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:52:30 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:52:30 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:52:30 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:52:30 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 16:52:44 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:52:44 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:52:44 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:52:44 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:52:44 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:52:44 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:52:44 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 16:52:49 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 16:52:49 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 16:52:49 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 16:52:49 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 16:52:49 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 16:52:49 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 16:52:49 | plan_intake | INFO | Plan Intake complete: 0 plans downloaded, 0 files routed
+2025-12-10 17:36:16 | orchestrator | INFO | Running agent: plan_intake
+2025-12-10 17:36:16 | plan_intake | INFO | Starting Plan Intake Monitor - checking 4 builder(s)
+2025-12-10 17:36:16 | plan_intake | INFO | Checking portal: hyphen
+2025-12-10 17:36:16 | plan_intake | INFO | Hyphen check would run here with Playwright
+2025-12-10 17:36:16 | plan_intake | INFO | Checking portal: supplypro
+2025-12-10 17:36:16 | plan_intake | INFO | Supplypro check would run here with Playwright
+2025-12-10 18:36:39 | orchestrator | INFO | Running agent: backup
+2025-12-10 18:36:39 | backup_agent | INFO | Starting nightly backup
+2025-12-10 18:36:41 | backup_agent | INFO | Backing up: C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\Operations
+2025-12-10 18:36:43 | backup_agent | INFO | Backing up: C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\BATs
+2025-12-10 18:36:44 | backup_agent | INFO | Backup complete: 1 files, 0.0 MB
+2025-12-10 18:37:08 | orchestrator | INFO | Running agent: completeness
+2025-12-10 18:37:08 | completeness_checker | INFO | Starting completeness check
+2025-12-10 18:37:08 | completeness_checker | INFO | Checking Richmond American: 5 subdivisions
+2025-12-10 18:37:18 | orchestrator | INFO | Running agent: pdss_sync
+2025-12-10 18:37:18 | pdss_sync | INFO | Starting PDSS sync
+2025-12-10 18:37:18 | pdss_sync | INFO | Starting PDSS sync with folder structure
+2025-12-10 18:37:18 | pdss_sync | INFO | Added new job: HOL-COYOTE_RID-Lot 47
+2025-12-10 18:37:18 | pdss_sync | INFO | PDSS data saved to C:\Users\corey.boser\OneDrive - BLDR\Sales Team One - Construction Platform\Operations\PDSS\pdss_tracker.json
+2025-12-10 18:37:18 | teams_notify | WARNING | Teams webhook URL not configured - skipping notification
+2025-12-10 18:37:18 | pdss_sync | INFO | Teams notification sent
