@@ -376,4 +376,380 @@ router.get('/status', validateServiceToken, async (req: Request, res: Response) 
   }
 });
 
+// ============================================================================
+// PLAN MANAGEMENT ROUTES
+// ============================================================================
+
+/**
+ * POST /api/v1/portal-sync/plans
+ *
+ * Creates or updates plans from Python agents
+ */
+router.post('/plans', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const plan = req.body;
+
+    if (!plan.code) {
+      return res.status(400).json({ error: 'plan code is required' });
+    }
+
+    const result = await prisma.plan.upsert({
+      where: { code: plan.code },
+      update: {
+        name: plan.name,
+        customerPlanCode: plan.customerPlanCode,
+        type: plan.type || 'SINGLE_STORY',
+        sqft: plan.sqft,
+        bedrooms: plan.bedrooms,
+        bathrooms: plan.bathrooms,
+        garage: plan.garage,
+        style: plan.style,
+        notes: plan.notes,
+        updatedAt: new Date(),
+      },
+      create: {
+        code: plan.code,
+        name: plan.name,
+        customerPlanCode: plan.customerPlanCode,
+        builderId: plan.builderId,
+        type: plan.type || 'SINGLE_STORY',
+        sqft: plan.sqft,
+        bedrooms: plan.bedrooms,
+        bathrooms: plan.bathrooms,
+        garage: plan.garage,
+        style: plan.style,
+        notes: plan.notes,
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        activityType: 'plan_sync',
+        title: `Plan ${plan.code} synced`,
+        detail: plan.name || null,
+        icon: '📋',
+      },
+    });
+
+    res.json({ success: true, plan: result });
+  } catch (error) {
+    console.error('Plan sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * POST /api/v1/portal-sync/elevations
+ *
+ * Creates or updates plan elevations
+ */
+router.post('/elevations', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const elevation = req.body;
+
+    if (!elevation.planId || !elevation.code) {
+      return res.status(400).json({ error: 'planId and code are required' });
+    }
+
+    const result = await prisma.planElevation.upsert({
+      where: {
+        planId_code: {
+          planId: elevation.planId,
+          code: elevation.code,
+        },
+      },
+      update: {
+        name: elevation.name,
+        description: elevation.description,
+        architectDesigner: elevation.architectDesigner,
+        architectDesignerDate: elevation.architectDesignerDate ? new Date(elevation.architectDesignerDate) : null,
+        structuralEngineer: elevation.structuralEngineer,
+        structuralEngineerDate: elevation.structuralEngineerDate ? new Date(elevation.structuralEngineerDate) : null,
+        iJoistCompany: elevation.iJoistCompany,
+        iJoistCompanyDate: elevation.iJoistCompanyDate ? new Date(elevation.iJoistCompanyDate) : null,
+        floorTrussCompany: elevation.floorTrussCompany,
+        floorTrussCompanyDate: elevation.floorTrussCompanyDate ? new Date(elevation.floorTrussCompanyDate) : null,
+        roofTrussCompany: elevation.roofTrussCompany,
+        roofTrussCompanyDate: elevation.roofTrussCompanyDate ? new Date(elevation.roofTrussCompanyDate) : null,
+        updatedAt: new Date(),
+      },
+      create: {
+        planId: elevation.planId,
+        code: elevation.code,
+        name: elevation.name,
+        description: elevation.description,
+        architectDesigner: elevation.architectDesigner,
+        architectDesignerDate: elevation.architectDesignerDate ? new Date(elevation.architectDesignerDate) : null,
+        structuralEngineer: elevation.structuralEngineer,
+        structuralEngineerDate: elevation.structuralEngineerDate ? new Date(elevation.structuralEngineerDate) : null,
+        iJoistCompany: elevation.iJoistCompany,
+        iJoistCompanyDate: elevation.iJoistCompanyDate ? new Date(elevation.iJoistCompanyDate) : null,
+        floorTrussCompany: elevation.floorTrussCompany,
+        floorTrussCompanyDate: elevation.floorTrussCompanyDate ? new Date(elevation.floorTrussCompanyDate) : null,
+        roofTrussCompany: elevation.roofTrussCompany,
+        roofTrussCompanyDate: elevation.roofTrussCompanyDate ? new Date(elevation.roofTrussCompanyDate) : null,
+      },
+    });
+
+    res.json({ success: true, elevation: result });
+  } catch (error) {
+    console.error('Elevation sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * POST /api/v1/portal-sync/plan-documents
+ *
+ * Associates documents with plans or elevations
+ */
+router.post('/plan-documents', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const doc = req.body;
+
+    if (!doc.planId || !doc.fileName) {
+      return res.status(400).json({ error: 'planId and fileName are required' });
+    }
+
+    const result = await prisma.planDocument.create({
+      data: {
+        planId: doc.planId,
+        elevationId: doc.elevationId || null,
+        fileName: doc.fileName,
+        fileType: doc.fileType || 'OTHER',
+        filePath: doc.filePath,
+        fileSize: doc.fileSize || 0,
+        mimeType: doc.mimeType || 'application/octet-stream',
+        version: doc.version || 1,
+        documentDate: doc.documentDate ? new Date(doc.documentDate) : new Date(),
+        changeNotes: doc.changeNotes,
+        uploadedBy: doc.uploadedBy,
+      },
+    });
+
+    // Log activity
+    await prisma.activityLog.create({
+      data: {
+        activityType: 'document_upload',
+        title: `Document uploaded: ${doc.fileName}`,
+        detail: doc.fileType || null,
+        icon: '📄',
+      },
+    });
+
+    res.json({ success: true, document: result });
+  } catch (error) {
+    console.error('Plan document sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * GET /api/v1/portal-sync/documents
+ *
+ * Gets documents, optionally filtered by jobId, planId, or communityId
+ */
+router.get('/documents', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const { jobId, planId, communityId, lotNumber } = req.query;
+
+    const where: Record<string, unknown> = {};
+    if (planId) where.planId = planId;
+    if (communityId) where.communityId = communityId;
+    if (lotNumber) where.lotNumber = parseInt(lotNumber as string, 10);
+
+    const documents = await prisma.portalDocument.findMany({
+      where,
+      orderBy: { syncedAt: 'desc' },
+      take: 100,
+    });
+
+    res.json(documents);
+  } catch (error) {
+    console.error('Documents fetch error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * PATCH /api/v1/portal-sync/documents/:id
+ *
+ * Updates document status
+ */
+router.patch('/documents/:id', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status, processedAt } = req.body;
+
+    const result = await prisma.portalDocument.update({
+      where: { id },
+      data: {
+        status,
+        processedAt: processedAt ? new Date(processedAt) : undefined,
+      },
+    });
+
+    res.json({ success: true, document: result });
+  } catch (error) {
+    console.error('Document update error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * PATCH /api/v1/portal-sync/documents/:id/archive
+ *
+ * Archives a document
+ */
+router.patch('/documents/:id/archive', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { isArchived, archiveDate, archiveNotes } = req.body;
+
+    // Note: archiving for PlanDocument model (not PortalDocument)
+    // This would need to be adjusted based on which document type you're archiving
+    // For now, just update the portal document status
+    const result = await prisma.portalDocument.update({
+      where: { id },
+      data: {
+        status: isArchived ? 'archived' : 'received',
+      },
+    });
+
+    res.json({ success: true, document: result });
+  } catch (error) {
+    console.error('Document archive error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+// ============================================================================
+// JOB TRACKING ROUTES
+// ============================================================================
+
+/**
+ * POST /api/v1/portal-sync/stats
+ *
+ * Receives aggregated stats from Python agents for dashboard
+ */
+router.post('/stats', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const { type, data } = req.body;
+
+    // Store stats as a system alert of type "info" for now
+    // In a full implementation, you might have a dedicated stats table
+    await prisma.systemAlert.create({
+      data: {
+        alertType: 'info',
+        source: `stats_${type}`,
+        title: `${type} stats updated`,
+        message: `Dashboard stats for ${type} updated`,
+        details: data,
+      },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Stats sync error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * GET /api/v1/portal-sync/jobs/upcoming
+ *
+ * Gets jobs with upcoming start dates
+ */
+router.get('/jobs/upcoming', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const days = parseInt(req.query.days as string, 10) || 7;
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() + days);
+
+    const jobs = await prisma.job.findMany({
+      where: {
+        startDate: {
+          gte: now,
+          lte: cutoff,
+        },
+        status: {
+          in: ['APPROVED', 'ESTIMATED'],
+        },
+      },
+      include: {
+        customer: true,
+        plan: true,
+        elevation: true,
+        community: true,
+        lot: true,
+      },
+      orderBy: { startDate: 'asc' },
+    });
+
+    res.json(jobs);
+  } catch (error) {
+    console.error('Upcoming jobs fetch error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
+/**
+ * GET /api/v1/portal-sync/jobs/summary
+ *
+ * Gets job summary statistics
+ */
+router.get('/jobs/summary', validateServiceToken, async (req: Request, res: Response) => {
+  try {
+    const [
+      totalJobs,
+      draftJobs,
+      estimatedJobs,
+      approvedJobs,
+      inProgressJobs,
+      completedJobs,
+    ] = await Promise.all([
+      prisma.job.count(),
+      prisma.job.count({ where: { status: 'DRAFT' } }),
+      prisma.job.count({ where: { status: 'ESTIMATED' } }),
+      prisma.job.count({ where: { status: 'APPROVED' } }),
+      prisma.job.count({ where: { status: 'IN_PROGRESS' } }),
+      prisma.job.count({ where: { status: 'COMPLETED' } }),
+    ]);
+
+    // Get jobs starting this week
+    const now = new Date();
+    const weekFromNow = new Date();
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    const startingThisWeek = await prisma.job.count({
+      where: {
+        startDate: {
+          gte: now,
+          lte: weekFromNow,
+        },
+        status: {
+          in: ['APPROVED', 'ESTIMATED'],
+        },
+      },
+    });
+
+    res.json({
+      total: totalJobs,
+      byStatus: {
+        draft: draftJobs,
+        estimated: estimatedJobs,
+        approved: approvedJobs,
+        inProgress: inProgressJobs,
+        completed: completedJobs,
+      },
+      startingThisWeek,
+    });
+  } catch (error) {
+    console.error('Job summary fetch error:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
+  }
+});
+
 export default router;
