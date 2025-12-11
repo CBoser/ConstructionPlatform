@@ -32,6 +32,7 @@ model User {
   auditLogs        AuditLog[]
   notifications    Notification[]
   varianceReviews  VarianceReview[]
+  activityLogs     ActivityLog[]
 
   @@index([email])
   @@index([role])
@@ -78,6 +79,10 @@ model Customer {
   plans           Plan[]              // Plans owned by this builder
   customerPricing CustomerPricing[]
   variancePatterns VariancePattern[]
+  portalOrders    PortalOrder[]
+  portalDocuments PortalDocument[]
+  systemAlerts    SystemAlert[]
+  activityLogs    ActivityLog[]
 
   @@index([billToId])
   @@index([locationCode])
@@ -214,6 +219,7 @@ model Plan {
   jobs             Job[]
   variancePatterns VariancePattern[]
   documents        PlanDocument[]  // Uploaded documents
+  portalDocuments  PortalDocument[]  // Documents synced from portals
 
   @@index([code])
   @@index([type])
@@ -676,6 +682,10 @@ model Community {
   lots             Lot[]
   jobs             Job[]
   variancePatterns VariancePattern[]
+  portalOrders     PortalOrder[]
+  portalDocuments  PortalDocument[]
+  systemAlerts     SystemAlert[]
+  deliverySchedules DeliverySchedule[]
 
   @@index([customerId])
   @@index([isActive])
@@ -1107,6 +1117,157 @@ model AuditLog {
   @@index([userId])
   @@index([entityType, entityId])
   @@index([createdAt])
+}
+
+// ============================================================================
+// PORTAL SYNC & DASHBOARD (Python Agent Integration)
+// ============================================================================
+// These models support integration with STO Python agents for portal syncing,
+// alerts, activity tracking, and delivery scheduling.
+
+model PortalOrder {
+  id              String    @id @default(uuid())
+  externalId      String    @unique @map("external_id")  // PO number from SupplyPro/Hyphen
+  portal          String    // "supplypro", "hyphen"
+  orderType       String    @map("order_type") // "po", "bid", "epo"
+  category        String?   // "Lumber", "Trusses", "Siding", etc.
+  status          String    // "pending", "approved", "delivered", "late"
+  amount          Decimal   @db.Decimal(12, 2)
+  description     String?
+  dueDate         DateTime? @map("due_date")
+  completedAt     DateTime? @map("completed_at")
+
+  // Relations to existing models
+  customerId      String?   @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  communityId     String?   @map("community_id")
+  community       Community? @relation(fields: [communityId], references: [id])
+  lotNumber       Int?      @map("lot_number")
+
+  // Metadata
+  rawData         Json?     @map("raw_data")  // Full response from portal
+  syncedAt        DateTime  @default(now()) @map("synced_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([portal, orderType])
+  @@index([status])
+  @@index([dueDate])
+  @@map("portal_orders")
+}
+
+model PortalDocument {
+  id              String    @id @default(uuid())
+  externalId      String?   @map("external_id")  // ID from source system
+  portal          String    // "supplypro", "hyphen", "onedrive"
+  filename        String
+  docType         String?   @map("doc_type")  // "ARCH_DRAWINGS", "CALC_PKG", "TRUSS_CALCS"
+  fileUrl         String?   @map("file_url")  // URL or path to document
+  fileSize        Int?      @map("file_size")
+
+  // Relations
+  customerId      String?   @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  communityId     String?   @map("community_id")
+  community       Community? @relation(fields: [communityId], references: [id])
+  planId          String?   @map("plan_id")
+  plan            Plan?     @relation(fields: [planId], references: [id])
+  lotNumber       Int?      @map("lot_number")
+
+  status          String    @default("received")  // received, processed, archived
+  processedAt     DateTime? @map("processed_at")
+  syncedAt        DateTime  @default(now()) @map("synced_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([portal, docType])
+  @@index([customerId])
+  @@map("portal_documents")
+}
+
+model SystemAlert {
+  id              String    @id @default(uuid())
+  alertType       String    @map("alert_type")  // "critical", "warning", "info"
+  source          String    // "portal_sync", "completeness_check", "variance"
+  title           String
+  message         String
+  details         Json?
+  actionUrl       String?   @map("action_url")
+
+  // Relations
+  customerId      String?   @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  communityId     String?   @map("community_id")
+  community       Community? @relation(fields: [communityId], references: [id])
+  orderId         String?   @map("order_id")
+
+  isRead          Boolean   @default(false) @map("is_read")
+  isDismissed     Boolean   @default(false) @map("is_dismissed")
+  readAt          DateTime? @map("read_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([alertType, isDismissed])
+  @@index([createdAt])
+  @@map("system_alerts")
+}
+
+model ActivityLog {
+  id              String    @id @default(uuid())
+  activityType    String    @map("activity_type")  // "po_approved", "bid_submitted", "delivery", "document"
+  title           String
+  detail          String?
+  amount          Decimal?  @db.Decimal(12, 2)
+  icon            String?
+
+  // Relations
+  userId          String?   @map("user_id")
+  user            User?     @relation(fields: [userId], references: [id])
+  customerId      String?   @map("customer_id")
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  orderId         String?   @map("order_id")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@index([activityType])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+
+model DeliverySchedule {
+  id              String    @id @default(uuid())
+  portal          String    // "supplypro", "hyphen"
+  orderId         String?   @map("order_id")
+  scheduledTime   DateTime  @map("scheduled_time")
+  title           String
+  location        String?
+  status          String    @default("scheduled")  // scheduled, in_transit, delivered
+
+  // Relations
+  communityId     String?   @map("community_id")
+  community       Community? @relation(fields: [communityId], references: [id])
+  lotNumber       Int?      @map("lot_number")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([scheduledTime])
+  @@index([status])
+  @@map("delivery_schedules")
+}
+
+model PortalSyncLog {
+  id              String    @id @default(uuid())
+  portal          String
+  syncType        String    @map("sync_type")  // "orders", "documents", "deliveries"
+  status          String    // "started", "completed", "failed"
+  itemsFound      Int       @default(0) @map("items_found")
+  itemsProcessed  Int       @default(0) @map("items_processed")
+  errors          Json?
+  startedAt       DateTime  @default(now()) @map("started_at")
+  completedAt     DateTime? @map("completed_at")
+
+  @@index([portal, syncType])
+  @@index([startedAt])
+  @@map("portal_sync_logs")
 }
 
 // ============================================================================
