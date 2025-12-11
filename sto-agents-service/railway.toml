@@ -1,0 +1,27 @@
+# Railway Configuration for STO Agents Service
+# https://docs.railway.app/reference/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+startCommand = "uvicorn main:app --host 0.0.0.0 --port 8080"
+healthcheckPath = "/health"
+healthcheckTimeout = 10
+numReplicas = 1
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Note: Railway cron jobs are configured in the Railway dashboard
+# or via the API, not in this file.
+#
+# Recommended cron schedules:
+# - SupplyPro sync: */15 * * * * (every 15 minutes)
+# - Plan intake: */30 * * * * (every 30 minutes)
+# - Completeness check: 0 3 * * * (daily at 3 AM)
+#
+# To trigger syncs via cron, use curl:
+# curl -X POST https://your-service.up.railway.app/sync/supplypro
+# curl -X POST https://your-service.up.railway.app/sync/plan-intake
+# curl -X POST https://your-service.up.railway.app/sync/completeness

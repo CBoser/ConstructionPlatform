@@ -4,6 +4,8 @@ import customerRoutes from '../customer';
 import spreadsheetRoutes from '../spreadsheet';
 import planRoutes from '../plan';
 import materialRoutes from '../material';
+import portalSyncRoutes from '../portalSync';
+import dashboardRoutes from '../dashboard';
 import { v1VersionHeader } from '../../middleware/apiVersion';
 
 /**
@@ -12,10 +14,12 @@ import { v1VersionHeader } from '../../middleware/apiVersion';
  * Aggregates all v1 API routes under /api/v1
  *
  * Routes:
- * - /api/v1/auth       - Authentication endpoints
- * - /api/v1/customers  - Customer management
- * - /api/v1/plans      - Plan management
- * - /api/v1/materials  - Material management
+ * - /api/v1/auth         - Authentication endpoints
+ * - /api/v1/customers    - Customer management
+ * - /api/v1/plans        - Plan management
+ * - /api/v1/materials    - Material management
+ * - /api/v1/portal-sync  - Portal sync endpoints (Python agent integration)
+ * - /api/v1/dashboard    - Dashboard data endpoints
  */
 
 const v1Router = Router();
@@ -33,5 +37,9 @@ v1Router.use('/materials', materialRoutes);
 
 // Tools & Utilities
 v1Router.use('/spreadsheet', spreadsheetRoutes);
+
+// Portal Integration & Dashboard (Python Agent Integration)
+v1Router.use('/portal-sync', portalSyncRoutes);
+v1Router.use('/dashboard', dashboardRoutes);
 
 export default v1Router;

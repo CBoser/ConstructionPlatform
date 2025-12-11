@@ -1,0 +1,35 @@
+# STO Agents Service - Python Dependencies
+
+# Web Framework
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# HTTP Client (for MindFlow API calls)
+httpx==0.28.1
+
+# Data validation
+pydantic==2.10.3
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Async support
+anyio==4.7.0
+
+# Optional: For portal scraping (uncomment as needed)
+# selenium==4.27.1
+# webdriver-manager==4.0.2
+# beautifulsoup4==4.12.3
+# lxml==5.3.0
+
+# Optional: For OneDrive/SharePoint integration
+# msal==1.31.0
+# azure-identity==1.19.0
+# msgraph-sdk==1.16.0
+
+# Optional: For scheduling (if not using Railway cron)
+# apscheduler==3.10.4
+
+# Development
+pytest==8.3.4
+pytest-asyncio==0.25.0
