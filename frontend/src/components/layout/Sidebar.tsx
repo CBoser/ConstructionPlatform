@@ -50,6 +50,7 @@ const navigationItems: NavItem[] = [
     ],
   },
   { path: '/reports', label: 'Reports', icon: '📊' },
+  { path: '/feedback', label: 'Feedback', icon: '💬' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 

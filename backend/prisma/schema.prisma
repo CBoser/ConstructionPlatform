@@ -36,6 +36,11 @@ model User {
   pdssPlanAssigned PDSSPlanStatus[]  // PDSS plans assigned to this user
   pdssJobAssigned  PDSSJobStatus[]   // PDSS jobs assigned to this user
 
+  // Feedback relations
+  feedbackSubmitted  Feedback[]         @relation("FeedbackSubmitter")
+  feedbackResolved   Feedback[]         @relation("FeedbackResolver")
+  feedbackResponses  FeedbackResponse[]
+
   @@index([email])
   @@index([role])
   @@map("users")
@@ -1697,4 +1702,204 @@ model OptionSuffix {
   @@index([suffixCode])
   @@index([abbreviation])
   @@map("option_suffixes")
+}
+
+// ============================================================================
+// FEEDBACK & LEARNING SYSTEM
+// ============================================================================
+// Captures feedback for continuous improvement of estimates, processes, and data quality
+
+enum FeedbackType {
+  VARIANCE_REPORT    // Estimate vs Actual comparison
+  QUALITY_ISSUE      // Data quality problem identified
+  PROCESS_FAILURE    // Agent/automation failure
+  SUGGESTION         // User improvement suggestion
+  CORRECTION         // User corrected auto-generated data
+  THUMBS_UP          // Quick positive feedback
+  THUMBS_DOWN        // Quick negative feedback
+}
+
+enum FeedbackCategory {
+  MATERIAL           // Material quantity/cost variance
+  TIMING             // Schedule/timing variance
+  DOCUMENT           // Document quality/completeness
+  ESTIMATE           // Estimate accuracy
+  IMPORT             // Data import quality
+  AGENT              // Python agent performance
+  UI_UX              // User interface feedback
+  OTHER              // Miscellaneous
+}
+
+enum FeedbackStatus {
+  NEW                // Just submitted
+  REVIEWED           // Looked at by admin
+  IN_PROGRESS        // Being addressed
+  RESOLVED           // Fixed/implemented
+  DISMISSED          // Not actionable
+  DEFERRED           // Will address later
+}
+
+// Main Feedback entries
+model Feedback {
+  id              String           @id @default(uuid())
+  feedbackType    FeedbackType     @map("feedback_type")
+  category        FeedbackCategory @default(OTHER)
+
+  // Entity being rated/reviewed
+  entityType      String           @map("entity_type")   // Job, Plan, Estimate, Agent, Import
+  entityId        String           @map("entity_id")
+  entityName      String?          @map("entity_name")   // Human-readable reference
+
+  // Quick feedback
+  rating          Int?             // 1-5 star rating or -1/+1 for thumbs
+
+  // Variance tracking (for estimates)
+  estimatedValue  Decimal?         @db.Decimal(12, 2) @map("estimated_value")
+  actualValue     Decimal?         @db.Decimal(12, 2) @map("actual_value")
+  varianceAmount  Decimal?         @db.Decimal(12, 2) @map("variance_amount")
+  variancePercent Decimal?         @db.Decimal(5, 2) @map("variance_percent")
+
+  // Details
+  title           String?
+  description     String?          @db.Text
+  notes           String?          @db.Text
+
+  // Context
+  context         Json?            // Additional structured data
+  tags            String[]         @default([])
+
+  // Source tracking
+  source          String?          // "web", "agent", "import", "manual"
+  submittedById   String?          @map("submitted_by_id")
+  submittedBy     User?            @relation("FeedbackSubmitter", fields: [submittedById], references: [id])
+
+  // Resolution tracking
+  status          FeedbackStatus   @default(NEW)
+  resolvedById    String?          @map("resolved_by_id")
+  resolvedBy      User?            @relation("FeedbackResolver", fields: [resolvedById], references: [id])
+  resolvedAt      DateTime?        @map("resolved_at")
+  actionTaken     String?          @db.Text @map("action_taken")
+
+  // Timestamps
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  responses       FeedbackResponse[]
+  patterns        FeedbackPattern[] @relation("PatternFeedback")
+
+  @@index([feedbackType])
+  @@index([category])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@index([submittedById])
+  @@index([createdAt])
+  @@map("feedback")
+}
+
+// Feedback responses/comments
+model FeedbackResponse {
+  id              String   @id @default(uuid())
+  feedbackId      String   @map("feedback_id")
+  feedback        Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  responderId     String   @map("responder_id")
+  responder       User     @relation(fields: [responderId], references: [id])
+
+  message         String   @db.Text
+  isInternal      Boolean  @default(false) @map("is_internal") // Internal team notes
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([feedbackId])
+  @@index([responderId])
+  @@map("feedback_responses")
+}
+
+// Detected patterns from feedback analysis
+model FeedbackPattern {
+  id              String   @id @default(uuid())
+
+  // Pattern identification
+  patternType     String   @map("pattern_type")   // "over_estimate", "under_estimate", "missing_doc"
+  patternName     String   @map("pattern_name")
+  description     String?  @db.Text
+
+  // Pattern scope
+  entityType      String?  @map("entity_type")    // Plan, Builder, MaterialClass, etc.
+  entityId        String?  @map("entity_id")
+  entityName      String?  @map("entity_name")
+
+  // Statistics
+  occurrenceCount Int      @default(0) @map("occurrence_count")
+  avgVariance     Decimal? @db.Decimal(12, 2) @map("avg_variance")
+  avgVariancePct  Decimal? @db.Decimal(5, 2) @map("avg_variance_pct")
+  totalImpact     Decimal? @db.Decimal(12, 2) @map("total_impact")
+
+  // Confidence
+  confidence      Decimal? @db.Decimal(3, 2)      // 0.00 to 1.00
+  sampleSize      Int      @default(0) @map("sample_size")
+
+  // Recommended action
+  recommendation  String?  @db.Text
+  adjustmentFactor Decimal? @db.Decimal(5, 4) @map("adjustment_factor") // e.g., 1.05 for 5% increase
+
+  // Status
+  isActive        Boolean  @default(true) @map("is_active")
+  isApplied       Boolean  @default(false) @map("is_applied")  // Has adjustment been applied?
+  appliedAt       DateTime? @map("applied_at")
+  appliedById     String?  @map("applied_by_id")
+
+  // Analysis metadata
+  lastAnalyzedAt  DateTime? @map("last_analyzed_at")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Related feedback items that formed this pattern
+  feedbackItems   Feedback[] @relation("PatternFeedback")
+
+  @@index([patternType])
+  @@index([entityType, entityId])
+  @@index([isActive])
+  @@map("feedback_patterns")
+}
+
+// Variance tracking summary (aggregate stats)
+model VarianceSummary {
+  id              String   @id @default(uuid())
+
+  // Period
+  periodType      String   @map("period_type")    // "daily", "weekly", "monthly"
+  periodStart     DateTime @map("period_start")
+  periodEnd       DateTime @map("period_end")
+
+  // Scope
+  entityType      String   @map("entity_type")    // "all", "builder", "plan", "material_class"
+  entityId        String?  @map("entity_id")
+  entityName      String?  @map("entity_name")
+
+  // Aggregate statistics
+  totalEstimated  Decimal  @db.Decimal(14, 2) @map("total_estimated")
+  totalActual     Decimal  @db.Decimal(14, 2) @map("total_actual")
+  totalVariance   Decimal  @db.Decimal(14, 2) @map("total_variance")
+  variancePercent Decimal  @db.Decimal(5, 2) @map("variance_percent")
+
+  // Counts
+  jobCount        Int      @map("job_count")
+  overEstimates   Int      @default(0) @map("over_estimates")
+  underEstimates  Int      @default(0) @map("under_estimates")
+  onTarget        Int      @default(0) @map("on_target")        // Within threshold
+
+  // Distribution
+  avgVariance     Decimal? @db.Decimal(12, 2) @map("avg_variance")
+  medianVariance  Decimal? @db.Decimal(12, 2) @map("median_variance")
+  stdDevVariance  Decimal? @db.Decimal(12, 2) @map("std_dev_variance")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@unique([periodType, periodStart, entityType, entityId])
+  @@index([periodType, periodStart])
+  @@index([entityType, entityId])
+  @@map("variance_summaries")
 }

@@ -68,6 +68,7 @@ const Schedule = React.lazy(() => import('./pages/schedule'));
 // Other pages
 const Reports = React.lazy(() => import('./pages/reports'));
 const Settings = React.lazy(() => import('./pages/settings'));
+const Feedback = React.lazy(() => import('./pages/feedback'));
 
 // Tools
 const SpreadsheetExtractor = React.lazy(() => import('./pages/tools/SpreadsheetExtractor'));
@@ -257,6 +258,16 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <Settings />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/feedback"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <Feedback />
                       </MainLayout>
                     </ProtectedRoute>
                   }
