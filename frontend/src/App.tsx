@@ -58,6 +58,9 @@ const Plans = React.lazy(() => import('./pages/plans'));
 const Jobs = React.lazy(() => import('./pages/jobs'));
 const Takeoffs = React.lazy(() => import('./pages/jobs/Takeoffs'));
 
+// PDSS (Plan Data Status Sheet)
+const PDSS = React.lazy(() => import('./pages/pdss'));
+
 // Transaction pages
 const PurchaseOrders = React.lazy(() => import('./pages/purchase-orders'));
 const Schedule = React.lazy(() => import('./pages/schedule'));
@@ -65,9 +68,11 @@ const Schedule = React.lazy(() => import('./pages/schedule'));
 // Other pages
 const Reports = React.lazy(() => import('./pages/reports'));
 const Settings = React.lazy(() => import('./pages/settings'));
+const Feedback = React.lazy(() => import('./pages/feedback'));
 
 // Tools
 const SpreadsheetExtractor = React.lazy(() => import('./pages/tools/SpreadsheetExtractor'));
+const DataImport = React.lazy(() => import('./pages/tools/DataImport'));
 
 import './styles/App.css';
 import './styles/design-system.css';
@@ -193,6 +198,16 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/operations/pdss"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <PDSS />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Transaction routes */}
                 <Route
@@ -247,6 +262,16 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/feedback"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <Feedback />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Tools routes */}
                 <Route
@@ -255,6 +280,16 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <SpreadsheetExtractor />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tools/import"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <DataImport />
                       </MainLayout>
                     </ProtectedRoute>
                   }

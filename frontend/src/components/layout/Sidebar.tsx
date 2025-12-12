@@ -28,6 +28,7 @@ const navigationItems: NavItem[] = [
     children: [
       { path: '/operations/jobs', label: 'Jobs', icon: '🏗️' },
       { path: '/operations/takeoffs', label: 'Takeoffs', icon: '📐' },
+      { path: '/operations/pdss', label: 'PDSS Tracker', icon: '📋' },
     ],
   },
   {
@@ -45,9 +46,11 @@ const navigationItems: NavItem[] = [
     icon: '🛠️',
     children: [
       { path: '/tools/spreadsheet-extractor', label: 'Spreadsheet Extractor', icon: '📊' },
+      { path: '/tools/import', label: 'Data Import', icon: '📥' },
     ],
   },
   { path: '/reports', label: 'Reports', icon: '📊' },
+  { path: '/feedback', label: 'Feedback', icon: '💬' },
   { path: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 
