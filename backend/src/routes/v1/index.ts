@@ -4,6 +4,7 @@ import customerRoutes from '../customer';
 import spreadsheetRoutes from '../spreadsheet';
 import planRoutes from '../plan';
 import materialRoutes from '../material';
+import jobRoutes from '../job';
 import portalSyncRoutes from '../portalSync';
 import dashboardRoutes from '../dashboard';
 import { v1VersionHeader } from '../../middleware/apiVersion';
@@ -18,6 +19,7 @@ import { v1VersionHeader } from '../../middleware/apiVersion';
  * - /api/v1/customers    - Customer management
  * - /api/v1/plans        - Plan management
  * - /api/v1/materials    - Material management
+ * - /api/v1/jobs         - Job management
  * - /api/v1/portal-sync  - Portal sync endpoints (Python agent integration)
  * - /api/v1/dashboard    - Dashboard data endpoints
  */
@@ -34,6 +36,9 @@ v1Router.use('/customers', customerRoutes);
 // Plan & Material Management
 v1Router.use('/plans', planRoutes);
 v1Router.use('/materials', materialRoutes);
+
+// Job Management
+v1Router.use('/jobs', jobRoutes);
 
 // Tools & Utilities
 v1Router.use('/spreadsheet', spreadsheetRoutes);

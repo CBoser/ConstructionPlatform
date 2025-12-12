@@ -45,6 +45,7 @@ const navigationItems: NavItem[] = [
     icon: '🛠️',
     children: [
       { path: '/tools/spreadsheet-extractor', label: 'Spreadsheet Extractor', icon: '📊' },
+      { path: '/tools/import', label: 'Data Import', icon: '📥' },
     ],
   },
   { path: '/reports', label: 'Reports', icon: '📊' },

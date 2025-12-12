@@ -68,6 +68,7 @@ const Settings = React.lazy(() => import('./pages/settings'));
 
 // Tools
 const SpreadsheetExtractor = React.lazy(() => import('./pages/tools/SpreadsheetExtractor'));
+const DataImport = React.lazy(() => import('./pages/tools/DataImport'));
 
 import './styles/App.css';
 import './styles/design-system.css';
@@ -255,6 +256,16 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <SpreadsheetExtractor />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tools/import"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <DataImport />
                       </MainLayout>
                     </ProtectedRoute>
                   }
