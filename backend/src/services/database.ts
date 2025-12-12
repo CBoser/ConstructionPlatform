@@ -163,5 +163,6 @@ class DatabaseService {
 
 // Export singleton instance
 export const db = DatabaseService.getInstance().getClient();
+export const prisma = db; // Alias for backwards compatibility
 export const dbService = DatabaseService.getInstance();
 export default DatabaseService;

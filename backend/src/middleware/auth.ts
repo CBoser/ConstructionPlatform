@@ -55,9 +55,9 @@ export const authenticateToken = async (
  *   requireRole('ADMIN', 'ESTIMATOR')  // spread args
  *   requireRole(['ADMIN', 'ESTIMATOR']) // array
  */
-export const requireRole = (...args: (UserRole | UserRole[])[]) => {
+export const requireRole = (...args: (UserRole | UserRole[] | string | string[])[]) => {
   // Flatten args to support both array and spread syntax
-  const allowedRoles: UserRole[] = args.flat() as UserRole[];
+  const allowedRoles = args.flat() as UserRole[];
 
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {

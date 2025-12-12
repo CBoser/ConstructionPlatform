@@ -796,10 +796,7 @@ router.post('/jobs', validateServiceToken, async (req: Request, res: Response) =
       if (!customerId && job.builder) {
         const customer = await prisma.customer.findFirst({
           where: {
-            OR: [
-              { customerName: { contains: job.builder, mode: 'insensitive' } },
-              { shortName: { equals: job.builder, mode: 'insensitive' } },
-            ],
+            customerName: { contains: job.builder, mode: 'insensitive' },
           },
         });
         if (customer) customerId = customer.id;
@@ -821,13 +818,39 @@ router.post('/jobs', validateServiceToken, async (req: Request, res: Response) =
         if (plan) planId = plan.id;
       }
 
-      // Create new job
+      // Validate required fields for job creation
+      if (!customerId || !planId) {
+        return res.status(400).json({
+          error: 'Cannot create job without customer and plan',
+          details: { customerId: !!customerId, planId: !!planId },
+        });
+      }
+
+      // Get or create a system user for service-created jobs
+      let systemUser = await prisma.user.findFirst({
+        where: { email: 'system@mindflow.local' },
+      });
+      if (!systemUser) {
+        systemUser = await prisma.user.create({
+          data: {
+            email: 'system@mindflow.local',
+            passwordHash: 'SERVICE_ACCOUNT_NO_LOGIN',
+            firstName: 'System',
+            lastName: 'Service',
+            role: 'ADMIN',
+            isActive: true,
+          },
+        });
+      }
+
+      // Create new job using relations
       result = await prisma.job.create({
         data: {
           jobNumber: job.jobNumber,
-          customerId: customerId,
-          communityId: communityId,
-          planId: planId,
+          customer: { connect: { id: customerId } },
+          plan: { connect: { id: planId } },
+          community: communityId ? { connect: { id: communityId } } : undefined,
+          createdBy: { connect: { id: job.createdById || systemUser.id } },
           status: job.status || 'DRAFT',
           startDate: job.startDate ? new Date(job.startDate) : null,
           notes: job.notes,
@@ -870,36 +893,51 @@ router.post('/communities', validateServiceToken, async (req: Request, res: Resp
     if (!customerId && community.builder) {
       const customer = await prisma.customer.findFirst({
         where: {
-          OR: [
-            { customerName: { contains: community.builder, mode: 'insensitive' } },
-            { shortName: { equals: community.builder, mode: 'insensitive' } },
-          ],
+          customerName: { contains: community.builder, mode: 'insensitive' },
         },
       });
       if (customer) customerId = customer.id;
     }
 
-    // Upsert community
-    const result = await prisma.community.upsert({
-      where: { name: community.name },
-      update: {
-        city: community.city || undefined,
-        county: community.county || undefined,
-        shippingYard: community.shippingYard || undefined,
-        lotPrefix: community.lotPrefix || undefined,
-        isActive: community.isActive ?? true,
-        updatedAt: new Date(),
-      },
-      create: {
+    // customerId is required for Community
+    if (!customerId) {
+      return res.status(400).json({ error: 'Customer ID or valid builder name is required' });
+    }
+
+    // Find existing community by name and customer
+    const existing = await prisma.community.findFirst({
+      where: {
         name: community.name,
         customerId: customerId,
-        city: community.city,
-        county: community.county,
-        shippingYard: community.shippingYard,
-        lotPrefix: community.lotPrefix,
-        isActive: community.isActive ?? true,
       },
     });
+
+    let result;
+    if (existing) {
+      // Update existing community
+      result = await prisma.community.update({
+        where: { id: existing.id },
+        data: {
+          shippingYard: community.shippingYard || existing.shippingYard,
+          jurisdiction: community.jurisdiction || existing.jurisdiction,
+          region: community.region || existing.region,
+          isActive: community.isActive ?? existing.isActive,
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new community
+      result = await prisma.community.create({
+        data: {
+          name: community.name,
+          customerId: customerId,
+          shippingYard: community.shippingYard || 'DEFAULT',
+          jurisdiction: community.jurisdiction,
+          region: community.region,
+          isActive: community.isActive ?? true,
+        },
+      });
+    }
 
     // Log activity
     await prisma.activityLog.create({
