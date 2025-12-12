@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
@@ -26,6 +27,7 @@ type ViewMode = 'table' | 'cards';
 
 const Plans: React.FC = () => {
   const { showToast } = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [isExporting, setIsExporting] = useState(false);
 
   // View mode state
@@ -63,6 +65,15 @@ const Plans: React.FC = () => {
   const { data, isLoading, error, refetch } = usePlans(query);
   const { data: stats } = usePlanStats();
   const deletePlan = useDeletePlan();
+
+  // Check for upload query parameter from dashboard quick action
+  useEffect(() => {
+    if (searchParams.get('upload') === 'true') {
+      setIsImportDialogOpen(true);
+      // Remove the query param after opening
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // Handle search
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
