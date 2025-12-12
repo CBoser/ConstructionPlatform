@@ -166,12 +166,12 @@ router.get('/plans/stats', authenticateToken, async (req: Request, res: Response
       success: true,
       data: {
         total,
-        byStatus: byStatus.map((s) => ({ status: s.planStatus, count: s._count })),
-        byTakeoff: byTakeoff.map((s) => ({ status: s.takeoffStatus, count: s._count })),
-        byPriority: byPriority.map((s) => ({ priority: s.priority, count: s._count })),
+        byStatus: byStatus.map((s: { planStatus: string; _count: number }) => ({ status: s.planStatus, count: s._count })),
+        byTakeoff: byTakeoff.map((s: { takeoffStatus: string; _count: number }) => ({ status: s.takeoffStatus, count: s._count })),
+        byPriority: byPriority.map((s: { priority: string; _count: number }) => ({ priority: s.priority, count: s._count })),
         needsAttention: byPriority
-          .filter((p) => p.priority === 'CRITICAL' || p.priority === 'HIGH')
-          .reduce((sum, p) => sum + p._count, 0),
+          .filter((p: { priority: string; _count: number }) => p.priority === 'CRITICAL' || p.priority === 'HIGH')
+          .reduce((sum: number, p: { priority: string; _count: number }) => sum + p._count, 0),
       },
     });
   } catch (error) {
@@ -467,8 +467,8 @@ router.get('/jobs/stats', authenticateToken, async (req: Request, res: Response,
       success: true,
       data: {
         total,
-        byStatus: byStatus.map((s) => ({ status: s.planStatus, count: s._count })),
-        byPriority: byPriority.map((s) => ({ priority: s.priority, count: s._count })),
+        byStatus: byStatus.map((s: { planStatus: string; _count: number }) => ({ status: s.planStatus, count: s._count })),
+        byPriority: byPriority.map((s: { priority: string; _count: number }) => ({ priority: s.priority, count: s._count })),
         incompleteDocuments: incompleteCount,
       },
     });
@@ -775,8 +775,8 @@ router.get('/dashboard', authenticateToken, async (req: Request, res: Response, 
     res.json({
       success: true,
       data: {
-        planStats: planStats.map((s) => ({ status: s.planStatus, count: s._count })),
-        jobStats: jobStats.map((s) => ({ status: s.planStatus, count: s._count })),
+        planStats: planStats.map((s: { planStatus: string; _count: number }) => ({ status: s.planStatus, count: s._count })),
+        jobStats: jobStats.map((s: { planStatus: string; _count: number }) => ({ status: s.planStatus, count: s._count })),
         myAssignments: {
           plans: myAssignedPlans,
           jobs: myAssignedJobs,

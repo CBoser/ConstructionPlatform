@@ -238,12 +238,12 @@ router.get('/stats', authenticateToken, async (req: Request, res: Response, next
       success: true,
       data: {
         total,
-        byStatus: byStatus.map((s) => ({ status: s.status, count: s._count })),
+        byStatus: byStatus.map((s: { status: string; _count: number }) => ({ status: s.status, count: s._count })),
         upcomingStarts,
         recentlyCompleted,
         activeCount: byStatus
-          .filter((s) => ['IN_PROGRESS', 'APPROVED', 'PENDING_APPROVAL'].includes(s.status))
-          .reduce((sum, s) => sum + s._count, 0),
+          .filter((s: { status: string; _count: number }) => ['IN_PROGRESS', 'APPROVED', 'PENDING_APPROVAL'].includes(s.status))
+          .reduce((sum: number, s: { status: string; _count: number }) => sum + s._count, 0),
       },
     });
   } catch (error) {

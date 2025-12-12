@@ -1,9 +1,26 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { SpreadsheetAnalyzer, SpreadsheetAnalysis } from '../services/spreadsheetAnalyzer';
 import { authenticateToken } from '../middleware/auth';
 import { prisma } from '../services/database';
+
+// Helper function to convert ExcelJS worksheet to array of arrays (like xlsx.utils.sheet_to_json with header:1)
+function worksheetToJson(worksheet: ExcelJS.Worksheet): unknown[][] {
+  const result: unknown[][] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const rowData: unknown[] = [];
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      // Pad array to correct column position (colNumber is 1-indexed)
+      while (rowData.length < colNumber - 1) {
+        rowData.push(undefined);
+      }
+      rowData.push(cell.value);
+    });
+    result.push(rowData);
+  });
+  return result;
+}
 
 const router = Router();
 
@@ -661,10 +678,13 @@ router.post(
       const { importType: specifiedType, sheetName, dryRun } = req.body;
       const isDryRun = dryRun === 'true' || dryRun === true;
 
-      // Parse the Excel file
-      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-      const targetSheet = sheetName || workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[targetSheet];
+      // Parse the Excel file using exceljs
+      const workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(req.file.buffer);
+
+      const sheetNames = workbook.worksheets.map(ws => ws.name);
+      const targetSheet = sheetName || sheetNames[0];
+      const worksheet = workbook.getWorksheet(targetSheet);
 
       if (!worksheet) {
         res.status(400).json({
@@ -674,8 +694,8 @@ router.post(
         return;
       }
 
-      // Convert to JSON
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as unknown[][];
+      // Convert to JSON array format
+      const jsonData = worksheetToJson(worksheet);
 
       if (jsonData.length < 2) {
         res.status(400).json({
