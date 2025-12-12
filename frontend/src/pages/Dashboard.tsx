@@ -33,6 +33,9 @@ const Dashboard: React.FC = () => {
       case 'Import Data':
         navigate('/tools/import');
         break;
+      case 'Upload Plan':
+        navigate('/plans?upload=true');
+        break;
       default:
         break;
     }
@@ -173,9 +176,9 @@ const Dashboard: React.FC = () => {
           <section className="section">
             <h3 className="section-title">Quick Actions</h3>
             <div className="quick-actions">
-              <QuickAction icon="&#128230;" text="Create PO" onClick={() => handleQuickAction('Create PO')} />
-              <QuickAction icon="&#128202;" text="View Reports" onClick={() => handleQuickAction('View Reports')} />
+              <QuickAction icon="&#128196;" text="Upload Plan" onClick={() => handleQuickAction('Upload Plan')} />
               <QuickAction icon="&#127959;" text="New Job" onClick={() => handleQuickAction('New Job')} />
+              <QuickAction icon="&#128230;" text="Create PO" onClick={() => handleQuickAction('Create PO')} />
               <QuickAction icon="&#128203;" text="Import Data" onClick={() => handleQuickAction('Import Data')} />
             </div>
           </section>

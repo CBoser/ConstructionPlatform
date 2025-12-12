@@ -1094,23 +1094,27 @@ def quick_start():
     """Quick start - start everything"""
     print_header("Quick Start - Full Platform Launch")
 
-    print_info("Step 1/5: Starting PostgreSQL...")
+    print_info("Step 1/4: Starting PostgreSQL...")
     db_start()
     print()
 
-    print_info("Step 2/5: Running migrations...")
+    print_info("Step 2/4: Running migrations...")
     db_migrate()
     print()
 
-    print_info("Step 3/5: Seeding database...")
-    db_seed()
+    print_info("Step 3/4: Checking database...")
+    # Try to seed, but don't fail if data already exists
+    code, stdout, stderr = run_command("npm run prisma:seed", cwd=BACKEND_DIR, capture=True, check=False)
+    if code == 0:
+        print_success("Database seeded!")
+    else:
+        if "Existing data detected" in stdout or "Existing data detected" in stderr:
+            print_success("Database already has data - skipping seed")
+        else:
+            print_warning("Seed skipped (run manually if needed)")
     print()
 
-    print_info("Step 4/5: Installing dependencies...")
-    install_dependencies()
-    print()
-
-    print_info("Step 5/5: Starting servers...")
+    print_info("Step 4/4: Starting servers...")
     print_success("Quick start setup complete!")
     print()
     print_info("Now starting full stack...")
