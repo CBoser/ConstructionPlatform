@@ -10,10 +10,6 @@ import {
   useFeedbackList,
   useFeedbackPatterns,
   useResolveFeedback,
-  Feedback,
-  FeedbackType,
-  FeedbackCategory,
-  FeedbackStatus,
   FEEDBACK_TYPE_LABELS,
   FEEDBACK_CATEGORY_LABELS,
   FEEDBACK_STATUS_LABELS,
@@ -22,6 +18,7 @@ import {
   getVarianceColor,
   formatUserName,
 } from '../../services/feedbackService';
+import type { Feedback, FeedbackType, FeedbackCategory, FeedbackStatus } from '../../services/feedbackService';
 import { FeedbackModal, VarianceInput } from '../../components/feedback';
 import './feedback.css';
 

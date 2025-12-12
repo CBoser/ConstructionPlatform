@@ -5,7 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import { useQuickFeedback, FeedbackCategory } from '../../services/feedbackService';
+import { useQuickFeedback } from '../../services/feedbackService';
+import type { FeedbackCategory } from '../../services/feedbackService';
 import './feedback.css';
 
 interface QuickFeedbackProps {

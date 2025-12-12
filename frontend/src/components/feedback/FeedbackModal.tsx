@@ -5,13 +5,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  useCreateFeedback,
-  FeedbackType,
-  FeedbackCategory,
-  FEEDBACK_TYPE_LABELS,
-  FEEDBACK_CATEGORY_LABELS,
-} from '../../services/feedbackService';
+import { useCreateFeedback, FEEDBACK_TYPE_LABELS, FEEDBACK_CATEGORY_LABELS } from '../../services/feedbackService';
+import type { FeedbackType, FeedbackCategory } from '../../services/feedbackService';
 import './feedback.css';
 
 interface FeedbackModalProps {

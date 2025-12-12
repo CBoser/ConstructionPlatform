@@ -5,7 +5,95 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import api from './api';
+
+// =============================================================================
+// API Configuration
+// =============================================================================
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('accessToken');
+};
+
+const api = {
+  async get<T = any>(endpoint: string, options: { params?: Record<string, any> } = {}): Promise<{ data: T }> {
+    const token = getAuthToken();
+    const url = new URL(`${API_BASE_URL}/api/v1${endpoint}`);
+    if (options.params) {
+      Object.entries(options.params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          url.searchParams.append(key, String(value));
+        }
+      });
+    }
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API Error ${response.status}`);
+    }
+    const data = await response.json();
+    return { data };
+  },
+
+  async post<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API Error ${response.status}`);
+    }
+    const data = await response.json();
+    return { data };
+  },
+
+  async put<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API Error ${response.status}`);
+    }
+    const data = await response.json();
+    return { data };
+  },
+
+  async delete<T = any>(endpoint: string): Promise<{ data: T }> {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `API Error ${response.status}`);
+    }
+    const data = await response.json();
+    return { data };
+  },
+};
 
 // =============================================================================
 // TYPES

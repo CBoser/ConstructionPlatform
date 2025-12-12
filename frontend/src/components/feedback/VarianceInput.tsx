@@ -5,12 +5,8 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
-  useVarianceReport,
-  FeedbackCategory,
-  FEEDBACK_CATEGORY_LABELS,
-  getVarianceColor,
-} from '../../services/feedbackService';
+import { useVarianceReport, FEEDBACK_CATEGORY_LABELS, getVarianceColor } from '../../services/feedbackService';
+import type { FeedbackCategory } from '../../services/feedbackService';
 import './feedback.css';
 
 interface VarianceInputProps {
