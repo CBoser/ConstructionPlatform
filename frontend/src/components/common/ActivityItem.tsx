@@ -1,7 +1,9 @@
 import React from 'react';
 
+type ActivityType = 'po' | 'bid' | 'delivery' | 'completed';
+
 interface ActivityItemProps {
-  type: 'po' | 'bid' | 'delivery' | 'completed';
+  type: ActivityType | string;
   icon: string;
   title: string;
   detail: string;

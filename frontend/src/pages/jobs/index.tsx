@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
 import Button from '../../components/common/Button';
 import StatCard from '../../components/common/StatCard';
-import Table, { Column } from '../../components/common/Table';
+import Table from '../../components/common/Table';
+import type { Column } from '../../components/common/Table';
 import Modal from '../../components/common/Modal';
 import Input from '../../components/common/Input';
 import {
@@ -12,14 +13,12 @@ import {
   useCreateJob,
   useUpdateJobStatus,
   useDeleteJob,
-  Job,
-  JobStatus,
-  ListJobsQuery,
   JOB_STATUS_LABELS,
   getStatusBadgeClass,
   formatJobDate,
   getDaysUntilStart,
 } from '../../services/jobService';
+import type { Job, JobStatus, ListJobsQuery } from '../../services/jobService';
 import { usePlans } from '../../services/planService';
 import { useCustomers } from '../../services/customerService';
 

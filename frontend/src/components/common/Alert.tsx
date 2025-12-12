@@ -6,9 +6,10 @@ interface AlertProps {
   title: string;
   message: string;
   time?: string;
+  onDismiss?: () => void;
 }
 
-const Alert: React.FC<AlertProps> = ({ type, icon, title, message, time }) => {
+const Alert: React.FC<AlertProps> = ({ type, icon, title, message, time, onDismiss }) => {
   return (
     <div className={`alert alert-${type}`}>
       <div className="alert-icon">{icon}</div>
@@ -17,6 +18,11 @@ const Alert: React.FC<AlertProps> = ({ type, icon, title, message, time }) => {
         <div>{message}</div>
         {time && <div className="alert-time">{time}</div>}
       </div>
+      {onDismiss && (
+        <button className="alert-dismiss" onClick={onDismiss} aria-label="Dismiss">
+          &times;
+        </button>
+      )}
     </div>
   );
 };

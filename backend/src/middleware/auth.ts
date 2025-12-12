@@ -51,9 +51,14 @@ export const authenticateToken = async (
  * Middleware to require specific roles
  * Must be used after authenticateToken
  *
- * Usage: requireRole(UserRole.ADMIN, UserRole.ESTIMATOR)
+ * Usage:
+ *   requireRole('ADMIN', 'ESTIMATOR')  // spread args
+ *   requireRole(['ADMIN', 'ESTIMATOR']) // array
  */
-export const requireRole = (...allowedRoles: UserRole[]) => {
+export const requireRole = (...args: (UserRole | UserRole[])[]) => {
+  // Flatten args to support both array and spread syntax
+  const allowedRoles: UserRole[] = args.flat() as UserRole[];
+
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({

@@ -8,12 +8,6 @@ import {
   usePDSSDashboard,
   usePDSSJobs,
   useUpdatePDSSJob,
-  PDSSJobStatus,
-  PDSSStatus,
-  PDSSTakeoffStatus,
-  PDSSQuoteStatus,
-  PDSSPriority,
-  PDSSListQuery,
   PDSS_STATUS_LABELS,
   PDSS_TAKEOFF_LABELS,
   PDSS_QUOTE_LABELS,
@@ -21,6 +15,14 @@ import {
   getStatusBadgeClass,
   getPriorityBadgeClass,
   formatAssignee,
+} from '../../services/pdssService';
+import type {
+  PDSSJobStatus,
+  PDSSStatus,
+  PDSSTakeoffStatus,
+  PDSSQuoteStatus,
+  PDSSPriority,
+  PDSSListQuery,
 } from '../../services/pdssService';
 
 const PDSSTracker: React.FC = () => {
