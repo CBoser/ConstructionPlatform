@@ -387,6 +387,37 @@ def db_studio():
     run_command("npx prisma studio", cwd=BACKEND_DIR, check=False)
 
 
+def db_generate():
+    """Generate Prisma client from schema"""
+    print_header("Generate Prisma Client")
+
+    print_info("Regenerating Prisma client from schema...")
+    code, stdout, stderr = run_command("npx prisma generate", cwd=BACKEND_DIR, capture=True, check=False)
+
+    if code == 0:
+        print_success("Prisma client generated successfully!")
+        print_info("Models synced with schema.prisma")
+    else:
+        print_error("Failed to generate Prisma client")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def db_validate():
+    """Validate Prisma schema"""
+    print_header("Validate Prisma Schema")
+
+    print_info("Validating schema.prisma...")
+    code, stdout, stderr = run_command("npx prisma validate", cwd=BACKEND_DIR, capture=True, check=False)
+
+    if code == 0:
+        print_success("Schema is valid!")
+    else:
+        print_error("Schema validation failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
 # ============================================================================
 # Server Management
 # ============================================================================
@@ -439,6 +470,65 @@ def start_full_stack():
     run_command("npm run dev", cwd=PROJECT_ROOT, check=False)
 
 
+def build_backend():
+    """Build backend TypeScript"""
+    print_header("Build Backend")
+
+    print_info("Compiling TypeScript...")
+    code, stdout, stderr = run_command("npm run build", cwd=BACKEND_DIR, capture=True, check=False)
+
+    if code == 0:
+        print_success("Backend build successful!")
+    else:
+        print_error("Backend build failed")
+        # Count errors
+        error_count = stderr.count("error TS") if stderr else 0
+        if error_count > 0:
+            print_warning(f"Found {error_count} TypeScript errors")
+            print()
+            # Show first few errors
+            lines = stderr.split('\n')[:20]
+            for line in lines:
+                print(f"{Colors.RED}{line}{Colors.ENDC}")
+            if len(stderr.split('\n')) > 20:
+                print(f"\n... and more errors")
+
+
+def build_frontend():
+    """Build frontend for production"""
+    print_header("Build Frontend")
+
+    print_info("Building frontend for production...")
+    code, stdout, stderr = run_command("npm run build", cwd=FRONTEND_DIR, capture=True, check=False)
+
+    if code == 0:
+        print_success("Frontend build successful!")
+        print_info("Output: frontend/dist/")
+    else:
+        print_error("Frontend build failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr[:2000]}{Colors.ENDC}")
+
+
+def build_all():
+    """Build both backend and frontend"""
+    print_header("Build All")
+
+    print_info("Step 1/3: Generating Prisma client...")
+    db_generate()
+    print()
+
+    print_info("Step 2/3: Building backend...")
+    build_backend()
+    print()
+
+    print_info("Step 3/3: Building frontend...")
+    build_frontend()
+    print()
+
+    print_success("Build process complete!")
+
+
 # ============================================================================
 # Testing
 # ============================================================================
@@ -470,6 +560,10 @@ def test_api():
     endpoints = [
         ("Health Check", "http://localhost:3001/health"),
         ("Auth Login", "http://localhost:3001/api/auth/login"),
+        ("Dashboard", "http://localhost:3001/api/v1/dashboard/summary"),
+        ("Jobs", "http://localhost:3001/api/v1/jobs"),
+        ("PDSS Dashboard", "http://localhost:3001/api/v1/pdss/dashboard"),
+        ("Feedback Dashboard", "http://localhost:3001/api/v1/feedback/dashboard"),
     ]
 
     import urllib.request
@@ -483,11 +577,119 @@ def test_api():
         except urllib.error.HTTPError as e:
             if e.code == 405:
                 print_warning(f"{name} - Endpoint exists but method not allowed (expected)")
+            elif e.code == 401:
+                print_warning(f"{name} - Requires authentication (expected)")
             else:
                 print_error(f"{name} - HTTP {e.code}")
         except Exception as e:
             print_error(f"{name} - {str(e)}")
         print()
+
+
+# ============================================================================
+# Python Scripts Integration
+# ============================================================================
+
+PYTHON_SCRIPTS_DIR = PROJECT_ROOT / "scripts" / "sto-agents"
+
+
+def run_pdss_sync():
+    """Run PDSS sync script"""
+    print_header("PDSS Sync")
+
+    script_path = PYTHON_SCRIPTS_DIR / "pdss_sync.py"
+    if not script_path.exists():
+        print_error(f"Script not found: {script_path}")
+        return
+
+    print_info("Running PDSS sync...")
+    code, stdout, stderr = run_command(
+        f"python3 {script_path}" if not IS_WINDOWS else f"python {script_path}",
+        cwd=PROJECT_ROOT,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("PDSS sync complete!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("PDSS sync failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def run_teams_notify():
+    """Test Teams notification"""
+    print_header("Teams Notification Test")
+
+    script_path = PYTHON_SCRIPTS_DIR / "teams_notify.py"
+    if not script_path.exists():
+        print_error(f"Script not found: {script_path}")
+        return
+
+    print_info("Sending test notification to Teams...")
+    code, stdout, stderr = run_command(
+        f"python3 {script_path} --test" if not IS_WINDOWS else f"python {script_path} --test",
+        cwd=PROJECT_ROOT,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Test notification sent!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Notification failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def run_supplypro_report():
+    """Run SupplyPro reporter"""
+    print_header("SupplyPro Reporter")
+
+    script_path = PYTHON_SCRIPTS_DIR / "supplypro_reporter.py"
+    if not script_path.exists():
+        print_error(f"Script not found: {script_path}")
+        return
+
+    print_info("Running SupplyPro reporter...")
+    code, stdout, stderr = run_command(
+        f"python3 {script_path}" if not IS_WINDOWS else f"python {script_path}",
+        cwd=PROJECT_ROOT,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Report generated!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Reporter failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def list_python_scripts():
+    """List available Python scripts"""
+    print_header("Available Python Scripts")
+
+    if PYTHON_SCRIPTS_DIR.exists():
+        scripts = list(PYTHON_SCRIPTS_DIR.glob("*.py"))
+        if scripts:
+            for script in sorted(scripts):
+                print(f"  {Colors.CYAN}•{Colors.ENDC} {script.name}")
+        else:
+            print_warning("No Python scripts found in sto-agents/")
+    else:
+        print_error(f"Scripts directory not found: {PYTHON_SCRIPTS_DIR}")
+
+    print()
+    print_info("Run scripts with: python scripts/sto-agents/<script>.py")
 
 
 # ============================================================================
@@ -680,15 +882,28 @@ def print_menu():
     print("  7. Run Migrations")
     print("  8. Seed Database")
     print("  9. Open Prisma Studio")
+    print("  G. Generate Prisma Client")
+    print("  V. Validate Prisma Schema")
 
     print(f"\n{Colors.CYAN}🚀 Server Management{Colors.ENDC}")
     print("  B. Start Backend Server")
     print("  F. Start Frontend Server")
     print("  A. Start Full Stack (Both)")
 
+    print(f"\n{Colors.CYAN}🔨 Build{Colors.ENDC}")
+    print("  C. Build Backend (TypeScript)")
+    print("  D. Build Frontend (Production)")
+    print("  W. Build All (Prisma + Backend + Frontend)")
+
     print(f"\n{Colors.CYAN}🧪 Testing{Colors.ENDC}")
     print("  T. Run Security Tests")
     print("  H. Test API Health")
+
+    print(f"\n{Colors.CYAN}🐍 Python Scripts (STO Agents){Colors.ENDC}")
+    print("  S. List Python Scripts")
+    print("  Y. Run PDSS Sync")
+    print("  N. Test Teams Notification")
+    print("  O. Run SupplyPro Reporter")
 
     print(f"\n{Colors.CYAN}🔧 Utilities{Colors.ENDC}")
     print("  J. Generate JWT Secret")
@@ -782,7 +997,7 @@ def main():
 
     # Initial greeting
     print_header("Welcome to MindFlow DevOps Tool")
-    print_info("Sprint 1 - Security Foundation")
+    print_info("Features: PDSS Tracker, Feedback System, Teams Notifications")
     print_info(f"Platform: {platform.system()} ({platform.machine()})")
     print_info(f"Python: {sys.version.split()[0]}")
 
@@ -818,6 +1033,12 @@ def main():
             elif choice == '9':
                 db_studio()
                 wait_for_user()
+            elif choice == 'G':
+                db_generate()
+                wait_for_user()
+            elif choice == 'V':
+                db_validate()
+                wait_for_user()
             elif choice == 'B':
                 start_backend()
                 wait_for_user()
@@ -827,11 +1048,32 @@ def main():
             elif choice == 'A':
                 start_full_stack()
                 wait_for_user()
+            elif choice == 'C':
+                build_backend()
+                wait_for_user()
+            elif choice == 'D':
+                build_frontend()
+                wait_for_user()
+            elif choice == 'W':
+                build_all()
+                wait_for_user()
             elif choice == 'T':
                 run_security_tests()
                 wait_for_user()
             elif choice == 'H':
                 test_api()
+                wait_for_user()
+            elif choice == 'S':
+                list_python_scripts()
+                wait_for_user()
+            elif choice == 'Y':
+                run_pdss_sync()
+                wait_for_user()
+            elif choice == 'N':
+                run_teams_notify()
+                wait_for_user()
+            elif choice == 'O':
+                run_supplypro_report()
                 wait_for_user()
             elif choice == 'J':
                 generate_jwt_secret()
