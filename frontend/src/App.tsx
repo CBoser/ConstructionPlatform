@@ -58,6 +58,9 @@ const Plans = React.lazy(() => import('./pages/plans'));
 const Jobs = React.lazy(() => import('./pages/jobs'));
 const Takeoffs = React.lazy(() => import('./pages/jobs/Takeoffs'));
 
+// PDSS (Plan Data Status Sheet)
+const PDSS = React.lazy(() => import('./pages/pdss'));
+
 // Transaction pages
 const PurchaseOrders = React.lazy(() => import('./pages/purchase-orders'));
 const Schedule = React.lazy(() => import('./pages/schedule'));
@@ -190,6 +193,16 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <Takeoffs />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/operations/pdss"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <PDSS />
                       </MainLayout>
                     </ProtectedRoute>
                   }

@@ -33,6 +33,8 @@ model User {
   notifications    Notification[]
   varianceReviews  VarianceReview[]
   activityLogs     ActivityLog[]
+  pdssPlanAssigned PDSSPlanStatus[]  // PDSS plans assigned to this user
+  pdssJobAssigned  PDSSJobStatus[]   // PDSS jobs assigned to this user
 
   @@index([email])
   @@index([role])
@@ -83,6 +85,7 @@ model Customer {
   portalDocuments PortalDocument[]
   systemAlerts    SystemAlert[]
   activityLogs    ActivityLog[]
+  pdssDocRequirements PDSSDocumentRequirement[]
 
   @@index([billToId])
   @@index([locationCode])
@@ -220,6 +223,7 @@ model Plan {
   variancePatterns VariancePattern[]
   documents        PlanDocument[]  // Uploaded documents
   portalDocuments  PortalDocument[]  // Documents synced from portals
+  pdssStatus       PDSSPlanStatus[]  // PDSS tracking for this plan
 
   @@index([code])
   @@index([type])
@@ -269,6 +273,7 @@ model PlanElevation {
   versionHistory  ElevationVersion[]
   assignedOptions PlanAssignedOption[]  // Options specific to this elevation
   documents       PlanDocument[]  // Uploaded documents specific to this elevation
+  pdssStatus      PDSSPlanStatus[]  // PDSS tracking for this elevation
 
   @@unique([planId, code])
   @@index([planId])
@@ -774,6 +779,7 @@ model Job {
   jobOptions    JobOption[]
   takeoff       Takeoff?
   purchaseOrders PurchaseOrder[]
+  pdssStatus    PDSSJobStatus?  // PDSS tracking for this job
 
   @@index([jobNumber])
   @@index([customerId])
@@ -783,9 +789,11 @@ model Job {
 
 enum JobStatus {
   DRAFT
+  PENDING_APPROVAL
   ESTIMATED
   APPROVED
   IN_PROGRESS
+  ON_HOLD
   COMPLETED
   CANCELLED
 }
@@ -1268,6 +1276,194 @@ model PortalSyncLog {
   @@index([portal, syncType])
   @@index([startedAt])
   @@map("portal_sync_logs")
+}
+
+// ============================================================================
+// PDSS (PLAN DATA STATUS SHEET) TRACKING
+// ============================================================================
+// Tracks plan/elevation document status and job-level PDSS completion.
+// Based on STO PDSS workflow: Plan status, takeoff status, quote status.
+
+// Builder-specific required documents definition
+model PDSSDocumentRequirement {
+  id              String    @id @default(uuid())
+  customerId      String    @map("customer_id")
+  customer        Customer  @relation(fields: [customerId], references: [id])
+
+  docType         String    @map("doc_type")   // "ARCH_DRAWINGS", "STRUCT_CALCS", "TRUSS_LAYOUT", etc.
+  docName         String    @map("doc_name")   // Human readable name
+  isRequired      Boolean   @default(true) @map("is_required")
+  description     String?
+
+  // Timing requirements
+  requiredByPhase String?   @map("required_by_phase")  // "BEFORE_START", "FRAMING", "PRE_DRYWALL"
+  daysBeforeStart Int?      @map("days_before_start")  // Days before job start this is needed
+
+  sortOrder       Int       @default(0) @map("sort_order")
+  isActive        Boolean   @default(true) @map("is_active")
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relationships
+  documentStatuses PDSSDocumentStatus[]
+
+  @@unique([customerId, docType])
+  @@index([customerId])
+  @@map("pdss_document_requirements")
+}
+
+// Plan/Elevation level PDSS status
+model PDSSPlanStatus {
+  id              String    @id @default(uuid())
+
+  // Link to plan and optionally elevation
+  planId          String    @map("plan_id")
+  plan            Plan      @relation(fields: [planId], references: [id])
+  elevationId     String?   @map("elevation_id")
+  elevation       PlanElevation? @relation(fields: [elevationId], references: [id])
+
+  // Status tracking
+  planStatus      PDSSStatus @default(NEW) @map("plan_status")
+  takeoffStatus   PDSSTakeoffStatus @default(NOT_STARTED) @map("takeoff_status")
+  quoteStatus     PDSSQuoteStatus @default(NOT_STARTED) @map("quote_status")
+
+  // Document completeness
+  documentsComplete Boolean @default(false) @map("documents_complete")
+  documentCount     Int     @default(0) @map("document_count")
+
+  // Assignment & Priority
+  assignedToId    String?   @map("assigned_to_id")
+  assignedTo      User?     @relation(fields: [assignedToId], references: [id])
+  priority        PDSSPriority @default(MEDIUM)
+  dueDate         DateTime? @map("due_date")
+
+  // Notes
+  notes           String?   @db.Text
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  // Relationships
+  documentStatuses PDSSDocumentStatus[]
+
+  @@unique([planId, elevationId])
+  @@index([planId])
+  @@index([planStatus])
+  @@index([assignedToId])
+  @@map("pdss_plan_status")
+}
+
+// Job-level PDSS status (per lot implementation)
+model PDSSJobStatus {
+  id              String    @id @default(uuid())
+
+  // Link to job
+  jobId           String    @unique @map("job_id")
+  job             Job       @relation(fields: [jobId], references: [id])
+
+  // Status tracking (inherits from plan but can override)
+  planStatus      PDSSStatus @default(NEW) @map("plan_status")
+  takeoffStatus   PDSSTakeoffStatus @default(NOT_STARTED) @map("takeoff_status")
+  quoteStatus     PDSSQuoteStatus @default(NOT_STARTED) @map("quote_status")
+
+  // Document completeness for this specific job
+  documentsComplete Boolean @default(false) @map("documents_complete")
+  missingDocuments  Json?   @map("missing_documents")  // Array of missing doc types
+
+  // Assignment & Priority
+  assignedToId    String?   @map("assigned_to_id")
+  assignedTo      User?     @relation(fields: [assignedToId], references: [id])
+  priority        PDSSPriority @default(MEDIUM)
+  dueDate         DateTime? @map("due_date")
+
+  // Alerts
+  alertsSent      Int       @default(0) @map("alerts_sent")
+  lastAlertAt     DateTime? @map("last_alert_at")
+
+  // Notes
+  notes           String?   @db.Text
+
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  @@index([jobId])
+  @@index([planStatus])
+  @@index([priority])
+  @@map("pdss_job_status")
+}
+
+// Individual document status tracking
+model PDSSDocumentStatus {
+  id                  String    @id @default(uuid())
+
+  // Link to requirement
+  requirementId       String    @map("requirement_id")
+  requirement         PDSSDocumentRequirement @relation(fields: [requirementId], references: [id])
+
+  // Link to plan status (optional - for plan-level tracking)
+  planStatusId        String?   @map("plan_status_id")
+  planStatus          PDSSPlanStatus? @relation(fields: [planStatusId], references: [id])
+
+  // Status
+  status              DocumentReceiptStatus @default(PENDING)
+  receivedAt          DateTime? @map("received_at")
+  verifiedAt          DateTime? @map("verified_at")
+  verifiedById        String?   @map("verified_by_id")
+
+  // Document reference
+  documentUrl         String?   @map("document_url")
+  documentVersion     Int       @default(1) @map("document_version")
+
+  // Notes
+  notes               String?
+
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@unique([requirementId, planStatusId])
+  @@index([requirementId])
+  @@index([planStatusId])
+  @@index([status])
+  @@map("pdss_document_status")
+}
+
+enum PDSSStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETE
+  ON_HOLD
+  ARCHIVED
+}
+
+enum PDSSTakeoffStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  PENDING_REVIEW
+  COMPLETE
+}
+
+enum PDSSQuoteStatus {
+  NOT_STARTED
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+}
+
+enum PDSSPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum DocumentReceiptStatus {
+  PENDING
+  RECEIVED
+  VERIFIED
+  REJECTED
+  SUPERSEDED
 }
 
 // ============================================================================

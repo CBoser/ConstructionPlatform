@@ -28,6 +28,7 @@ const navigationItems: NavItem[] = [
     children: [
       { path: '/operations/jobs', label: 'Jobs', icon: '🏗️' },
       { path: '/operations/takeoffs', label: 'Takeoffs', icon: '📐' },
+      { path: '/operations/pdss', label: 'PDSS Tracker', icon: '📋' },
     ],
   },
   {
