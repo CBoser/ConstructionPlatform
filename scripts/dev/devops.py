@@ -859,64 +859,235 @@ def generate_folder_tree():
 
 
 # ============================================================================
-# Main Menu
+# Main Menu & Submenus
 # ============================================================================
 
-def print_menu():
-    """Print the main menu"""
-    print(f"\n{Colors.BOLD}{Colors.BLUE}")
-    print("╔════════════════════════════════════════════════════════════════════╗")
-    print("║         MindFlow Platform - DevOps Management Tool                 ║")
-    print("╚════════════════════════════════════════════════════════════════════╝")
-    print(f"{Colors.ENDC}")
+def print_banner():
+    """Print the application banner"""
+    print(f"\n{Colors.YELLOW}    ╔═══════════════════════════════════════════════════════════╗")
+    print(f"    ║  🏗️  {Colors.BOLD}MindFlow - DevOps Management Tool{Colors.ENDC}{Colors.YELLOW}                 ║")
+    print(f"    ║      Construction Platform Management                      ║")
+    print(f"    ╚═══════════════════════════════════════════════════════════╝{Colors.ENDC}")
 
-    print(f"{Colors.CYAN}📊 System & Health{Colors.ENDC}")
-    print("  1. Check Prerequisites")
-    print("  2. Check Environment Configuration")
-    print("  3. Check Service Health")
 
-    print(f"\n{Colors.CYAN}🗄️  Database Management{Colors.ENDC}")
-    print("  4. Start PostgreSQL")
-    print("  5. Stop PostgreSQL")
-    print("  6. Reset Database (delete all data)")
-    print("  7. Run Migrations")
-    print("  8. Seed Database")
-    print("  9. Open Prisma Studio")
-    print("  G. Generate Prisma Client")
-    print("  V. Validate Prisma Schema")
+def print_main_menu():
+    """Print the main menu with categories"""
+    print_banner()
+    print()
 
-    print(f"\n{Colors.CYAN}🚀 Server Management{Colors.ENDC}")
-    print("  B. Start Backend Server")
-    print("  F. Start Frontend Server")
-    print("  A. Start Full Stack (Both)")
+    print(f"{Colors.CYAN}Management{Colors.ENDC}")
+    print(f"  1. System & Health     - Check prerequisites, environment, services")
+    print(f"  2. Database            - PostgreSQL start/stop/reset, Prisma tools")
+    print(f"  3. Server Control      - Backend, frontend, full stack")
+    print(f"  4. Build & Deploy      - TypeScript compile, production builds")
+    print(f"  5. Testing & QA        - Security tests, API health checks")
+    print(f"  6. Python Scripts      - PDSS sync, Teams notify, SupplyPro")
+    print(f"  7. Utilities           - Dependencies, .env, project structure")
+    print()
 
-    print(f"\n{Colors.CYAN}🔨 Build{Colors.ENDC}")
-    print("  C. Build Backend (TypeScript)")
-    print("  D. Build Frontend (Production)")
-    print("  W. Build All (Prisma + Backend + Frontend)")
+    print(f"{Colors.GREEN}Quick Actions{Colors.ENDC}")
+    print(f"  8. Quick Start (Everything)")
+    print(f"  9. Frontend Only (Vite dev server)")
+    print()
 
-    print(f"\n{Colors.CYAN}🧪 Testing{Colors.ENDC}")
-    print("  T. Run Security Tests")
-    print("  H. Test API Health")
+    print(f"{Colors.RED}0. Exit{Colors.ENDC}")
+    print()
 
-    print(f"\n{Colors.CYAN}🐍 Python Scripts (STO Agents){Colors.ENDC}")
-    print("  S. List Python Scripts")
-    print("  Y. Run PDSS Sync")
-    print("  N. Test Teams Notification")
-    print("  O. Run SupplyPro Reporter")
 
-    print(f"\n{Colors.CYAN}🔧 Utilities{Colors.ENDC}")
-    print("  J. Generate JWT Secret")
-    print("  L. View Docker Logs")
-    print("  I. Install Dependencies")
-    print("  E. Create .env File")
-    print("  P. Generate Project Tree")
+def submenu_system():
+    """System & Health submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ System & Health ═══{Colors.ENDC}")
+        print("  1. Check Prerequisites")
+        print("  2. Check Environment Configuration")
+        print("  3. Check Service Health")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
 
-    print(f"\n{Colors.CYAN}📖 Quick Actions{Colors.ENDC}")
-    print("  Q. Quick Start (DB + Backend + Frontend)")
-    print("  R. Full Reset (DB + Dependencies)")
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
 
-    print(f"\n{Colors.RED}X. Exit{Colors.ENDC}\n")
+        if choice == '1':
+            check_prerequisites()
+            wait_for_user()
+        elif choice == '2':
+            check_environment()
+            wait_for_user()
+        elif choice == '3':
+            check_health()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_database():
+    """Database Management submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Database Management ═══{Colors.ENDC}")
+        print("  1. Start PostgreSQL")
+        print("  2. Stop PostgreSQL")
+        print("  3. Reset Database (delete all)")
+        print("  4. Run Migrations")
+        print("  5. Seed Database")
+        print("  6. Open Prisma Studio")
+        print("  7. Generate Prisma Client")
+        print("  8. Validate Prisma Schema")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            db_start()
+            wait_for_user()
+        elif choice == '2':
+            db_stop()
+            wait_for_user()
+        elif choice == '3':
+            db_reset()
+            wait_for_user()
+        elif choice == '4':
+            db_migrate()
+            wait_for_user()
+        elif choice == '5':
+            db_seed()
+            wait_for_user()
+        elif choice == '6':
+            db_studio()
+            wait_for_user()
+        elif choice == '7':
+            db_generate()
+            wait_for_user()
+        elif choice == '8':
+            db_validate()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_server():
+    """Server Control submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Server Control ═══{Colors.ENDC}")
+        print("  1. Start Backend Server (port 3001)")
+        print("  2. Start Frontend Server (port 5173)")
+        print("  3. Start Full Stack (Both)")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            start_backend()
+            wait_for_user()
+        elif choice == '2':
+            start_frontend()
+            wait_for_user()
+        elif choice == '3':
+            start_full_stack()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_build():
+    """Build & Deploy submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Build & Deploy ═══{Colors.ENDC}")
+        print("  1. Build Backend (TypeScript)")
+        print("  2. Build Frontend (Production)")
+        print("  3. Build All (Prisma + Backend + Frontend)")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            build_backend()
+            wait_for_user()
+        elif choice == '2':
+            build_frontend()
+            wait_for_user()
+        elif choice == '3':
+            build_all()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_testing():
+    """Testing & QA submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Testing & QA ═══{Colors.ENDC}")
+        print("  1. Run Security Tests")
+        print("  2. Test API Health")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            run_security_tests()
+            wait_for_user()
+        elif choice == '2':
+            test_api()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_python():
+    """Python Scripts submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Python Scripts (STO Agents) ═══{Colors.ENDC}")
+        print("  1. List Available Scripts")
+        print("  2. Run PDSS Sync")
+        print("  3. Test Teams Notification")
+        print("  4. Run SupplyPro Reporter")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            list_python_scripts()
+            wait_for_user()
+        elif choice == '2':
+            run_pdss_sync()
+            wait_for_user()
+        elif choice == '3':
+            run_teams_notify()
+            wait_for_user()
+        elif choice == '4':
+            run_supplypro_report()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def submenu_utilities():
+    """Utilities submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Utilities ═══{Colors.ENDC}")
+        print("  1. Generate JWT Secret")
+        print("  2. View Docker Logs")
+        print("  3. Install Dependencies")
+        print("  4. Create .env File")
+        print("  5. Generate Project Tree")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            generate_jwt_secret()
+            wait_for_user()
+        elif choice == '2':
+            view_logs()
+            wait_for_user()
+        elif choice == '3':
+            install_dependencies()
+            wait_for_user()
+        elif choice == '4':
+            create_env_file()
+            wait_for_user()
+        elif choice == '5':
+            generate_folder_tree()
+            wait_for_user()
+        elif choice == '0':
+            break
 
 
 def quick_start():
@@ -995,108 +1166,32 @@ def full_reset():
 def main():
     """Main menu loop"""
 
-    # Initial greeting
-    print_header("Welcome to MindFlow DevOps Tool")
-    print_info("Features: PDSS Tracker, Feedback System, Teams Notifications")
-    print_info(f"Platform: {platform.system()} ({platform.machine()})")
-    print_info(f"Python: {sys.version.split()[0]}")
-
     while True:
         try:
-            print_menu()
-            choice = input(f"{Colors.BOLD}Select an option: {Colors.ENDC}").strip().upper()
+            print_main_menu()
+            choice = input(f"{Colors.BOLD}Select an option: {Colors.ENDC}").strip()
 
             if choice == '1':
-                check_prerequisites()
-                wait_for_user()
+                submenu_system()
             elif choice == '2':
-                check_environment()
-                wait_for_user()
+                submenu_database()
             elif choice == '3':
-                check_health()
-                wait_for_user()
+                submenu_server()
             elif choice == '4':
-                db_start()
-                wait_for_user()
+                submenu_build()
             elif choice == '5':
-                db_stop()
-                wait_for_user()
+                submenu_testing()
             elif choice == '6':
-                db_reset()
-                wait_for_user()
+                submenu_python()
             elif choice == '7':
-                db_migrate()
-                wait_for_user()
+                submenu_utilities()
             elif choice == '8':
-                db_seed()
-                wait_for_user()
-            elif choice == '9':
-                db_studio()
-                wait_for_user()
-            elif choice == 'G':
-                db_generate()
-                wait_for_user()
-            elif choice == 'V':
-                db_validate()
-                wait_for_user()
-            elif choice == 'B':
-                start_backend()
-                wait_for_user()
-            elif choice == 'F':
-                start_frontend()
-                wait_for_user()
-            elif choice == 'A':
-                start_full_stack()
-                wait_for_user()
-            elif choice == 'C':
-                build_backend()
-                wait_for_user()
-            elif choice == 'D':
-                build_frontend()
-                wait_for_user()
-            elif choice == 'W':
-                build_all()
-                wait_for_user()
-            elif choice == 'T':
-                run_security_tests()
-                wait_for_user()
-            elif choice == 'H':
-                test_api()
-                wait_for_user()
-            elif choice == 'S':
-                list_python_scripts()
-                wait_for_user()
-            elif choice == 'Y':
-                run_pdss_sync()
-                wait_for_user()
-            elif choice == 'N':
-                run_teams_notify()
-                wait_for_user()
-            elif choice == 'O':
-                run_supplypro_report()
-                wait_for_user()
-            elif choice == 'J':
-                generate_jwt_secret()
-                wait_for_user()
-            elif choice == 'L':
-                view_logs()
-                wait_for_user()
-            elif choice == 'I':
-                install_dependencies()
-                wait_for_user()
-            elif choice == 'E':
-                create_env_file()
-                wait_for_user()
-            elif choice == 'P':
-                generate_folder_tree()
-                wait_for_user()
-            elif choice == 'Q':
                 quick_start()
                 wait_for_user()
-            elif choice == 'R':
-                full_reset()
+            elif choice == '9':
+                start_frontend()
                 wait_for_user()
-            elif choice == 'X':
+            elif choice == '0':
                 print_info("Goodbye!")
                 break
             else:
