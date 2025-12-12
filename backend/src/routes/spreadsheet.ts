@@ -680,7 +680,12 @@ router.post(
 
       // Parse the Excel file using exceljs
       const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(req.file.buffer);
+      // Convert multer buffer to ArrayBuffer for exceljs compatibility
+      const arrayBuffer = req.file.buffer.buffer.slice(
+        req.file.buffer.byteOffset,
+        req.file.buffer.byteOffset + req.file.buffer.byteLength
+      );
+      await workbook.xlsx.load(arrayBuffer);
 
       const sheetNames = workbook.worksheets.map(ws => ws.name);
       const targetSheet = sheetName || sheetNames[0];
