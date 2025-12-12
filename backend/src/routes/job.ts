@@ -134,7 +134,6 @@ router.get('/', authenticateToken, async (req: Request, res: Response, next: Nex
             select: {
               id: true,
               customerName: true,
-              customerCode: true,
             },
           },
           plan: {
@@ -156,20 +155,19 @@ router.get('/', authenticateToken, async (req: Request, res: Response, next: Nex
             select: {
               id: true,
               name: true,
-              code: true,
             },
           },
           lot: {
             select: {
               id: true,
               lotNumber: true,
-              address: true,
             },
           },
           createdBy: {
             select: {
               id: true,
-              name: true,
+              firstName: true,
+              lastName: true,
             },
           },
           _count: {
@@ -292,7 +290,6 @@ router.get('/upcoming', authenticateToken, async (req: Request, res: Response, n
         lot: {
           select: {
             lotNumber: true,
-            address: true,
           },
         },
       },
@@ -330,14 +327,16 @@ router.get('/:id', authenticateToken, async (req: Request, res: Response, next: 
         createdBy: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
         approvedBy: {
           select: {
             id: true,
-            name: true,
+            firstName: true,
+            lastName: true,
             email: true,
           },
         },
