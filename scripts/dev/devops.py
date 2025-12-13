@@ -761,6 +761,43 @@ def create_env_file():
         print_error(f".env.example not found: {example_file}")
 
 
+def kill_node_processes():
+    """Kill all Node.js processes (useful for file locking issues)"""
+    print_header("Kill Node.js Processes")
+
+    print_warning("This will terminate ALL running Node.js processes!")
+    print_info("Use this to fix EPERM errors when files are locked.")
+    print()
+
+    confirm = input(f"{Colors.YELLOW}Continue? (yes/no): {Colors.ENDC}")
+
+    if confirm.lower() != 'yes':
+        print_info("Aborted.")
+        return
+
+    if IS_WINDOWS:
+        print_info("Killing Node.js processes on Windows...")
+        code, stdout, stderr = run_command("taskkill /F /IM node.exe", capture=True, check=False)
+        if code == 0:
+            print_success("Node.js processes terminated")
+        elif "not found" in stderr.lower() or "no tasks" in stderr.lower():
+            print_info("No Node.js processes were running")
+        else:
+            print_warning("Some processes may not have been terminated")
+            if stderr:
+                print(stderr)
+    else:
+        print_info("Killing Node.js processes on Unix...")
+        code, stdout, stderr = run_command("pkill -f node", capture=True, check=False)
+        if code == 0:
+            print_success("Node.js processes terminated")
+        else:
+            print_info("No Node.js processes were running")
+
+    print()
+    print_info("You can now run 'npx prisma generate' without EPERM errors")
+
+
 def generate_folder_tree():
     """Generate a folder tree of the project structure"""
     print_header("Generate Folder Tree")
@@ -875,6 +912,10 @@ def print_main_menu():
     print_banner()
     print()
 
+    print(f"{Colors.YELLOW}🚀 First Time?{Colors.ENDC}")
+    print(f"  F. First-Time Setup    - Complete setup wizard (recommended for new installs)")
+    print()
+
     print(f"{Colors.CYAN}Management{Colors.ENDC}")
     print(f"  1. System & Health     - Check prerequisites, environment, services")
     print(f"  2. Database            - PostgreSQL start/stop/reset, Prisma tools")
@@ -882,7 +923,7 @@ def print_main_menu():
     print(f"  4. Build & Deploy      - TypeScript compile, production builds")
     print(f"  5. Testing & QA        - Security tests, API health checks")
     print(f"  6. Python Scripts      - PDSS sync, Teams notify, SupplyPro")
-    print(f"  7. Utilities           - Dependencies, .env, project structure")
+    print(f"  7. Utilities           - Dependencies, .env, kill processes")
     print()
 
     print(f"{Colors.GREEN}Quick Actions{Colors.ENDC}")
@@ -1067,6 +1108,7 @@ def submenu_utilities():
         print("  3. Install Dependencies")
         print("  4. Create .env File")
         print("  5. Generate Project Tree")
+        print(f"  6. {Colors.RED}Kill Node Processes{Colors.ENDC} (fix EPERM errors)")
         print(f"  {Colors.RED}0. Back{Colors.ENDC}")
 
         choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
@@ -1086,8 +1128,221 @@ def submenu_utilities():
         elif choice == '5':
             generate_folder_tree()
             wait_for_user()
+        elif choice == '6':
+            kill_node_processes()
+            wait_for_user()
         elif choice == '0':
             break
+
+
+def first_time_setup():
+    """First-time setup wizard - complete platform initialization"""
+    print_header("First-Time Setup Wizard")
+
+    print(f"{Colors.CYAN}This wizard will set up the MindFlow Platform from scratch.{Colors.ENDC}")
+    print()
+    print("Steps to be performed:")
+    print("  1. Check prerequisites (Node.js, Docker, etc.)")
+    print("  2. Create .env file from template")
+    print("  3. Install backend dependencies (npm install)")
+    print("  4. Generate Prisma client")
+    print("  5. Start PostgreSQL database (Docker)")
+    print("  6. Run database migrations")
+    print("  7. Seed database with test data")
+    print("  8. Install frontend dependencies")
+    print("  9. Health check")
+    print()
+
+    confirm = input(f"{Colors.YELLOW}Start first-time setup? (yes/no): {Colors.ENDC}")
+    if confirm.lower() != 'yes':
+        print_info("Aborted.")
+        return
+
+    print()
+
+    # Step 1: Prerequisites
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 1/9: Checking Prerequisites{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    if not check_prerequisites():
+        print_error("Prerequisites check failed. Please install missing tools.")
+        return
+    print()
+
+    # Step 2: Create .env
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 2/9: Creating Environment File{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    env_file = BACKEND_DIR / ".env"
+    example_file = BACKEND_DIR / ".env.example"
+
+    if env_file.exists():
+        print_info(".env file already exists - skipping")
+    elif example_file.exists():
+        import shutil
+        shutil.copy(example_file, env_file)
+        print_success(f"Created .env from .env.example")
+
+        # Generate and set JWT secret
+        import secrets
+        jwt_secret = secrets.token_hex(32)
+
+        with open(env_file, 'r') as f:
+            content = f.read()
+
+        content = content.replace(
+            'JWT_SECRET=your-secret-key-here-change-in-production',
+            f'JWT_SECRET={jwt_secret}'
+        )
+
+        with open(env_file, 'w') as f:
+            f.write(content)
+
+        print_success("Generated secure JWT_SECRET")
+    else:
+        print_error(".env.example not found!")
+        return
+    print()
+
+    # Step 3: Install backend dependencies
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 3/9: Installing Backend Dependencies{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: npm install (backend)")
+    code, _, _ = run_command("npm install", cwd=BACKEND_DIR, check=False)
+    if code == 0:
+        print_success("Backend dependencies installed")
+    else:
+        print_error("Failed to install backend dependencies")
+        return
+    print()
+
+    # Step 4: Generate Prisma client
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 4/9: Generating Prisma Client{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: npx prisma generate")
+    code, stdout, stderr = run_command("npx prisma generate", cwd=BACKEND_DIR, capture=True, check=False)
+    if code == 0:
+        print_success("Prisma client generated")
+    else:
+        if "EPERM" in stderr:
+            print_error("EPERM error - another process is locking files")
+            print_info("Try: Close VS Code, stop any running Node processes")
+            print_info("Or use Menu 7 > 'Kill Node Processes' to terminate them")
+            return
+        else:
+            print_error("Failed to generate Prisma client")
+            if stderr:
+                print(stderr[:500])
+            return
+    print()
+
+    # Step 5: Start PostgreSQL
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 5/9: Starting PostgreSQL Database{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: docker-compose up -d postgres")
+    code, _, _ = run_command("docker-compose up -d postgres", cwd=PROJECT_ROOT, check=False)
+    if code == 0:
+        print_success("PostgreSQL container started")
+        print_info("Waiting for database to be ready...")
+        time.sleep(5)
+
+        # Check if ready
+        for i in range(10):
+            code, _, _ = run_command(
+                "docker exec mindflow-postgres pg_isready -U mindflow",
+                capture=True, check=False
+            )
+            if code == 0:
+                print_success("Database is ready!")
+                break
+            time.sleep(1)
+        else:
+            print_warning("Database may still be starting...")
+    else:
+        print_error("Failed to start PostgreSQL container")
+        print_info("Make sure Docker Desktop is running")
+        return
+    print()
+
+    # Step 6: Run migrations
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 6/9: Running Database Migrations{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: npx prisma migrate deploy")
+    code, _, stderr = run_command("npx prisma migrate deploy", cwd=BACKEND_DIR, capture=True, check=False)
+    if code == 0:
+        print_success("Migrations applied successfully")
+    else:
+        print_error("Migration failed")
+        if stderr:
+            print(stderr[:500])
+        return
+    print()
+
+    # Step 7: Seed database
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 7/9: Seeding Database{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: npx prisma db seed")
+    code, stdout, stderr = run_command("npx prisma db seed", cwd=BACKEND_DIR, capture=True, check=False)
+    if code == 0:
+        print_success("Database seeded with test data")
+        print_info("Test users created:")
+        print("  - admin@mindflow.com (Admin)")
+        print("  - estimator@mindflow.com (Estimator)")
+        print("  - viewer@mindflow.com (Viewer)")
+        print(f"  - Password: DevPassword123!")
+    else:
+        # Seed might fail if data exists, that's OK
+        if "already exist" in stderr.lower() or "unique constraint" in stderr.lower():
+            print_info("Database already has data - skipping seed")
+        else:
+            print_warning("Seed may have partially completed")
+    print()
+
+    # Step 8: Install frontend dependencies
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 8/9: Installing Frontend Dependencies{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print_info("Running: npm install (frontend)")
+    code, _, _ = run_command("npm install", cwd=FRONTEND_DIR, check=False)
+    if code == 0:
+        print_success("Frontend dependencies installed")
+    else:
+        print_warning("Frontend dependencies installation had issues")
+    print()
+
+    # Step 9: Health check
+    print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    print(f"{Colors.BOLD}Step 9/9: Final Health Check{Colors.ENDC}")
+    print(f"{Colors.BOLD}{'='*60}{Colors.ENDC}")
+    check_health()
+    print()
+
+    # Summary
+    print_header("Setup Complete!")
+    print_success("MindFlow Platform is ready!")
+    print()
+    print(f"{Colors.GREEN}What's next:{Colors.ENDC}")
+    print()
+    print("  Start the backend server:")
+    print(f"    {Colors.CYAN}cd backend && npm run dev{Colors.ENDC}")
+    print(f"    Server will run at: http://localhost:3001")
+    print()
+    print("  Start the frontend (in a new terminal):")
+    print(f"    {Colors.CYAN}cd frontend && npm run dev{Colors.ENDC}")
+    print(f"    Frontend will run at: http://localhost:5173")
+    print()
+    print("  Or start both with:")
+    print(f"    {Colors.CYAN}python scripts/dev/devops.py{Colors.ENDC} -> Option 8 (Quick Start)")
+    print()
+    print(f"{Colors.GREEN}Test login credentials:{Colors.ENDC}")
+    print(f"    Email: admin@mindflow.com")
+    print(f"    Password: DevPassword123!")
+    print()
 
 
 def quick_start():
@@ -1169,9 +1424,12 @@ def main():
     while True:
         try:
             print_main_menu()
-            choice = input(f"{Colors.BOLD}Select an option: {Colors.ENDC}").strip()
+            choice = input(f"{Colors.BOLD}Select an option: {Colors.ENDC}").strip().upper()
 
-            if choice == '1':
+            if choice == 'F':
+                first_time_setup()
+                wait_for_user()
+            elif choice == '1':
                 submenu_system()
             elif choice == '2':
                 submenu_database()
