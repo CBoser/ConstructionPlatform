@@ -164,9 +164,9 @@ async function validateDatabase() {
 
   // Check plans reference valid customers
   const invalidPlanBuilders = await prisma.$queryRaw<[{count: bigint}]>`
-    SELECT COUNT(*) as count FROM "Plan" p
+    SELECT COUNT(*) as count FROM plans p
     WHERE p.builder_id IS NOT NULL
-    AND NOT EXISTS (SELECT 1 FROM "Customer" c WHERE c.id = p.builder_id)
+    AND NOT EXISTS (SELECT 1 FROM customers c WHERE c.id = p.builder_id)
   `;
   if (Number(invalidPlanBuilders[0].count) === 0) {
     log('Plan->Customer FK', 'PASS', 'All plan builder references valid');
@@ -308,39 +308,49 @@ async function validateDatabase() {
   }
 
   // ============================================================================
-  // 7. LAYER 2 MATERIALS (SKU Level)
+  // 7. INTERNAL MATERIAL CATALOG
   // ============================================================================
-  console.log('\n7. LAYER 2 MATERIALS (SKU Level)');
+  console.log('\n7. INTERNAL MATERIAL CATALOG');
   console.log('───────────────────────────────────────────────────────────────');
 
   try {
-    const layer2Count = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer2_materials`;
-    if (Number(layer2Count[0].count) >= 100) {
-      log('Layer2 Materials', 'PASS', `${layer2Count[0].count} SKU-level materials`);
-    } else if (Number(layer2Count[0].count) > 0) {
-      log('Layer2 Materials', 'WARN', `Only ${layer2Count[0].count} SKU-level materials`);
+    const internalCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM internal_materials`;
+    if (Number(internalCount[0].count) >= 50) {
+      log('Internal Materials', 'PASS', `${internalCount[0].count} internal materials`);
+    } else if (Number(internalCount[0].count) > 0) {
+      log('Internal Materials', 'WARN', `Only ${internalCount[0].count} internal materials`);
     } else {
-      log('Layer2 Materials', 'FAIL', 'No Layer2 materials found');
+      log('Internal Materials', 'FAIL', 'No internal materials found');
     }
 
-    // Check materials by pack
-    const packDistribution = await prisma.$queryRaw<{bat_pack_id: string, count: bigint}[]>`
-      SELECT bat_pack_id, COUNT(*) as count FROM layer2_materials
-      GROUP BY bat_pack_id ORDER BY bat_pack_id
+    // Check supplier cross-references
+    const supplierXrefCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM supplier_sku_xref`;
+    if (Number(supplierXrefCount[0].count) >= 30) {
+      log('Supplier SKU Xrefs', 'PASS', `${supplierXrefCount[0].count} supplier SKU mappings`);
+    } else if (Number(supplierXrefCount[0].count) > 0) {
+      log('Supplier SKU Xrefs', 'WARN', `Only ${supplierXrefCount[0].count} supplier SKU mappings`);
+    } else {
+      log('Supplier SKU Xrefs', 'WARN', 'No supplier SKU mappings yet');
+    }
+
+    // Check suppliers
+    const supplierCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM suppliers`;
+    if (Number(supplierCount[0].count) >= 1) {
+      log('Suppliers', 'PASS', `${supplierCount[0].count} suppliers defined`);
+    } else {
+      log('Suppliers', 'WARN', 'No suppliers defined yet');
+    }
+
+    // Check material categories
+    const categoryDist = await prisma.$queryRaw<{category: string, count: bigint}[]>`
+      SELECT category, COUNT(*) as count FROM internal_materials
+      GROUP BY category ORDER BY count DESC
     `;
-    const criticalPacks = ['|10', '|20', '|40', '|60'];
-    for (const pack of criticalPacks) {
-      const packData = packDistribution.find(p => p.bat_pack_id === pack);
-      if (packData && Number(packData.count) >= 5) {
-        log(`Layer2 Pack ${pack}`, 'PASS', `${packData.count} materials`);
-      } else if (packData) {
-        log(`Layer2 Pack ${pack}`, 'WARN', `Only ${packData.count} materials`);
-      } else {
-        log(`Layer2 Pack ${pack}`, 'WARN', 'No materials for critical pack');
-      }
+    for (const cat of categoryDist) {
+      log(`Category: ${cat.category}`, 'INFO', `${cat.count} materials`);
     }
   } catch {
-    log('Layer2 Materials', 'WARN', 'Table not yet created (run migration)');
+    log('Internal Materials', 'WARN', 'Tables not yet created (run migration)');
   }
 
   // ============================================================================

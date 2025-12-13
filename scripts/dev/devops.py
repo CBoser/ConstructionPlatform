@@ -1115,7 +1115,7 @@ def submenu_code_system():
         print("  1. Validate Code System Data")
         print("  2. Seed Code System Only")
         print("  3. Seed Holt Cross-Reference")
-        print("  4. Seed Layer2 Materials")
+        print("  4. Seed Material Catalog")
         print("  5. View Code System Statistics")
         print(f"  {Colors.RED}0. Back{Colors.ENDC}")
 
@@ -1209,23 +1209,23 @@ def seed_holt_xref():
 
 
 def seed_layer2_materials():
-    """Seed Layer2 SKU materials"""
-    print_header("Seed Layer2 Materials (SKU Level)")
+    """Seed Internal Material Catalog and Supplier SKU Cross-References"""
+    print_header("Seed Material Catalog (Internal + Supplier Xref)")
 
-    print_info("Seeding Layer2 materials from HOLT BAT Pack guide...")
+    print_info("Seeding internal materials and supplier SKU cross-references...")
     code, stdout, stderr = run_command(
-        "npx ts-node -e \"import('./prisma/seeds/layer2Materials.seed').then(m => m.seedLayer2Materials())\"",
+        "npx ts-node -e \"import('./prisma/seeds/materialCatalog.seed').then(m => m.seedMaterialCatalog())\"",
         cwd=BACKEND_DIR,
         capture=True,
         check=False
     )
 
     if code == 0:
-        print_success("Layer2 materials seeded!")
+        print_success("Material catalog seeded!")
         if stdout:
             print(stdout)
     else:
-        print_error("Layer2 materials seeding failed")
+        print_error("Material catalog seeding failed")
         if stderr:
             print(f"{Colors.RED}{stderr}{Colors.ENDC}")
 
@@ -1242,11 +1242,15 @@ def view_code_system_stats():
         ("Phase Definitions", "SELECT COUNT(*) FROM phase_option_definitions"),
         ("Richmond Options", "SELECT COUNT(*) FROM richmond_option_codes"),
         ("Option Suffixes", "SELECT COUNT(*) FROM option_suffixes"),
+        ("Building Types", "SELECT COUNT(*) FROM building_types"),
+        ("Story Types", "SELECT COUNT(*) FROM story_types"),
         ("Layer1 Codes", "SELECT COUNT(*) FROM layer1_codes"),
         ("Holt Phase Mappings", "SELECT COUNT(*) FROM holt_phase_xref"),
         ("Item Type Mappings", "SELECT COUNT(*) FROM item_type_xref"),
         ("BAT Pack Definitions", "SELECT COUNT(*) FROM bat_pack_definitions"),
-        ("Layer2 Materials", "SELECT COUNT(*) FROM layer2_materials"),
+        ("Suppliers", "SELECT COUNT(*) FROM suppliers"),
+        ("Internal Materials", "SELECT COUNT(*) FROM internal_materials"),
+        ("Supplier SKU Xrefs", "SELECT COUNT(*) FROM supplier_sku_xref"),
         ("Customer Code Xrefs", "SELECT COUNT(*) FROM customer_code_xref"),
     ]
 
