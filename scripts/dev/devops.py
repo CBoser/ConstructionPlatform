@@ -542,9 +542,9 @@ def run_security_tests():
     print_header("Running Security Tests")
 
     tests = [
-        ("JWT Validation Test", "node test-jwt-validation.js"),
-        ("Seed Security Test", "node test-seed-security.js"),
-        ("Security Headers Test", "node test-security-headers.js"),
+        ("JWT Validation Test", "node tests/integration/test-jwt-validation.js"),
+        ("Seed Security Test", "node tests/integration/test-seed-security.js"),
+        ("Security Headers Test", "node tests/integration/test-security-headers.js"),
     ]
 
     for name, cmd in tests:

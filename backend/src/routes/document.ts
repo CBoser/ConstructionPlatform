@@ -1,16 +1,27 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { documentService } from '../services/document';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { UserRole, DocumentType } from '@prisma/client';
 
 const router = Router();
 
+// Ensure uploads directory exists
+const uploadDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('📁 [uploads]: Created uploads directory:', uploadDir);
+}
+
 // Configure multer for file uploads (disk storage)
 const storage = multer.diskStorage({
-  destination: async (_req, _file, cb) => {
-    const uploadDir = path.join(__dirname, '../../uploads');
+  destination: (_req, _file, cb) => {
+    // Ensure directory exists before each upload (in case it was deleted)
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
     cb(null, uploadDir);
   },
   filename: (_req, file, cb) => {

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
@@ -14,7 +14,19 @@ const prisma = new PrismaClient();
  * - Recent activity feed
  * - Today's deliveries
  * - Material cost trends
+ *
+ * Note: Portal-related tables (portal_orders, system_alerts, activity_logs, delivery_schedules)
+ * may not exist if the database hasn't been fully migrated. All queries to these tables
+ * have fallback handling to return empty/default values.
  */
+
+// Helper to check if an error is a Prisma "table does not exist" error
+function isTableNotFoundError(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    (error.code === 'P2021' || error.code === 'P2010')
+  );
+}
 
 // Helper functions
 function formatRelativeTime(date: Date): string {
@@ -62,6 +74,76 @@ function getAlertIcon(type: string): string {
   return icons[type] || 'ℹ️';
 }
 
+// Safe query wrappers for portal tables
+async function safePortalOrderAggregate(where: Prisma.PortalOrderWhereInput) {
+  try {
+    return await prisma.portalOrder.aggregate({
+      where,
+      _sum: { amount: true },
+    });
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return { _sum: { amount: null } };
+    }
+    throw error;
+  }
+}
+
+async function safePortalOrderCount(where: Prisma.PortalOrderWhereInput) {
+  try {
+    return await prisma.portalOrder.count({ where });
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return 0;
+    }
+    throw error;
+  }
+}
+
+async function safeSystemAlertFindMany(options: Prisma.SystemAlertFindManyArgs) {
+  try {
+    return await prisma.systemAlert.findMany(options);
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function safeActivityLogFindMany(options: Prisma.ActivityLogFindManyArgs) {
+  try {
+    return await prisma.activityLog.findMany(options);
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function safeDeliveryScheduleFindMany(options: Prisma.DeliveryScheduleFindManyArgs) {
+  try {
+    return await prisma.deliverySchedule.findMany(options);
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function safePortalOrderFindMany(options: Prisma.PortalOrderFindManyArgs) {
+  try {
+    return await prisma.portalOrder.findMany(options);
+  } catch (error) {
+    if (isTableNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
+}
+
 /**
  * GET /api/v1/dashboard/stats
  *
@@ -94,21 +176,15 @@ router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
 
     const jobsTrend = activeJobs - jobsLastWeek;
 
-    // Material Orders (from PortalOrder)
-    const materialOrders = await prisma.portalOrder.aggregate({
-      where: {
-        orderType: 'po',
-        createdAt: { gte: startOfMonth },
-      },
-      _sum: { amount: true },
+    // Material Orders (from PortalOrder) - with fallback
+    const materialOrders = await safePortalOrderAggregate({
+      orderType: 'po',
+      createdAt: { gte: startOfMonth },
     });
 
-    const todayOrders = await prisma.portalOrder.aggregate({
-      where: {
-        orderType: 'po',
-        createdAt: { gte: startOfToday },
-      },
-      _sum: { amount: true },
+    const todayOrders = await safePortalOrderAggregate({
+      orderType: 'po',
+      createdAt: { gte: startOfToday },
     });
 
     // Pending Approvals (from PurchaseOrder model)
@@ -116,21 +192,17 @@ router.get('/stats', authenticateToken, async (req: Request, res: Response) => {
       where: { status: 'DRAFT' }, // DRAFT status used as "pending approval"
     });
 
-    // On Time Delivery calculation
-    const totalDeliveries = await prisma.portalOrder.count({
-      where: {
-        orderType: 'po',
-        status: 'delivered',
-        createdAt: { gte: startOfMonth },
-      },
+    // On Time Delivery calculation - with fallback
+    const totalDeliveries = await safePortalOrderCount({
+      orderType: 'po',
+      status: 'delivered',
+      createdAt: { gte: startOfMonth },
     });
 
-    const lateDeliveries = await prisma.portalOrder.count({
-      where: {
-        orderType: 'po',
-        status: 'late',
-        createdAt: { gte: startOfMonth },
-      },
+    const lateDeliveries = await safePortalOrderCount({
+      orderType: 'po',
+      status: 'late',
+      createdAt: { gte: startOfMonth },
     });
 
     const totalDeliveriesForRate = totalDeliveries + lateDeliveries;
@@ -179,7 +251,7 @@ router.get('/alerts', authenticateToken, async (req: Request, res: Response) => 
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
 
-    const alerts = await prisma.systemAlert.findMany({
+    const alerts = await safeSystemAlertFindMany({
       where: { isDismissed: false },
       orderBy: [
         { alertType: 'asc' }, // critical < info < warning (alphabetical puts critical first)
@@ -193,7 +265,7 @@ router.get('/alerts', authenticateToken, async (req: Request, res: Response) => 
     });
 
     res.json(
-      alerts.map((a) => ({
+      alerts.map((a: any) => ({
         id: a.id,
         type: a.alertType,
         icon: getAlertIcon(a.alertType),
@@ -230,6 +302,10 @@ router.patch('/alerts/:id/dismiss', authenticateToken, async (req: Request, res:
 
     res.json({ success: true });
   } catch (error) {
+    if (isTableNotFoundError(error)) {
+      res.status(404).json({ error: 'Alert system not available' });
+      return;
+    }
     console.error('Dismiss alert error:', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -254,6 +330,10 @@ router.patch('/alerts/:id/read', authenticateToken, async (req: Request, res: Re
 
     res.json({ success: true });
   } catch (error) {
+    if (isTableNotFoundError(error)) {
+      res.status(404).json({ error: 'Alert system not available' });
+      return;
+    }
     console.error('Mark alert read error:', error);
     res.status(500).json({ error: error instanceof Error ? error.message : 'Unknown error' });
   }
@@ -268,7 +348,7 @@ router.get('/activity', authenticateToken, async (req: Request, res: Response) =
   try {
     const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
 
-    const activities = await prisma.activityLog.findMany({
+    const activities = await safeActivityLogFindMany({
       orderBy: { createdAt: 'desc' },
       take: limit,
       include: {
@@ -278,7 +358,7 @@ router.get('/activity', authenticateToken, async (req: Request, res: Response) =
     });
 
     res.json(
-      activities.map((a) => ({
+      activities.map((a: any) => ({
         id: a.id,
         type: a.activityType,
         icon: a.icon || getActivityIcon(a.activityType),
@@ -311,7 +391,7 @@ router.get('/deliveries', authenticateToken, async (req: Request, res: Response)
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const deliveries = await prisma.deliverySchedule.findMany({
+    const deliveries = await safeDeliveryScheduleFindMany({
       where: {
         scheduledTime: {
           gte: today,
@@ -325,7 +405,7 @@ router.get('/deliveries', authenticateToken, async (req: Request, res: Response)
     });
 
     res.json(
-      deliveries.map((d) => ({
+      deliveries.map((d: any) => ({
         id: d.id,
         time: formatTime(d.scheduledTime),
         scheduledTime: d.scheduledTime,
@@ -368,7 +448,7 @@ router.get('/trends', authenticateToken, async (req: Request, res: Response) => 
         break;
     }
 
-    const orders = await prisma.portalOrder.findMany({
+    const orders = await safePortalOrderFindMany({
       where: {
         orderType: 'po',
         createdAt: { gte: startDate },
@@ -384,7 +464,7 @@ router.get('/trends', authenticateToken, async (req: Request, res: Response) => 
     // Aggregate by category and time period
     const trendData: Record<string, Record<string, number>> = {};
 
-    for (const order of orders) {
+    for (const order of orders as any[]) {
       const dateKey =
         period === 'month'
           ? `${order.createdAt.getFullYear()}-${String(order.createdAt.getMonth() + 1).padStart(2, '0')}`
@@ -405,7 +485,7 @@ router.get('/trends', authenticateToken, async (req: Request, res: Response) => 
 
     // Format for chart consumption
     const labels = Object.keys(trendData).sort();
-    const categories = [...new Set(orders.map((o) => o.category || 'Other'))];
+    const categories = [...new Set((orders as any[]).map((o) => o.category || 'Other'))];
 
     const datasets = categories.map((category) => ({
       label: category,
@@ -416,7 +496,7 @@ router.get('/trends', authenticateToken, async (req: Request, res: Response) => 
       labels,
       datasets,
       summary: {
-        totalAmount: orders.reduce((sum, o) => sum + Number(o.amount), 0),
+        totalAmount: (orders as any[]).reduce((sum, o) => sum + Number(o.amount), 0),
         orderCount: orders.length,
         period,
       },
@@ -432,6 +512,9 @@ router.get('/trends', authenticateToken, async (req: Request, res: Response) => 
  *
  * Returns a combined summary with all dashboard data in one request
  * Useful for initial page load to reduce round trips
+ *
+ * Note: This endpoint gracefully handles missing portal tables by returning
+ * default/empty values for portal-related data.
  */
 router.get('/summary', authenticateToken, async (req: Request, res: Response) => {
   try {
@@ -444,19 +527,8 @@ router.get('/summary', authenticateToken, async (req: Request, res: Response) =>
     const tomorrow = new Date(startOfToday);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Run all queries in parallel
-    const [
-      activeJobsCount,
-      jobsLastWeekCount,
-      materialOrdersSum,
-      todayOrdersSum,
-      pendingApprovalsCount,
-      deliveredCount,
-      lateCount,
-      alerts,
-      activities,
-      deliveries,
-    ] = await Promise.all([
+    // Run queries - core models first, then portal models with fallbacks
+    const [activeJobsCount, jobsLastWeekCount, pendingApprovalsCount] = await Promise.all([
       prisma.job.count({
         where: { status: { in: ['DRAFT', 'ESTIMATED', 'APPROVED', 'IN_PROGRESS'] } },
       }),
@@ -466,44 +538,39 @@ router.get('/summary', authenticateToken, async (req: Request, res: Response) =>
           createdAt: { lt: startOfWeek },
         },
       }),
-      prisma.portalOrder.aggregate({
-        where: { orderType: 'po', createdAt: { gte: startOfMonth } },
-        _sum: { amount: true },
-      }),
-      prisma.portalOrder.aggregate({
-        where: { orderType: 'po', createdAt: { gte: startOfToday } },
-        _sum: { amount: true },
-      }),
       prisma.purchaseOrder.count({ where: { status: 'DRAFT' } }),
-      prisma.portalOrder.count({
-        where: { orderType: 'po', status: 'delivered', createdAt: { gte: startOfMonth } },
-      }),
-      prisma.portalOrder.count({
-        where: { orderType: 'po', status: 'late', createdAt: { gte: startOfMonth } },
-      }),
-      prisma.systemAlert.findMany({
-        where: { isDismissed: false },
-        orderBy: [{ alertType: 'asc' }, { createdAt: 'desc' }],
-        take: 5,
-        include: {
-          customer: { select: { customerName: true } },
-          community: { select: { name: true } },
-        },
-      }),
-      prisma.activityLog.findMany({
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        include: {
-          customer: { select: { customerName: true } },
-        },
-      }),
-      prisma.deliverySchedule.findMany({
-        where: { scheduledTime: { gte: startOfToday, lt: tomorrow } },
-        orderBy: { scheduledTime: 'asc' },
-        take: 5,
-        include: { community: { select: { name: true } } },
-      }),
     ]);
+
+    // Portal-related queries with fallbacks
+    const [materialOrdersSum, todayOrdersSum, deliveredCount, lateCount, alerts, activities, deliveries] =
+      await Promise.all([
+        safePortalOrderAggregate({ orderType: 'po', createdAt: { gte: startOfMonth } }),
+        safePortalOrderAggregate({ orderType: 'po', createdAt: { gte: startOfToday } }),
+        safePortalOrderCount({ orderType: 'po', status: 'delivered', createdAt: { gte: startOfMonth } }),
+        safePortalOrderCount({ orderType: 'po', status: 'late', createdAt: { gte: startOfMonth } }),
+        safeSystemAlertFindMany({
+          where: { isDismissed: false },
+          orderBy: [{ alertType: 'asc' }, { createdAt: 'desc' }],
+          take: 5,
+          include: {
+            customer: { select: { customerName: true } },
+            community: { select: { name: true } },
+          },
+        }),
+        safeActivityLogFindMany({
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+          include: {
+            customer: { select: { customerName: true } },
+          },
+        }),
+        safeDeliveryScheduleFindMany({
+          where: { scheduledTime: { gte: startOfToday, lt: tomorrow } },
+          orderBy: { scheduledTime: 'asc' },
+          take: 5,
+          include: { community: { select: { name: true } } },
+        }),
+      ]);
 
     const jobsTrend = activeJobsCount - jobsLastWeekCount;
     const totalMaterialAmount = Number(materialOrdersSum._sum.amount || 0);
@@ -534,7 +601,7 @@ router.get('/summary', authenticateToken, async (req: Request, res: Response) =>
           trendUp: onTimeRate >= 95,
         },
       },
-      alerts: alerts.map((a) => ({
+      alerts: (alerts as any[]).map((a) => ({
         id: a.id,
         type: a.alertType,
         icon: getAlertIcon(a.alertType),
@@ -544,7 +611,7 @@ router.get('/summary', authenticateToken, async (req: Request, res: Response) =>
         customer: a.customer?.customerName,
         community: a.community?.name,
       })),
-      activities: activities.map((a) => ({
+      activities: (activities as any[]).map((a) => ({
         id: a.id,
         type: a.activityType,
         icon: a.icon || getActivityIcon(a.activityType),
@@ -553,7 +620,7 @@ router.get('/summary', authenticateToken, async (req: Request, res: Response) =>
         amount: a.amount ? Number(a.amount) : null,
         time: formatRelativeTime(a.createdAt),
       })),
-      deliveries: deliveries.map((d) => ({
+      deliveries: (deliveries as any[]).map((d) => ({
         id: d.id,
         time: formatTime(d.scheduledTime),
         title: d.title,
