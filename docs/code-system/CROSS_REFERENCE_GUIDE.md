@@ -9,7 +9,7 @@
 
 MindFlow uses **5 cross-reference databases** to translate between different coding systems. This allows us to:
 - Accept data from multiple builders (Holt, Richmond, custom)
-- Work with multiple suppliers (HOLT Supply, 84 Lumber, BlueLinx)
+- Work with multiple suppliers (HOLT Supply, BFS/STO, 84 Lumber, BlueLinx)
 - Maintain a single unified internal system
 
 ```
@@ -33,16 +33,18 @@ MindFlow uses **5 cross-reference databases** to translate between different cod
     │ │ Phase     │ │      │ │ SKUs      │ │       │ │ Codes     │ │
     │ │ Xref      │ │      │ └───────────┘ │       │ │ → Classes │ │
     │ └───────────┘ │      │ ┌───────────┐ │       │ └───────────┘ │
-    │ ┌───────────┐ │      │ │ 84 Lumber │ │       └───────────────┘
+    │ ┌───────────┐ │      │ │ BFS/STO   │ │       └───────────────┘
     │ │ Richmond  │ │      │ │ SKUs      │ │
     │ │ Option    │ │      │ └───────────┘ │
     │ │ Codes     │ │      │ ┌───────────┐ │
-    │ └───────────┘ │      │ │ BlueLinx  │ │
+    │ └───────────┘ │      │ │ 84 Lumber │ │
     │ ┌───────────┐ │      │ │ SKUs      │ │
     │ │ Customer  │ │      │ └───────────┘ │
-    │ │ Code Xref │ │      └───────────────┘
-    │ └───────────┘ │
-    └───────────────┘
+    │ │ Code Xref │ │      │ ┌───────────┐ │
+    │ └───────────┘ │      │ │ BlueLinx  │ │
+    └───────────────┘      │ │ SKUs      │ │
+                           │ └───────────┘ │
+                           └───────────────┘
 ```
 
 ---
@@ -192,17 +194,40 @@ CustomerCodeXref
 ```
 InternalMaterial (Our Catalog)
        │
-       ├── SupplierSkuXref → HOLT SKU
+       ├── SupplierSkuXref → HOLT SKU (BAT Pack system)
+       ├── SupplierSkuXref → BFS/STO SKU (Descriptive codes)
        ├── SupplierSkuXref → 84 Lumber SKU
        └── SupplierSkuXref → BlueLinx SKU
 ```
 
+### Current Suppliers
+| Code | Name | Code System | Format |
+|------|------|-------------|--------|
+| HOLT | Holt Homes Supply | BAT Pack | Compact alphanumeric (`2616HF3TICAG`) |
+| BFS | Builder's FirstSource | STO | Descriptive (`2X4-92-5/8-SPF`) |
+| 84LBR | 84 Lumber | BOM | Traditional (`PT-2X6-16`) |
+| BLUELINX | BlueLinx | Custom | Vendor-specific |
+
+### BFS/STO Code Format
+```
+PREFIX-DIMENSION-SPEC[-VARIANT][-SEQ]
+
+Examples:
+  2X4-8-SPF           → 2x4 x 8' SPF #2
+  2X6-92-5/8-DF       → 2x6 x 92-5/8" DF Stud Grade
+  OSB-7/16-4X8-TG     → 7/16" OSB 4x8 Tongue & Groove
+  HANGER-LUS28        → Simpson LUS28 Joist Hanger
+  GLB-5X18            → Glulam Beam 5" x 18"
+```
+
 ### Translation Examples
-| Our Internal Code | HOLT SKU | 84 Lumber SKU | Description |
-|-------------------|----------|---------------|-------------|
-| FRM-2X6-16-PT-SILL | 2616HF3TICAG | PT-2X6-16 | 2x6x16 PT Sill |
-| SID-LAP-HZ-8.25-12 | HZ10814CMSP | HP-825-12 | HardiePlank 8.25" |
-| HW-HD-HDU4 | HDU4-SDS2.5 | SIMPSON-HDU4 | Hold-Down HDU4 |
+| Our Internal Code | HOLT SKU | BFS/STO SKU | Description |
+|-------------------|----------|-------------|-------------|
+| FRM-2X6-16-PT-SILL | 2616HF3TICAG | 2X6-16-PT-GC | 2x6x16 PT Sill |
+| FRM-2X4-92-SPF-STUD | 2492SPF2 | 2X4-92-5/8-SPF | 2x4 Precut Stud |
+| SID-LAP-HZ-8.25-12 | HZ10814CMSP | SID-HZ-LAP-8.25 | HardiePlank 8.25" |
+| HW-HGR-LUS28 | LUS28 | HANGER-LUS28 | Simpson LUS28 Hanger |
+| HW-HD-HD5A | HD5A | ANCHOR-HD5A | Simpson HD5A Hold-Down |
 
 ### Database Fields
 ```

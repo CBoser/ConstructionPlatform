@@ -29,6 +29,14 @@ const SUPPLIERS = [
     notes: 'Primary framing and siding supplier for Holt Homes builders',
   },
   {
+    code: 'BFS',
+    name: "Builder's FirstSource",
+    type: 'Dealer',
+    catalogVersion: 'STO_DEC_2025',
+    packSystem: 'STO',
+    notes: "Sales Team One PDX - Builder's FirstSource descriptive item codes",
+  },
+  {
     code: '84LBR',
     name: '84 Lumber',
     type: 'Dealer',
@@ -362,6 +370,177 @@ const HOLT_SKUS: SupplierSkuXrefDef[] = [
 ];
 
 // ============================================================================
+// BFS (BUILDER'S FIRSTSOURCE) STO SKU CROSS-REFERENCE
+// Sales Team One - Human-readable descriptive item codes
+// Format: PREFIX-DIMENSION-SPEC[-VARIANT][-SEQ]
+// ============================================================================
+
+interface BfsSkuXrefDef {
+  internalCode: string;      // Links to InternalMaterial
+  supplierSku: string;       // STO descriptive code
+  supplierDescription?: string;
+  category: string;          // STO category
+}
+
+const BFS_SKUS: BfsSkuXrefDef[] = [
+  // Dimensional Lumber - Studs
+  { internalCode: 'FRM-2X4-92-SPF-STUD', supplierSku: '2X4-92-5/8-SPF', supplierDescription: '2x4 x 92-5/8" SPF Stud Grade', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-92-HF-STUD', supplierSku: '2X4-92-5/8-HF', supplierDescription: '2x4 x 92-5/8" HF Stud Grade', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-92-SPF-STUD', supplierSku: '2X6-92-5/8-SPF', supplierDescription: '2x6 x 92-5/8" SPF Stud Grade', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-92-HF-STUD', supplierSku: '2X6-92-5/8-HF', supplierDescription: '2x6 x 92-5/8" HF Stud Grade', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-104-SPF-STUD', supplierSku: '2X4-104-5/8-DF', supplierDescription: '2x4 x 104-5/8" DF Stud 9ft', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-104-SPF-STUD', supplierSku: '2X6-104-5/8-DF', supplierDescription: '2x6 x 104-5/8" DF Stud 9ft', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-116-SPF-STUD', supplierSku: '2X4-116-5/8-DF', supplierDescription: '2x4 x 116-5/8" DF Stud 10ft', category: 'Dimensional Lumber' },
+
+  // Dimensional Lumber - Plates
+  { internalCode: 'FRM-2X4-8-SPF-PLT', supplierSku: '2X4-8-SPF', supplierDescription: '2x4 x 8\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-10-SPF-PLT', supplierSku: '2X4-10-SPF', supplierDescription: '2x4 x 10\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-12-SPF-PLT', supplierSku: '2X4-12-SPF', supplierDescription: '2x4 x 12\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-14-SPF-PLT', supplierSku: '2X4-14-SPF', supplierDescription: '2x4 x 14\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-16-SPF-PLT', supplierSku: '2X4-16-SPF', supplierDescription: '2x4 x 16\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X4-20-SPF-PLT', supplierSku: '2X4-20-SPF', supplierDescription: '2x4 x 20\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-8-SPF-PLT', supplierSku: '2X6-8-SPF', supplierDescription: '2x6 x 8\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-10-SPF-PLT', supplierSku: '2X6-10-SPF', supplierDescription: '2x6 x 10\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-12-SPF-PLT', supplierSku: '2X6-12-SPF', supplierDescription: '2x6 x 12\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-14-SPF-PLT', supplierSku: '2X6-14-SPF', supplierDescription: '2x6 x 14\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-16-SPF-PLT', supplierSku: '2X6-16-SPF', supplierDescription: '2x6 x 16\' SPF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X6-20-SPF-PLT', supplierSku: '2X6-20-SPF', supplierDescription: '2x6 x 20\' SPF #2', category: 'Dimensional Lumber' },
+
+  // Dimensional Lumber - Headers
+  { internalCode: 'FRM-2X10-8-DF-HDR', supplierSku: '2X10-8-DF', supplierDescription: '2x10 x 8\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X10-10-DF-HDR', supplierSku: '2X10-10-DF', supplierDescription: '2x10 x 10\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X10-12-DF-HDR', supplierSku: '2X10-12-DF', supplierDescription: '2x10 x 12\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X10-14-DF-HDR', supplierSku: '2X10-14-DF', supplierDescription: '2x10 x 14\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X10-16-DF-HDR', supplierSku: '2X10-16-DF', supplierDescription: '2x10 x 16\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X12-8-DF-HDR', supplierSku: '2X12-8-DF', supplierDescription: '2x12 x 8\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X12-10-DF-HDR', supplierSku: '2X12-10-DF', supplierDescription: '2x12 x 10\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X12-12-DF-HDR', supplierSku: '2X12-12-DF', supplierDescription: '2x12 x 12\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X12-14-DF-HDR', supplierSku: '2X12-14-DF', supplierDescription: '2x12 x 14\' DF #2', category: 'Dimensional Lumber' },
+  { internalCode: 'FRM-2X12-16-DF-HDR', supplierSku: '2X12-16-DF', supplierDescription: '2x12 x 16\' DF #2', category: 'Dimensional Lumber' },
+
+  // Pressure Treated - Sill Plates
+  { internalCode: 'FRM-2X6-8-PT-SILL', supplierSku: '2X6-8-PT-GC', supplierDescription: '2x6 x 8\' PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-2X6-10-PT-SILL', supplierSku: '2X6-10-PT-GC', supplierDescription: '2x6 x 10\' PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-2X6-12-PT-SILL', supplierSku: '2X6-12-PT-GC', supplierDescription: '2x6 x 12\' PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-2X6-14-PT-SILL', supplierSku: '2X6-14-PT-GC', supplierDescription: '2x6 x 14\' PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-2X6-16-PT-SILL', supplierSku: '2X6-16-PT-GC', supplierDescription: '2x6 x 16\' PT Ground Contact', category: 'Pressure Treated' },
+
+  // Pressure Treated - Posts
+  { internalCode: 'FRM-4X4-8-PT-POST', supplierSku: '4X4-8-DF-PT-GC', supplierDescription: '4x4 x 8\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-4X4-10-PT-POST', supplierSku: '4X4-10-DF-PT-GC', supplierDescription: '4x4 x 10\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-4X4-12-PT-POST', supplierSku: '4X4-12-DF-PT-GC', supplierDescription: '4x4 x 12\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-4X4-16-PT-POST', supplierSku: '4X4-16-DF-PT-GC', supplierDescription: '4x4 x 16\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-6X6-8-PT-POST', supplierSku: '6X6-8-DF-PT-GC', supplierDescription: '6x6 x 8\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-6X6-10-PT-POST', supplierSku: '6X6-10-DF-PT-GC', supplierDescription: '6x6 x 10\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-6X6-12-PT-POST', supplierSku: '6X6-12-DF-PT-GC', supplierDescription: '6x6 x 12\' DF PT Ground Contact', category: 'Pressure Treated' },
+  { internalCode: 'FRM-6X6-16-PT-POST', supplierSku: '6X6-16-DF-PT-GC', supplierDescription: '6x6 x 16\' DF PT Ground Contact', category: 'Pressure Treated' },
+
+  // Engineered Lumber - I-Joists
+  { internalCode: 'ENG-IJ-9.5-16', supplierSku: 'IJT-9-1/2-TJI110', supplierDescription: 'TJI 110 I-Joist 9-1/2" x 16\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-9.5-18', supplierSku: 'IJT-9-1/2-TJI110-18', supplierDescription: 'TJI 110 I-Joist 9-1/2" x 18\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-9.5-20', supplierSku: 'IJT-9-1/2-TJI110-20', supplierDescription: 'TJI 110 I-Joist 9-1/2" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-11.875-16', supplierSku: 'IJT-11-7/8-TJI110', supplierDescription: 'TJI 110 I-Joist 11-7/8" x 16\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-11.875-18', supplierSku: 'IJT-11-7/8-TJI110-18', supplierDescription: 'TJI 110 I-Joist 11-7/8" x 18\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-11.875-20', supplierSku: 'IJT-11-7/8-TJI110-20', supplierDescription: 'TJI 110 I-Joist 11-7/8" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-11.875-24', supplierSku: 'IJT-11-7/8-TJI110-24', supplierDescription: 'TJI 110 I-Joist 11-7/8" x 24\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-14-16', supplierSku: 'IJT-14-TJI110', supplierDescription: 'TJI 110 I-Joist 14" x 16\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-14-20', supplierSku: 'IJT-14-TJI110-20', supplierDescription: 'TJI 110 I-Joist 14" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-IJ-16-20', supplierSku: 'IJT-16-TJI110-20', supplierDescription: 'TJI 110 I-Joist 16" x 20\'', category: 'Engineered Lumber' },
+
+  // Engineered Lumber - LVL
+  { internalCode: 'ENG-LVL-1.75X9.5-16', supplierSku: 'LVL-1-3/4X9-1/2', supplierDescription: 'LVL 1-3/4" x 9-1/2" x 16\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X9.5-20', supplierSku: 'LVL-1-3/4X9-1/2-20', supplierDescription: 'LVL 1-3/4" x 9-1/2" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X11.875-16', supplierSku: 'LVL-1-3/4X11-7/8', supplierDescription: 'LVL 1-3/4" x 11-7/8" x 16\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X11.875-20', supplierSku: 'LVL-1-3/4X11-7/8-20', supplierDescription: 'LVL 1-3/4" x 11-7/8" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X11.875-24', supplierSku: 'LVL-1-3/4X11-7/8-24', supplierDescription: 'LVL 1-3/4" x 11-7/8" x 24\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X14-20', supplierSku: 'LVL-1-3/4X14', supplierDescription: 'LVL 1-3/4" x 14" x 20\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-LVL-1.75X16-20', supplierSku: 'LVL-1-3/4X16', supplierDescription: 'LVL 1-3/4" x 16" x 20\'', category: 'Engineered Lumber' },
+
+  // Engineered Lumber - Rim Board
+  { internalCode: 'ENG-RIM-1.125X9.5-16', supplierSku: 'RIM-1-1/8X9-1/2', supplierDescription: 'Rim Board 1-1/8" x 9-1/2"', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-RIM-1.125X11.875-16', supplierSku: 'RIM-1-1/8X11-7/8', supplierDescription: 'Rim Board 1-1/8" x 11-7/8"', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-RIM-1.25X14-16', supplierSku: 'RIM-1-1/4X14', supplierDescription: 'Rim Board 1-1/4" x 14"', category: 'Engineered Lumber' },
+
+  // Engineered Lumber - Glulam
+  { internalCode: 'ENG-GLU-3.125X11.25-14', supplierSku: 'GLB-3-1/8X11-1/4', supplierDescription: 'Glulam Beam 3-1/8" x 11-1/4" x 14\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-GLU-3.125X11.25-18', supplierSku: 'GLB-3-1/8X11-1/4-18', supplierDescription: 'Glulam Beam 3-1/8" x 11-1/4" x 18\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-GLU-5.125X12-14', supplierSku: 'GLB-5-1/8X12', supplierDescription: 'Glulam Beam 5-1/8" x 12" x 14\'', category: 'Engineered Lumber' },
+  { internalCode: 'ENG-GLU-5.125X12-18', supplierSku: 'GLB-5-1/8X12-18', supplierDescription: 'Glulam Beam 5-1/8" x 12" x 18\'', category: 'Engineered Lumber' },
+
+  // Sheathing - OSB
+  { internalCode: 'SHT-OSB-7/16-4X8', supplierSku: 'OSB-7/16-4X8', supplierDescription: '7/16" OSB 4x8 Wall Sheathing', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-7/16-4X9', supplierSku: 'OSB-7/16-4X9', supplierDescription: '7/16" OSB 4x9 Wall Sheathing', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-7/16-4X10', supplierSku: 'OSB-7/16-4X10', supplierDescription: '7/16" OSB 4x10 Wall Sheathing', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-1/2-4X8-ROOF', supplierSku: 'OSB-1/2-4X8', supplierDescription: '1/2" OSB 4x8 Roof Sheathing', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-15/32-4X8-ROOF', supplierSku: 'OSB-15/32-4X8', supplierDescription: '15/32" OSB 4x8 Roof Sheathing', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-23/32-4X8-TG', supplierSku: 'OSB-23/32-4X8-TG', supplierDescription: '23/32" OSB 4x8 T&G Subfloor', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-7/8-4X8-TG', supplierSku: 'OSB-7/8-4X8-TG', supplierDescription: '7/8" OSB 4x8 T&G Subfloor', category: 'Sheathing' },
+  { internalCode: 'SHT-OSB-1-1/8-4X8-TG', supplierSku: 'OSB-1-1/8-4X8-TG', supplierDescription: '1-1/8" OSB 4x8 T&G Subfloor', category: 'Sheathing' },
+
+  // Sheathing - Plywood
+  { internalCode: 'SHT-PLY-1/2-CDX-4X8', supplierSku: 'PLY-1/2-CDX-4X8', supplierDescription: '1/2" CDX Plywood 4x8', category: 'Sheathing' },
+  { internalCode: 'SHT-PLY-3/4-CDX-4X8', supplierSku: 'PLY-3/4-CDX-4X8', supplierDescription: '3/4" CDX Plywood 4x8', category: 'Sheathing' },
+
+  // Hardware - Joist Hangers (Simpson Strong-Tie)
+  { internalCode: 'HW-HGR-LUS26', supplierSku: 'HANGER-LUS26', supplierDescription: 'Simpson LUS26 Joist Hanger', category: 'Hardware' },
+  { internalCode: 'HW-HGR-LUS28', supplierSku: 'HANGER-LUS28', supplierDescription: 'Simpson LUS28 Joist Hanger', category: 'Hardware' },
+  { internalCode: 'HW-HGR-LUS210', supplierSku: 'HANGER-LUS210', supplierDescription: 'Simpson LUS210 Joist Hanger', category: 'Hardware' },
+  { internalCode: 'HW-HGR-LUS212', supplierSku: 'HANGER-LUS212', supplierDescription: 'Simpson LUS212 Joist Hanger', category: 'Hardware' },
+  { internalCode: 'HW-HGR-HUS26', supplierSku: 'HANGER-HUS26', supplierDescription: 'Simpson HUS26 Face Mount Hanger', category: 'Hardware' },
+  { internalCode: 'HW-HGR-HUS28', supplierSku: 'HANGER-HUS28', supplierDescription: 'Simpson HUS28 Face Mount Hanger', category: 'Hardware' },
+
+  // Hardware - Framing Angles
+  { internalCode: 'HW-ANG-A34', supplierSku: 'CLIP-A34', supplierDescription: 'Simpson A34 Framing Angle', category: 'Hardware' },
+  { internalCode: 'HW-ANG-A35', supplierSku: 'CLIP-A35', supplierDescription: 'Simpson A35 Framing Angle', category: 'Hardware' },
+  { internalCode: 'HW-ANG-LS50', supplierSku: 'HDW-LS50', supplierDescription: 'Simpson LS50 Angle', category: 'Hardware' },
+
+  // Hardware - Post Bases
+  { internalCode: 'HW-BASE-ABU44Z', supplierSku: 'BASE-ABU44Z', supplierDescription: 'Simpson ABU44Z Post Base', category: 'Hardware' },
+  { internalCode: 'HW-BASE-ABU66Z', supplierSku: 'BASE-ABU66Z', supplierDescription: 'Simpson ABU66Z Post Base', category: 'Hardware' },
+  { internalCode: 'HW-BASE-CB44', supplierSku: 'BASE-CB44', supplierDescription: 'Simpson CB44 Column Base', category: 'Hardware' },
+  { internalCode: 'HW-BASE-CB66', supplierSku: 'BASE-CB66', supplierDescription: 'Simpson CB66 Column Base', category: 'Hardware' },
+
+  // Hardware - Hold-Downs
+  { internalCode: 'HW-HD-HDU2', supplierSku: 'ANCHOR-HDU2', supplierDescription: 'Simpson HDU2 Hold-Down', category: 'Hardware' },
+  { internalCode: 'HW-HD-HDU4', supplierSku: 'ANCHOR-HDU4', supplierDescription: 'Simpson HDU4 Hold-Down', category: 'Hardware' },
+  { internalCode: 'HW-HD-HDU5', supplierSku: 'ANCHOR-HDU5', supplierDescription: 'Simpson HDU5 Hold-Down', category: 'Hardware' },
+  { internalCode: 'HW-HD-HDU8', supplierSku: 'ANCHOR-HDU8', supplierDescription: 'Simpson HDU8 Hold-Down', category: 'Hardware' },
+  { internalCode: 'HW-HD-HD5A', supplierSku: 'ANCHOR-HD5A', supplierDescription: 'Simpson HD5A Hold-Down', category: 'Hardware' },
+  { internalCode: 'HW-HD-HD7A', supplierSku: 'ANCHOR-HD7A', supplierDescription: 'Simpson HD7A Hold-Down', category: 'Hardware' },
+
+  // Hardware - Straps
+  { internalCode: 'HW-STRAP-CS16', supplierSku: 'STRAP-CS16', supplierDescription: 'Simpson CS16 Coiled Strap', category: 'Hardware' },
+  { internalCode: 'HW-STRAP-CS22', supplierSku: 'STRAP-CS22', supplierDescription: 'Simpson CS22 Coiled Strap', category: 'Hardware' },
+  { internalCode: 'HW-STRAP-MSTA24', supplierSku: 'STRAP-MSTA24', supplierDescription: 'Simpson MSTA24 Strap Tie', category: 'Hardware' },
+  { internalCode: 'HW-STRAP-MSTC40', supplierSku: 'STRAP-MSTC40', supplierDescription: 'Simpson MSTC40 Strap Tie', category: 'Hardware' },
+
+  // Housewrap
+  { internalCode: 'WRB-TYVEK-9X125', supplierSku: 'WRAP-TYVEK-9X125', supplierDescription: 'Tyvek Housewrap 9\' x 125\'', category: 'Housewrap' },
+  { internalCode: 'WRB-TYVEK-10X150', supplierSku: 'WRAP-TYVEK-10X150', supplierDescription: 'Tyvek Housewrap 10\' x 150\'', category: 'Housewrap' },
+  { internalCode: 'WRB-TAPE-3X164', supplierSku: 'WRAP-TAPE-3X164', supplierDescription: 'Tyvek Tape 3" x 164\'', category: 'Housewrap' },
+
+  // Siding - HardiePlank
+  { internalCode: 'SID-LAP-HZ-5.25-12', supplierSku: 'SID-HZ-LAP-5.25', supplierDescription: 'HardiePlank Lap 5-1/4" x 12\'', category: 'Siding' },
+  { internalCode: 'SID-LAP-HZ-8.25-12', supplierSku: 'SID-HZ-LAP-8.25', supplierDescription: 'HardiePlank Lap 8-1/4" x 12\'', category: 'Siding' },
+  { internalCode: 'SID-LAP-HZ-6.25-12', supplierSku: 'SID-HZ-LAP-6.25', supplierDescription: 'HardiePlank Lap 6-1/4" x 12\'', category: 'Siding' },
+  { internalCode: 'SID-PNL-HZ-4X8', supplierSku: 'SID-HZ-PANEL-4X8', supplierDescription: 'HardiePanel 4x8', category: 'Siding' },
+  { internalCode: 'SID-PNL-HZ-4X9', supplierSku: 'SID-HZ-PANEL-4X9', supplierDescription: 'HardiePanel 4x9', category: 'Siding' },
+  { internalCode: 'SID-PNL-HZ-4X10', supplierSku: 'SID-HZ-PANEL-4X10', supplierDescription: 'HardiePanel 4x10', category: 'Siding' },
+
+  // Siding - HardieTrim
+  { internalCode: 'SID-TRM-HZ-4-12', supplierSku: 'TRIM-HZ-5/4X4', supplierDescription: 'HardieTrim 5/4" x 4" x 12\'', category: 'Exterior Trim' },
+  { internalCode: 'SID-TRM-HZ-6-12', supplierSku: 'TRIM-HZ-5/4X6', supplierDescription: 'HardieTrim 5/4" x 6" x 12\'', category: 'Exterior Trim' },
+  { internalCode: 'SID-TRM-HZ-8-12', supplierSku: 'TRIM-HZ-5/4X8', supplierDescription: 'HardieTrim 5/4" x 8" x 12\'', category: 'Exterior Trim' },
+  { internalCode: 'SID-TRM-HZ-10-12', supplierSku: 'TRIM-HZ-5/4X10', supplierDescription: 'HardieTrim 5/4" x 10" x 12\'', category: 'Exterior Trim' },
+  { internalCode: 'SID-TRM-HZ-12-12', supplierSku: 'TRIM-HZ-5/4X12', supplierDescription: 'HardieTrim 5/4" x 12" x 12\'', category: 'Exterior Trim' },
+
+  // Fascia
+  { internalCode: 'SID-FASC-FJ-2X8-20', supplierSku: 'TRIM-2X8-20-FJ-WWP', supplierDescription: '2x8 x 20\' FJ WWP Fascia', category: 'Exterior Trim' },
+  { internalCode: 'SID-FASC-FJ-2X10-20', supplierSku: 'TRIM-2X10-20-FJ-WWP', supplierDescription: '2x10 x 20\' FJ WWP Fascia', category: 'Exterior Trim' },
+  { internalCode: 'SID-FASC-FJ-2X12-20', supplierSku: 'TRIM-2X12-20-FJ-WWP', supplierDescription: '2x12 x 20\' FJ WWP Fascia', category: 'Exterior Trim' },
+];
+
+// ============================================================================
 // SEED FUNCTION
 // ============================================================================
 
@@ -412,7 +591,7 @@ export async function seedMaterialCatalog() {
 
   // 3. Seed HOLT Supplier SKU Cross-References
   console.log('  🔗 Seeding HOLT SKU Cross-References...');
-  let xrefCount = 0;
+  let holtXrefCount = 0;
 
   for (const xref of HOLT_SKUS) {
     const internalMaterialId = materialMap.get(xref.internalCode);
@@ -447,14 +626,54 @@ export async function seedMaterialCatalog() {
         isPrimary: true,
       },
     });
-    xrefCount++;
+    holtXrefCount++;
   }
-  console.log(`    ✓ ${xrefCount} HOLT SKU cross-references seeded`);
+  console.log(`    ✓ ${holtXrefCount} HOLT SKU cross-references seeded`);
 
+  // 4. Seed BFS (Builder's FirstSource) STO SKU Cross-References
+  console.log('  🔗 Seeding BFS/STO SKU Cross-References...');
+  let bfsXrefCount = 0;
+
+  for (const xref of BFS_SKUS) {
+    const internalMaterialId = materialMap.get(xref.internalCode);
+    if (!internalMaterialId) {
+      console.warn(`    ⚠️ Internal material not found: ${xref.internalCode}`);
+      continue;
+    }
+
+    await prisma.supplierSkuXref.upsert({
+      where: {
+        internalMaterialId_supplierId_supplierSku: {
+          internalMaterialId,
+          supplierId: 'BFS',
+          supplierSku: xref.supplierSku,
+        },
+      },
+      update: {
+        supplierName: "Builder's FirstSource",
+        supplierDescription: xref.supplierDescription,
+        supplierPackId: xref.category,  // Use STO category as pack identifier
+        isPrimary: false,  // HOLT is primary, BFS is secondary
+      },
+      create: {
+        internalMaterialId,
+        supplierId: 'BFS',
+        supplierName: "Builder's FirstSource",
+        supplierSku: xref.supplierSku,
+        supplierDescription: xref.supplierDescription,
+        supplierPackId: xref.category,
+        isPrimary: false,
+      },
+    });
+    bfsXrefCount++;
+  }
+  console.log(`    ✓ ${bfsXrefCount} BFS/STO SKU cross-references seeded`);
+
+  const totalXrefs = holtXrefCount + bfsXrefCount;
   console.log('✅ Material Catalog seeding complete!');
   console.log(`   - ${SUPPLIERS.length} suppliers`);
   console.log(`   - ${ALL_INTERNAL_MATERIALS.length} internal materials`);
-  console.log(`   - ${xrefCount} supplier SKU cross-references`);
+  console.log(`   - ${totalXrefs} supplier SKU cross-references (${holtXrefCount} HOLT + ${bfsXrefCount} BFS)`);
 }
 
 // ============================================================================
