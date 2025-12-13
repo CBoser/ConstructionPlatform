@@ -73,6 +73,7 @@ const Feedback = React.lazy(() => import('./pages/feedback'));
 // Tools
 const SpreadsheetExtractor = React.lazy(() => import('./pages/tools/SpreadsheetExtractor'));
 const DataImport = React.lazy(() => import('./pages/tools/DataImport'));
+const ImplementationIntake = React.lazy(() => import('./pages/tools/ImplementationIntake'));
 
 import './styles/App.css';
 import './styles/design-system.css';
@@ -290,6 +291,16 @@ function App() {
                     <ProtectedRoute>
                       <MainLayout>
                         <DataImport />
+                      </MainLayout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tools/implementation-intake"
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout>
+                        <ImplementationIntake />
                       </MainLayout>
                     </ProtectedRoute>
                   }

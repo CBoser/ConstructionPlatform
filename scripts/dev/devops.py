@@ -930,6 +930,11 @@ def print_main_menu():
     print(f"  7. Utilities           - Dependencies, .env, kill processes")
     print()
 
+    print(f"{Colors.BLUE}Data & Code System{Colors.ENDC}")
+    print(f"  C. Code System         - Validate, seed, view unified code stats")
+    print(f"  B. Backup              - Create, list, restore database backups")
+    print()
+
     print(f"{Colors.GREEN}Quick Actions{Colors.ENDC}")
     print(f"  8. Quick Start (Everything)")
     print(f"  9. Frontend Only (Vite dev server)")
@@ -1101,6 +1106,331 @@ def submenu_python():
             wait_for_user()
         elif choice == '0':
             break
+
+
+def submenu_code_system():
+    """Code System Management submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Unified Code System ═══{Colors.ENDC}")
+        print("  1. Validate Code System Data")
+        print("  2. Seed Code System Only")
+        print("  3. Seed Holt Cross-Reference")
+        print("  4. Seed Layer2 Materials")
+        print("  5. View Code System Statistics")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            validate_code_system()
+            wait_for_user()
+        elif choice == '2':
+            seed_code_system()
+            wait_for_user()
+        elif choice == '3':
+            seed_holt_xref()
+            wait_for_user()
+        elif choice == '4':
+            seed_layer2_materials()
+            wait_for_user()
+        elif choice == '5':
+            view_code_system_stats()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def validate_code_system():
+    """Run code system validation script"""
+    print_header("Validate Code System Data")
+
+    print_info("Running validation script...")
+    code, stdout, stderr = run_command(
+        "npx ts-node scripts/validateDatabase.ts",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Code system validation passed!")
+        if stdout:
+            print(stdout)
+    else:
+        print_warning("Validation completed with warnings/errors")
+        if stdout:
+            print(stdout)
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def seed_code_system():
+    """Seed code system reference tables only"""
+    print_header("Seed Code System Tables")
+
+    print_info("Seeding code system (MaterialClass, PhaseOptions, Richmond, Suffixes)...")
+    code, stdout, stderr = run_command(
+        "npx ts-node scripts/seedCodeSystemOnly.ts",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Code system tables seeded!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Code system seeding failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def seed_holt_xref():
+    """Seed Holt cross-reference tables"""
+    print_header("Seed Holt Cross-Reference Tables")
+
+    print_info("Seeding Holt phase mappings, item types, and BAT packs...")
+    code, stdout, stderr = run_command(
+        "npx ts-node -e \"import('./prisma/seeds/holtXref.seed').then(m => m.seedHoltXref())\"",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Holt cross-reference tables seeded!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Holt cross-reference seeding failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def seed_layer2_materials():
+    """Seed Layer2 SKU materials"""
+    print_header("Seed Layer2 Materials (SKU Level)")
+
+    print_info("Seeding Layer2 materials from HOLT BAT Pack guide...")
+    code, stdout, stderr = run_command(
+        "npx ts-node -e \"import('./prisma/seeds/layer2Materials.seed').then(m => m.seedLayer2Materials())\"",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Layer2 materials seeded!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Layer2 materials seeding failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def view_code_system_stats():
+    """View code system statistics"""
+    print_header("Code System Statistics")
+
+    print_info("Querying database for code system statistics...")
+
+    # Use SQL queries to get counts
+    queries = [
+        ("Material Classes", "SELECT COUNT(*) FROM material_classes"),
+        ("Phase Definitions", "SELECT COUNT(*) FROM phase_option_definitions"),
+        ("Richmond Options", "SELECT COUNT(*) FROM richmond_option_codes"),
+        ("Option Suffixes", "SELECT COUNT(*) FROM option_suffixes"),
+        ("Layer1 Codes", "SELECT COUNT(*) FROM layer1_codes"),
+        ("Holt Phase Mappings", "SELECT COUNT(*) FROM holt_phase_xref"),
+        ("Item Type Mappings", "SELECT COUNT(*) FROM item_type_xref"),
+        ("BAT Pack Definitions", "SELECT COUNT(*) FROM bat_pack_definitions"),
+        ("Layer2 Materials", "SELECT COUNT(*) FROM layer2_materials"),
+        ("Customer Code Xrefs", "SELECT COUNT(*) FROM customer_code_xref"),
+    ]
+
+    for name, query in queries:
+        code, stdout, stderr = run_command(
+            f'docker exec mindflow-postgres psql -U mindflow -d mindflow_dev -t -c "{query}"',
+            capture=True,
+            check=False
+        )
+        if code == 0 and stdout.strip():
+            count = stdout.strip()
+            print(f"  {Colors.GREEN}✓{Colors.ENDC} {name}: {count}")
+        else:
+            print(f"  {Colors.YELLOW}?{Colors.ENDC} {name}: (table may not exist yet)")
+
+
+def submenu_backup():
+    """Backup & Restore submenu"""
+    while True:
+        print(f"\n{Colors.CYAN}═══ Backup & Restore ═══{Colors.ENDC}")
+        print("  1. Create Backup Now")
+        print("  2. List Available Backups")
+        print("  3. Clean Old Backups (>7 days)")
+        print("  4. Restore from Backup")
+        print("  5. View Backup Strategy")
+        print(f"  {Colors.RED}0. Back{Colors.ENDC}")
+
+        choice = input(f"\n{Colors.BOLD}Select: {Colors.ENDC}").strip()
+
+        if choice == '1':
+            create_backup()
+            wait_for_user()
+        elif choice == '2':
+            list_backups()
+            wait_for_user()
+        elif choice == '3':
+            clean_backups()
+            wait_for_user()
+        elif choice == '4':
+            restore_backup()
+            wait_for_user()
+        elif choice == '5':
+            view_backup_strategy()
+            wait_for_user()
+        elif choice == '0':
+            break
+
+
+def create_backup():
+    """Create database backup"""
+    print_header("Create Database Backup")
+
+    print_info("Creating PostgreSQL backup...")
+    code, stdout, stderr = run_command(
+        "npm run db:backup",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Backup created successfully!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Backup failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def list_backups():
+    """List available backups"""
+    print_header("Available Backups")
+
+    code, stdout, stderr = run_command(
+        "npm run db:backup -- --list",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if stdout:
+        print(stdout)
+
+
+def clean_backups():
+    """Clean old backups"""
+    print_header("Clean Old Backups")
+
+    print_info("Removing backups older than 7 days...")
+    code, stdout, stderr = run_command(
+        "npm run db:backup -- --clean",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if stdout:
+        print(stdout)
+
+
+def restore_backup():
+    """Restore from backup"""
+    print_header("Restore from Backup")
+
+    # First list backups
+    list_backups()
+
+    print()
+    backup_file = input(f"{Colors.YELLOW}Enter backup filename to restore (or 'cancel'): {Colors.ENDC}")
+
+    if backup_file.lower() == 'cancel':
+        print_info("Cancelled.")
+        return
+
+    print_warning("This will overwrite all current database data!")
+    confirm = input(f"{Colors.YELLOW}Type 'yes' to confirm: {Colors.ENDC}")
+
+    if confirm.lower() != 'yes':
+        print_info("Aborted.")
+        return
+
+    print_info(f"Restoring from {backup_file}...")
+    code, stdout, stderr = run_command(
+        f"npx ts-node scripts/restore.ts {backup_file}",
+        cwd=BACKEND_DIR,
+        capture=True,
+        check=False
+    )
+
+    if code == 0:
+        print_success("Restore completed!")
+        if stdout:
+            print(stdout)
+    else:
+        print_error("Restore failed")
+        if stderr:
+            print(f"{Colors.RED}{stderr}{Colors.ENDC}")
+
+
+def view_backup_strategy():
+    """Display backup strategy documentation"""
+    print_header("Backup Strategy")
+
+    print(f"""
+{Colors.CYAN}═══ MindFlow Backup Strategy ═══{Colors.ENDC}
+
+{Colors.GREEN}Automated Backups:{Colors.ENDC}
+  • Frequency: Daily (recommended via cron/scheduler)
+  • Retention: 7 days rolling window
+  • Format: PostgreSQL custom format (.dump) - compressed
+
+{Colors.GREEN}Backup Location:{Colors.ENDC}
+  • Local: backend/backups/
+  • Format: mindflow_dev_YYYY-MM-DDTHH-MM-SS.dump
+
+{Colors.GREEN}Backup Commands:{Colors.ENDC}
+  • Create:  npm run db:backup
+  • List:    npm run db:backup -- --list
+  • Clean:   npm run db:backup -- --clean
+  • Restore: npx ts-node scripts/restore.ts <filename>
+
+{Colors.GREEN}Recommended Schedule:{Colors.ENDC}
+  • Production: Daily at 2 AM (low traffic)
+  • Development: Before major changes
+  • Before migrations: Always
+
+{Colors.GREEN}Cron Example (Linux):{Colors.ENDC}
+  # Add to crontab: crontab -e
+  0 2 * * * cd /path/to/ConstructionPlatform/backend && npm run db:backup >> /var/log/mindflow-backup.log 2>&1
+
+{Colors.GREEN}Windows Task Scheduler:{Colors.ENDC}
+  • Action: Start a program
+  • Program: npm
+  • Arguments: run db:backup
+  • Start in: C:\\path\\to\\ConstructionPlatform\\backend
+  • Trigger: Daily at 2:00 AM
+
+{Colors.YELLOW}Important Notes:{Colors.ENDC}
+  • Always test restore procedure periodically
+  • Keep off-site copies for disaster recovery
+  • Include backup verification in deployment checks
+  • Monitor backup size trends for anomalies
+""")
 
 
 def submenu_utilities():
@@ -1460,6 +1790,10 @@ def main():
             elif choice == '9':
                 start_frontend()
                 wait_for_user()
+            elif choice == 'C':
+                submenu_code_system()
+            elif choice == 'B':
+                submenu_backup()
             elif choice == '0':
                 print_info("Goodbye!")
                 break

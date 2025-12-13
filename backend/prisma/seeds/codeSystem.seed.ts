@@ -33,27 +33,112 @@ const MATERIAL_CLASSES = [
 ];
 
 // ============================================================================
-// OPTION SUFFIXES (from user's updated format)
+// OPTION SUFFIXES - Complete Range (.01-.83)
+// Based on MindFlow Unified Coding System v2.0
+// Format: .xNN where x is the tens digit and NN is the full code
 // ============================================================================
 const OPTION_SUFFIXES = [
-  { suffixCode: '01', abbreviation: 'rf', fullName: 'ReadyFrame', category: 'structural' },
-  { suffixCode: '03', abbreviation: 'l', fullName: 'Loft', category: 'structural' },
-  { suffixCode: '04', abbreviation: 'nl', fullName: 'No Loft', category: 'structural' },
-  { suffixCode: '05', abbreviation: 'x', fullName: 'Extended', category: 'structural' },
-  { suffixCode: '06', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition' },
-  { suffixCode: '07', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior' },
-  { suffixCode: '08', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation' },
-  { suffixCode: '09', abbreviation: '9t', fullName: '9 Tall Walls', category: 'structural' },
-  { suffixCode: '10', abbreviation: '10t', fullName: "10' Tall Walls", category: 'structural' },
-  { suffixCode: '11', abbreviation: 'ec', fullName: 'Enhanced Corners', category: 'exterior' },
-  { suffixCode: '12', abbreviation: 'er', fullName: 'Enhanced Rear', category: 'exterior' },
-  { suffixCode: '13', abbreviation: 'fw', fullName: 'Fauxwood Siding', category: 'exterior' },
-  { suffixCode: '14', abbreviation: 'ma', fullName: 'Masonry', category: 'exterior' },
-  { suffixCode: '15', abbreviation: 'pr', fullName: 'Porch Rail', category: 'exterior' },
-  { suffixCode: '16', abbreviation: '', fullName: 'Available', category: 'reserved', isActive: false },
-  { suffixCode: '17', abbreviation: '', fullName: 'Available', category: 'reserved', isActive: false },
-  { suffixCode: '18', abbreviation: 's', fullName: 'Exterior Stair Material', category: 'exterior' },
-  { suffixCode: '19', abbreviation: '', fullName: 'Housewrap for Options', category: 'exterior' },
+  // 00-09: Core Structural Options
+  { suffixCode: '00', abbreviation: 'base', fullName: 'Base/Standard', category: 'base', description: 'Base configuration - no option applied' },
+  { suffixCode: '01', abbreviation: 'rf', fullName: 'ReadyFrame', category: 'structural', description: 'ReadyFrame prefab wall panels' },
+  { suffixCode: '02', abbreviation: 'lo', fullName: 'Loft Option', category: 'structural', description: 'Loft addition to plan' },
+  { suffixCode: '03', abbreviation: 'l', fullName: 'Loft', category: 'structural', description: 'With Loft configuration' },
+  { suffixCode: '04', abbreviation: 'nl', fullName: 'No Loft', category: 'structural', description: 'Without Loft configuration' },
+  { suffixCode: '05', abbreviation: 'x', fullName: 'Extended', category: 'structural', description: 'Extended version of room/area' },
+  { suffixCode: '06', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition', description: 'Sunroom addition' },
+  { suffixCode: '07', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior', description: 'Decorative post wraps' },
+  { suffixCode: '08', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation', description: 'Tall crawl space foundation' },
+  { suffixCode: '09', abbreviation: '9t', fullName: "9' Tall Walls", category: 'structural', description: '9-foot wall height option' },
+
+  // 10-19: Wall & Exterior Options
+  { suffixCode: '10', abbreviation: '10t', fullName: "10' Tall Walls", category: 'structural', description: '10-foot wall height option' },
+  { suffixCode: '11', abbreviation: 'ec', fullName: 'Enhanced Corners', category: 'exterior', description: 'Enhanced corner trim package' },
+  { suffixCode: '12', abbreviation: 'er', fullName: 'Enhanced Rear', category: 'exterior', description: 'Enhanced rear elevation trim' },
+  { suffixCode: '13', abbreviation: 'fw', fullName: 'Fauxwood Siding', category: 'exterior', description: 'Fauxwood siding option' },
+  { suffixCode: '14', abbreviation: 'ma', fullName: 'Masonry', category: 'exterior', description: 'Masonry/stone veneer option' },
+  { suffixCode: '15', abbreviation: 'pr', fullName: 'Porch Rail', category: 'exterior', description: 'Porch railing option' },
+  { suffixCode: '16', abbreviation: 'dk', fullName: 'Deck', category: 'addition', description: 'Deck addition' },
+  { suffixCode: '17', abbreviation: 'cp', fullName: 'Covered Patio', category: 'addition', description: 'Covered patio option' },
+  { suffixCode: '18', abbreviation: 's', fullName: 'Exterior Stair Material', category: 'exterior', description: 'Exterior stair materials' },
+  { suffixCode: '19', abbreviation: 'hw', fullName: 'Housewrap for Options', category: 'exterior', description: 'Housewrap for option areas' },
+
+  // 20-29: Room/Area Options
+  { suffixCode: '20', abbreviation: 'fp', fullName: 'Fireplace', category: 'interior', description: 'Fireplace addition' },
+  { suffixCode: '21', abbreviation: 'dba', fullName: 'Deluxe Bath A', category: 'interior', description: 'Deluxe master bath option A' },
+  { suffixCode: '22', abbreviation: 'dba2', fullName: 'Deluxe Bath A2', category: 'interior', description: 'Deluxe master bath option A2' },
+  { suffixCode: '23', abbreviation: 'dba3', fullName: 'Deluxe Bath A3', category: 'interior', description: 'Deluxe master bath option A3' },
+  { suffixCode: '24', abbreviation: 'br4', fullName: 'Bedroom 4', category: 'interior', description: 'Additional bedroom 4' },
+  { suffixCode: '25', abbreviation: 'br5', fullName: 'Bedroom 5', category: 'interior', description: 'Additional bedroom 5' },
+  { suffixCode: '26', abbreviation: 'stdy', fullName: 'Study', category: 'interior', description: 'Study/office option' },
+  { suffixCode: '27', abbreviation: 'den', fullName: 'Den', category: 'interior', description: 'Den option' },
+  { suffixCode: '28', abbreviation: 'denfb', fullName: 'Den w/ Full Bath', category: 'interior', description: 'Den with full bathroom' },
+  { suffixCode: '29', abbreviation: 'pwdr', fullName: 'Powder Room', category: 'interior', description: 'Powder room option' },
+
+  // 30-39: Garage & Covered Structures
+  { suffixCode: '30', abbreviation: '3car', fullName: '3-Car Garage', category: 'garage', description: '3-car garage addition' },
+  { suffixCode: '31', abbreviation: '4car', fullName: '4-Car Tandem Garage', category: 'garage', description: '4-car tandem garage' },
+  { suffixCode: '32', abbreviation: 'gx2', fullName: 'Garage 2\' Extension', category: 'garage', description: '2-foot garage extension' },
+  { suffixCode: '33', abbreviation: 'gx4', fullName: 'Garage 4\' Extension', category: 'garage', description: '4-foot garage extension' },
+  { suffixCode: '34', abbreviation: 'gx5', fullName: 'Garage 5\' Extension', category: 'garage', description: '5-foot garage extension' },
+  { suffixCode: '35', abbreviation: 'cd', fullName: 'Covered Deck', category: 'addition', description: 'Covered deck option' },
+  { suffixCode: '36', abbreviation: 'cd2', fullName: 'Covered Deck 2', category: 'addition', description: 'Covered deck option 2' },
+  { suffixCode: '37', abbreviation: 'cd3', fullName: 'Covered Deck 3', category: 'addition', description: 'Covered deck option 3' },
+  { suffixCode: '38', abbreviation: 'cp2', fullName: 'Covered Patio 2', category: 'addition', description: 'Covered patio option 2' },
+  { suffixCode: '39', abbreviation: 'cp3', fullName: 'Covered Patio 3', category: 'addition', description: 'Covered patio option 3' },
+
+  // 40-49: Window & Door Options
+  { suffixCode: '40', abbreviation: 'wgr', fullName: 'Great Room Windows', category: 'windows', description: 'Optional great room windows' },
+  { suffixCode: '41', abbreviation: 'wbr2', fullName: 'Bedroom 2 Window', category: 'windows', description: 'Optional bedroom 2 window' },
+  { suffixCode: '42', abbreviation: 'wbr3', fullName: 'Bedroom 3 Window', category: 'windows', description: 'Optional bedroom 3 window' },
+  { suffixCode: '43', abbreviation: 'wbr4', fullName: 'Bedroom 4 Window', category: 'windows', description: 'Optional bedroom 4 window' },
+  { suffixCode: '44', abbreviation: 'wbr5', fullName: 'Bedroom 5 Window', category: 'windows', description: 'Optional bedroom 5 window' },
+  { suffixCode: '45', abbreviation: 'wstd', fullName: 'Study Window', category: 'windows', description: 'Optional study window' },
+  { suffixCode: '46', abbreviation: 'ctr', fullName: 'Center Meet Door', category: 'doors', description: 'Center-meet sliding door' },
+  { suffixCode: '47', abbreviation: 'msl', fullName: 'Multi-Slide Door', category: 'doors', description: 'Multi-slide door system' },
+  { suffixCode: '48', abbreviation: 'frd', fullName: 'French Double Door', category: 'doors', description: 'French double door option' },
+  { suffixCode: '49', abbreviation: 'wflx', fullName: 'Flex Window', category: 'windows', description: 'Flex room window option' },
+
+  // 50-59: Basement & Foundation Options
+  { suffixCode: '50', abbreviation: 'wo', fullName: 'Walk-Out Basement', category: 'foundation', description: 'Walk-out basement option' },
+  { suffixCode: '51', abbreviation: 'wo2', fullName: 'Walk-Out Basement 2', category: 'foundation', description: 'Walk-out basement option 2' },
+  { suffixCode: '52', abbreviation: 'bsmfw', fullName: 'Basement Full Wall', category: 'foundation', description: 'Full basement wall framing' },
+  { suffixCode: '53', abbreviation: 'cfnd', fullName: 'Custom Foundation', category: 'foundation', description: 'Custom foundation option' },
+  { suffixCode: '54', abbreviation: 'slb', fullName: 'Slab Foundation', category: 'foundation', description: 'Slab on grade foundation' },
+  { suffixCode: '55', abbreviation: '', fullName: 'Reserved 55', category: 'reserved', isActive: false },
+  { suffixCode: '56', abbreviation: '', fullName: 'Reserved 56', category: 'reserved', isActive: false },
+  { suffixCode: '57', abbreviation: '', fullName: 'Reserved 57', category: 'reserved', isActive: false },
+  { suffixCode: '58', abbreviation: '', fullName: 'Reserved 58', category: 'reserved', isActive: false },
+  { suffixCode: '59', abbreviation: '', fullName: 'Reserved 59', category: 'reserved', isActive: false },
+
+  // 60-69: Ceiling & Interior Upgrades
+  { suffixCode: '60', abbreviation: 'cofdr', fullName: 'Coffered Dining Room', category: 'interior', description: 'Coffered ceiling in dining room' },
+  { suffixCode: '61', abbreviation: 'cofmb', fullName: 'Coffered Master BR', category: 'interior', description: 'Coffered ceiling in master bedroom' },
+  { suffixCode: '62', abbreviation: 'cofent', fullName: 'Coffered Entry', category: 'interior', description: 'Coffered ceiling in entry' },
+  { suffixCode: '63', abbreviation: 'coflv', fullName: 'Coffered Living Room', category: 'interior', description: 'Coffered ceiling in living room' },
+  { suffixCode: '64', abbreviation: 'bkcs', fullName: 'Bookcase', category: 'interior', description: 'Built-in bookcase option' },
+  { suffixCode: '65', abbreviation: 'retrt', fullName: 'Retreat', category: 'interior', description: 'Clubhouse/retreat option' },
+  { suffixCode: '66', abbreviation: 'pkoff', fullName: 'Pocket Office', category: 'interior', description: 'Pocket office option' },
+  { suffixCode: '67', abbreviation: '', fullName: 'Reserved 67', category: 'reserved', isActive: false },
+  { suffixCode: '68', abbreviation: '', fullName: 'Reserved 68', category: 'reserved', isActive: false },
+  { suffixCode: '69', abbreviation: '', fullName: 'Reserved 69', category: 'reserved', isActive: false },
+
+  // 70-79: Specialty & Regional Options
+  { suffixCode: '70', abbreviation: 'xgrt', fullName: 'Extended Great Room', category: 'structural', description: 'Extended great room option' },
+  { suffixCode: '71', abbreviation: 'loft2', fullName: 'Loft 2', category: 'structural', description: 'Second loft option' },
+  { suffixCode: '72', abbreviation: 'sunwo', fullName: 'Sunroom Walk-Out', category: 'addition', description: 'Sunroom with walk-out' },
+  { suffixCode: '73', abbreviation: 'fpsng', fullName: 'Fireplace Single', category: 'interior', description: 'Single-sided fireplace' },
+  { suffixCode: '74', abbreviation: 'fpdbl', fullName: 'Fireplace Double', category: 'interior', description: 'Double-sided fireplace' },
+  { suffixCode: '75', abbreviation: 'altkn', fullName: 'Alternate Kitchen', category: 'interior', description: 'Alternate kitchen layout' },
+  { suffixCode: '76', abbreviation: '', fullName: 'Reserved 76', category: 'reserved', isActive: false },
+  { suffixCode: '77', abbreviation: '', fullName: 'Reserved 77', category: 'reserved', isActive: false },
+  { suffixCode: '78', abbreviation: '', fullName: 'Reserved 78', category: 'reserved', isActive: false },
+  { suffixCode: '79', abbreviation: '', fullName: 'Reserved 79', category: 'reserved', isActive: false },
+
+  // 80-83: Elevation-Specific & Special Cases
+  { suffixCode: '80', abbreviation: 'elva', fullName: 'Elevation A Specific', category: 'elevation', description: 'Elevation A specific option' },
+  { suffixCode: '81', abbreviation: 'elvb', fullName: 'Elevation B Specific', category: 'elevation', description: 'Elevation B specific option' },
+  { suffixCode: '82', abbreviation: 'elvc', fullName: 'Elevation C Specific', category: 'elevation', description: 'Elevation C specific option' },
+  { suffixCode: '83', abbreviation: 'elvd', fullName: 'Elevation D Specific', category: 'elevation', description: 'Elevation D specific option' },
 ];
 
 // ============================================================================
@@ -463,14 +548,16 @@ export async function seedCodeSystem() {
         abbreviation: suffix.abbreviation,
         fullName: suffix.fullName,
         category: suffix.category,
-        isActive: suffix.isActive ?? true,
+        description: (suffix as any).description,
+        isActive: (suffix as any).isActive ?? true,
       },
       create: {
         suffixCode: suffix.suffixCode,
         abbreviation: suffix.abbreviation,
         fullName: suffix.fullName,
         category: suffix.category,
-        isActive: suffix.isActive ?? true,
+        description: (suffix as any).description,
+        isActive: (suffix as any).isActive ?? true,
       },
     });
   }
