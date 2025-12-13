@@ -15,20 +15,64 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // ============================================================================
-// MATERIAL CLASSES
+// MATERIAL CLASSES (Item Types)
+// BAT Unified Coding System v2.0 - 9 Item Types
+// Format: IIII in unified code PPPP-PPP.XXS-EE-IIII
 // ============================================================================
 const MATERIAL_CLASSES = [
   {
     classCode: '1000',
     className: 'Framing',
-    description: 'Structural framing materials including lumber, engineered wood, fasteners',
+    description: 'Structural framing materials - dimensional lumber, engineered wood, fasteners, hardware',
     sortOrder: 1,
   },
   {
     classCode: '1100',
-    className: 'Siding',
-    description: 'Exterior finishing materials including siding, trim, housewrap, post wraps',
+    className: 'Barge Credit',
+    description: 'Barge/rake credit materials - fascia, soffit credits at gable ends',
     sortOrder: 2,
+  },
+  {
+    classCode: '1200',
+    className: 'Trusses',
+    description: 'Engineered roof and floor truss systems',
+    sortOrder: 3,
+  },
+  {
+    classCode: '2000',
+    className: 'Windows',
+    description: 'Standard window units - vinyl, aluminum, wood clad',
+    sortOrder: 4,
+  },
+  {
+    classCode: '2050',
+    className: 'Triple Pane',
+    description: 'Triple pane window upgrade units - enhanced energy efficiency',
+    sortOrder: 5,
+  },
+  {
+    classCode: '2100',
+    className: 'Siding',
+    description: 'Exterior finishing materials - siding, trim, housewrap, post wraps',
+    sortOrder: 6,
+  },
+  {
+    classCode: '2150',
+    className: 'Ext. Doors',
+    description: 'Exterior doors - entry, patio, sliding, French doors',
+    sortOrder: 7,
+  },
+  {
+    classCode: '2200',
+    className: 'Roofing',
+    description: 'Roofing materials - shingles, underlayment, flashing, vents',
+    sortOrder: 8,
+  },
+  {
+    classCode: '3000',
+    className: 'Interior Trim',
+    description: 'Interior finish materials - trim, molding, doors, casing',
+    sortOrder: 9,
   },
 ];
 
@@ -65,34 +109,40 @@ const STORY_TYPES = [
 ];
 
 // ============================================================================
-// OPTION SUFFIXES - Complete Range (.01-.83)
-// Based on MindFlow Unified Coding System v2.0
-// Format: .xNN where x is the tens digit and NN is the full code
+// OPTION SUFFIXES - Fluid Phase Code System v2.0
+// BAT Unified Coding System: PPP.XXS format
+// - PPP = Phase (009-090)
+// - XX = Option (00-99)
+// - S = Suffix variant (0-9)
+//
+// Core Suffix Codes (v2.0 - 17 primary codes):
+// Single-digit (1-9): rf, lo, nl, x, sr, pw, tc, 9t
+// Two-digit (10-17): 10t, ec, er, fw, ma, pr, s, hw
 // ============================================================================
 const OPTION_SUFFIXES = [
-  // 00-09: Core Structural Options
+  // 00-09: Core Structural Options (Primary suffix codes)
   { suffixCode: '00', abbreviation: 'base', fullName: 'Base/Standard', category: 'base', description: 'Base configuration - no option applied' },
   { suffixCode: '01', abbreviation: 'rf', fullName: 'ReadyFrame', category: 'structural', description: 'ReadyFrame prefab wall panels' },
   { suffixCode: '02', abbreviation: 'lo', fullName: 'Loft Option', category: 'structural', description: 'Loft addition to plan' },
-  { suffixCode: '03', abbreviation: 'l', fullName: 'Loft', category: 'structural', description: 'With Loft configuration' },
-  { suffixCode: '04', abbreviation: 'nl', fullName: 'No Loft', category: 'structural', description: 'Without Loft configuration' },
-  { suffixCode: '05', abbreviation: 'x', fullName: 'Extended', category: 'structural', description: 'Extended version of room/area' },
-  { suffixCode: '06', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition', description: 'Sunroom addition' },
-  { suffixCode: '07', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior', description: 'Decorative post wraps' },
-  { suffixCode: '08', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation', description: 'Tall crawl space foundation' },
-  { suffixCode: '09', abbreviation: '9t', fullName: "9' Tall Walls", category: 'structural', description: '9-foot wall height option' },
+  { suffixCode: '03', abbreviation: 'nl', fullName: 'No Loft', category: 'structural', description: 'Without Loft configuration' },
+  { suffixCode: '04', abbreviation: 'x', fullName: 'Extended', category: 'structural', description: 'Extended version of room/area' },
+  { suffixCode: '05', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition', description: 'Sunroom addition' },
+  { suffixCode: '06', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior', description: 'Decorative post wraps' },
+  { suffixCode: '07', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation', description: 'Tall crawl space foundation' },
+  { suffixCode: '08', abbreviation: '9t', fullName: "9' Tall Walls", category: 'structural', description: '9-foot wall height option' },
+  { suffixCode: '09', abbreviation: 'alt', fullName: 'Alternate', category: 'structural', description: 'Alternate configuration variant' },
 
-  // 10-19: Wall & Exterior Options
+  // 10-19: Wall & Exterior Options (Secondary suffix codes)
   { suffixCode: '10', abbreviation: '10t', fullName: "10' Tall Walls", category: 'structural', description: '10-foot wall height option' },
   { suffixCode: '11', abbreviation: 'ec', fullName: 'Enhanced Corners', category: 'exterior', description: 'Enhanced corner trim package' },
   { suffixCode: '12', abbreviation: 'er', fullName: 'Enhanced Rear', category: 'exterior', description: 'Enhanced rear elevation trim' },
   { suffixCode: '13', abbreviation: 'fw', fullName: 'Fauxwood Siding', category: 'exterior', description: 'Fauxwood siding option' },
   { suffixCode: '14', abbreviation: 'ma', fullName: 'Masonry', category: 'exterior', description: 'Masonry/stone veneer option' },
   { suffixCode: '15', abbreviation: 'pr', fullName: 'Porch Rail', category: 'exterior', description: 'Porch railing option' },
-  { suffixCode: '16', abbreviation: 'dk', fullName: 'Deck', category: 'addition', description: 'Deck addition' },
-  { suffixCode: '17', abbreviation: 'cp', fullName: 'Covered Patio', category: 'addition', description: 'Covered patio option' },
-  { suffixCode: '18', abbreviation: 's', fullName: 'Exterior Stair Material', category: 'exterior', description: 'Exterior stair materials' },
-  { suffixCode: '19', abbreviation: 'hw', fullName: 'Housewrap for Options', category: 'exterior', description: 'Housewrap for option areas' },
+  { suffixCode: '16', abbreviation: 's', fullName: 'Exterior Stair Material', category: 'exterior', description: 'Exterior stair materials' },
+  { suffixCode: '17', abbreviation: 'hw', fullName: 'Housewrap for Options', category: 'exterior', description: 'Housewrap for option areas' },
+  { suffixCode: '18', abbreviation: 'dk', fullName: 'Deck', category: 'addition', description: 'Deck addition' },
+  { suffixCode: '19', abbreviation: 'cp', fullName: 'Covered Patio', category: 'addition', description: 'Covered patio option' },
 
   // 20-29: Room/Area Options
   { suffixCode: '20', abbreviation: 'fp', fullName: 'Fireplace', category: 'interior', description: 'Fireplace addition' },
@@ -175,7 +225,24 @@ const OPTION_SUFFIXES = [
 
 // ============================================================================
 // PHASE OPTION DEFINITIONS
-// Organized by phase series (09-90)
+// BAT Unified Coding System v2.0 - Fluid Phase Codes
+// Format: PPP.XXS (Phase.Option-Suffix)
+//
+// Phase Series (53 base phases across 9 series):
+// 009-019: Foundation & Floor Systems
+// 020-029: Main Floor Walls & Options
+// 030-039: Second Floor Systems
+// 040-049: Roof Systems
+// 058-059: Housewrap
+// 060-069: Exterior Trim & Siding
+// 070-079: Deck Exteriors
+//
+// Fluid Format Patterns:
+// .000 = Base (no option)
+// .00S = Suffix only variant
+// .0ZZ = Option 1-9 with suffix
+// .XX0 = Option 10-99 base
+// .XXS = Option 10-99 with suffix
 // ============================================================================
 interface PhaseDefinition {
   phaseCode: string;
