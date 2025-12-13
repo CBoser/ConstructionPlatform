@@ -123,9 +123,11 @@ def run_command(cmd: str, cwd: Optional[Path] = None, shell: bool = True,
                 shell=shell,
                 capture_output=True,
                 text=True,
-                check=check
+                check=check,
+                encoding='utf-8',
+                errors='replace'
             )
-            return result.returncode, result.stdout, result.stderr
+            return result.returncode, result.stdout or "", result.stderr or ""
         else:
             result = subprocess.run(
                 cmd,
@@ -136,7 +138,9 @@ def run_command(cmd: str, cwd: Optional[Path] = None, shell: bool = True,
             return result.returncode, "", ""
     except subprocess.CalledProcessError as e:
         if not check:
-            return e.returncode, e.stdout if hasattr(e, 'stdout') else "", e.stderr if hasattr(e, 'stderr') else ""
+            stdout = e.stdout if hasattr(e, 'stdout') and e.stdout else ""
+            stderr = e.stderr if hasattr(e, 'stderr') and e.stderr else ""
+            return e.returncode, stdout, stderr
         raise
 
 
@@ -1297,10 +1301,13 @@ def first_time_setup():
         print(f"  - Password: DevPassword123!")
     else:
         # Seed might fail if data exists, that's OK
-        if "already exist" in stderr.lower() or "unique constraint" in stderr.lower():
+        stderr_lower = (stderr or "").lower()
+        if "already exist" in stderr_lower or "unique constraint" in stderr_lower:
             print_info("Database already has data - skipping seed")
         else:
             print_warning("Seed may have partially completed")
+            if stderr:
+                print(f"{Colors.YELLOW}{stderr[:300]}{Colors.ENDC}")
     print()
 
     # Step 8: Install frontend dependencies
