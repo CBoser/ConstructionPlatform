@@ -1,9 +1,24 @@
 # BAT Unified Coding System
-## Complete Reference Guide
+## Central Material Database Reference Guide
 
-**Version:** 2.0  
-**Updated:** December 2025  
+**Version:** 2.0
+**Generated:** 2025-12-13
+**Total SKUs:** 516
+**Phase Codes:** 53
 **Status:** Architecture Decisions Confirmed
+
+---
+
+## Summary Statistics
+
+| Metric | Count |
+|--------|-------|
+| Total Unique SKUs | 516 |
+| RICHMOND Materials | 400 |
+| HOLT Materials | 278 |
+| Phase Codes | 53 |
+| Suffix Codes | 17 |
+| Item Types | 9 |
 
 ---
 

@@ -27,21 +27,37 @@ interface ItemTypeMapping {
 }
 
 const ITEM_TYPE_MAPPINGS: ItemTypeMapping[] = [
-  // Framing (1000)
-  { holtCostCode: '4085', holtCostName: 'Lumber', materialClassCode: '1000', dartCategory: 1, dartCategoryName: 'Dimensional Lumber', description: 'Structural framing lumber' },
-  { holtCostCode: '4086', holtCostName: 'Lumber - Barge Credit', materialClassCode: '1000', dartCategory: 1, dartCategoryName: 'Dimensional Lumber', description: 'Lumber barge/credit adjustments' },
-  { holtCostCode: '4120', holtCostName: 'Trusses', materialClassCode: '1000', dartCategory: 2, dartCategoryName: 'Engineered/Trusses', description: 'Roof and floor trusses' },
+  // ============================================================================
+  // BAT Unified Coding System v2.0 - Item Type Cross-Reference
+  // Rosetta Stone: Unified ↔ Holt ↔ Richmond
+  // ============================================================================
 
-  // Windows/Doors (future: 1200/1300)
-  { holtCostCode: '4140', holtCostName: 'Window Supply', materialClassCode: '1000', dartCategory: 4, dartCategoryName: 'Windows', description: 'Standard window supply' },
-  { holtCostCode: '4142', holtCostName: 'Window Supply - U-22 Triple Pane', materialClassCode: '1000', dartCategory: 4, dartCategoryName: 'Windows', description: 'Energy efficient triple pane windows (WA)' },
-  { holtCostCode: '4150', holtCostName: 'Exterior Door Supply', materialClassCode: '1000', dartCategory: 5, dartCategoryName: 'Doors', description: 'Exterior doors' },
+  // Framing/Lumber (1000) - Pack Range: |00-49, |80+
+  { holtCostCode: '4085', holtCostName: 'Lumber', materialClassCode: '1000', dartCategory: 1, dartCategoryName: 'Dimensional Lumber', description: 'Framing/Lumber - structural framing materials' },
 
-  // Siding (1100)
-  { holtCostCode: '4155', holtCostName: 'Siding Supply', materialClassCode: '1100', dartCategory: 3, dartCategoryName: 'Siding', description: 'Exterior siding materials' },
+  // Lumber - Barge Credit (1100)
+  { holtCostCode: '4086', holtCostName: 'Lumber - Barge Credit', materialClassCode: '1100', dartCategory: 1, dartCategoryName: 'Dimensional Lumber', description: 'Lumber - Barge Credit adjustments' },
 
-  // Trim/Millwork
-  { holtCostCode: '4320', holtCostName: 'Interior Trim Supply - Millwork', materialClassCode: '1100', dartCategory: 6, dartCategoryName: 'Trim/Millwork', description: 'Interior trim and millwork' },
+  // Trusses (1200) - Pack Range: |40-45
+  { holtCostCode: '4120', holtCostName: 'Trusses', materialClassCode: '1200', dartCategory: 4, dartCategoryName: 'Trusses', description: 'Engineered roof and floor trusses' },
+
+  // Windows (2000) - Pack Range: |40.xx
+  { holtCostCode: '4140', holtCostName: 'Window Supply', materialClassCode: '2000', dartCategory: 6, dartCategoryName: 'Windows', description: 'Windows - standard window units' },
+
+  // Windows - Triple Pane (2050)
+  { holtCostCode: '4142', holtCostName: 'Window Supply - U-22 Triple Pane', materialClassCode: '2050', dartCategory: 6, dartCategoryName: 'Windows', description: 'Windows - Triple Pane (WA energy code)' },
+
+  // Siding/Exterior (2100) - Pack Range: |58-79
+  { holtCostCode: '4155', holtCostName: 'Siding Supply', materialClassCode: '2100', dartCategory: 9, dartCategoryName: 'Siding/Masonry', description: 'Siding/Exterior - siding, trim, housewrap' },
+
+  // Exterior Doors (2150) - Pack Range: |83.xx
+  { holtCostCode: '4150', holtCostName: 'Exterior Door Supply', materialClassCode: '2150', dartCategory: 7, dartCategoryName: 'Doors', description: 'Exterior Doors - entry, patio, sliding' },
+
+  // Roofing (2200) - Pack Range: |50-57
+  { holtCostCode: '4156', holtCostName: 'Roofing Supply', materialClassCode: '2200', dartCategory: 11, dartCategoryName: 'Roofing', description: 'Roofing - shingles, underlayment, flashing' },
+
+  // Interior Trim/Millwork (3000) - Pack Range: |83+
+  { holtCostCode: '4320', holtCostName: 'Interior Trim Supply - Millwork', materialClassCode: '3000', dartCategory: 5, dartCategoryName: 'Millwork', description: 'Interior Trim/Millwork - trim, molding, doors' },
 ];
 
 // ============================================================================

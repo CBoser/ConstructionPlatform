@@ -228,7 +228,9 @@ const OPTION_SUFFIXES = [
 // BAT Unified Coding System v2.0 - Fluid Phase Codes
 // Format: PPP.XXS (Phase.Option-Suffix)
 //
-// Phase Series (53 base phases across 9 series):
+// Generated: 2025-12-13 | Total SKUs: 516 | Phase Codes: 53
+//
+// Phase Series:
 // 009-019: Foundation & Floor Systems
 // 020-029: Main Floor Walls & Options
 // 030-039: Second Floor Systems
@@ -237,12 +239,18 @@ const OPTION_SUFFIXES = [
 // 060-069: Exterior Trim & Siding
 // 070-079: Deck Exteriors
 //
+// Unified Code Structure: PPPP-PPP.XXS-EE-IIII
+// - PPPP = Plan Code (G914, 1670, etc.)
+// - PPP.XXS = Phase Code (Fluid: PPP=Major, XX=Option, S=Suffix)
+// - EE = Elevation (A, B, **, etc.)
+// - IIII = Item Type (1000, 2100, etc.)
+//
 // Fluid Format Patterns:
 // .000 = Base (no option)
-// .00S = Suffix only variant
-// .0ZZ = Option 1-9 with suffix
+// .00S = Suffix only variant (S=1-9)
+// .0ZZ = Two-digit suffix (ZZ=10-19)
 // .XX0 = Option 10-99 base
-// .XXS = Option 10-99 with suffix
+// .XXS = Option 10-99 with single suffix
 // ============================================================================
 interface PhaseDefinition {
   phaseCode: string;
@@ -266,7 +274,8 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phaseCode: '010.020', phaseName: 'OPT FIREPLACE FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Optional foundation with fireplace - FPSING01' },
   { phaseCode: '010.600', phaseName: 'EXTENDED GREAT ROOM FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Extended great room foundation - XGREAT' },
   { phaseCode: '010.610', phaseName: 'SUNROOM FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Sunroom foundation - SUN' },
-  { phaseCode: '010.820', phaseName: 'OPT DEN FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Optional den foundation' },
+  { phaseCode: '010.820', phaseName: 'OPT DEN FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Optional den foundation - |10.82' },
+  { phaseCode: '010.821', phaseName: 'OPT DEN + READYFRAME FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: 'Optional den + ReadyFrame foundation - |10.82rf' },
   { phaseCode: '010.830', phaseName: 'OPT DEN W/FULL BATH FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Optional den with full bathroom foundation' },
 
   // 11 Series - Main Joist System @ Foundation
@@ -276,21 +285,25 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phaseCode: '011.620', phaseName: 'MAIN JOIST SYSTEM LOFT 2 ADD ON @FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Loft 2 add-on joist system - LOFT2' },
 
   // 12 Series - Garage Foundation
-  { phaseCode: '012.000', phaseName: 'OPT 3RD CAR GARAGE FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Third car garage foundation - 3CARA/B/C' },
+  { phaseCode: '012.000', phaseName: 'OPT 3RD CAR GARAGE FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Third car garage foundation - |12' },
+  { phaseCode: '012.040', phaseName: "OPT 2 CAR 4' EXT FOUNDATION", isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: '2-car garage 4-foot extension - |12.04' },
   { phaseCode: '012.205', phaseName: "OPT 2 CAR GARAGE 2' EXT FOUNDATION", isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: '2-car garage 2-foot extension - GAREXT2' },
   { phaseCode: '012.400', phaseName: 'OPT 4 CAR GARAGE TANDEM FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: '4-car tandem garage foundation - 4CARTA/B/C' },
-  { phaseCode: '012.405', phaseName: "OPT 2 CAR GARAGE 4' EXT FOUNDATION", isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: '2-car garage 4-foot extension - 2CAR4XA/B/C' },
+  { phaseCode: '012.405', phaseName: "OPT 2 CAR GARAGE 4' EXT FOUNDATION", isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: '2-car garage 4-foot extension with suffix - 2CAR4XA/B/C' },
   { phaseCode: '012.505', phaseName: "OPT 2 CAR GARAGE 5' EXT FOUNDATION", isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: '2-car garage 5-foot extension - 2CAR5XA/B/C' },
 
   // 13 Series - Covered Patio Foundation
-  { phaseCode: '013.100', phaseName: 'COVERED PATIO FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio foundation option 1 - COVP' },
-  { phaseCode: '013.200', phaseName: 'COVERED PATIO 2 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio foundation option 2 - COVP2' },
+  { phaseCode: '013.000', phaseName: 'COVERED PATIO FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio foundation base - |13' },
+  { phaseCode: '013.100', phaseName: 'COVERED PATIO ELEV A FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio foundation Elev A - |13.10' },
+  { phaseCode: '013.200', phaseName: 'COVERED PATIO 2 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio 2 foundation - |13.20' },
+  { phaseCode: '013.207', phaseName: 'COVERED PATIO 2 + POST WRAP FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 1, description: 'Covered patio 2 + Post Wrap foundation - |13.20pw' },
   { phaseCode: '013.300', phaseName: 'COVERED PATIO 3 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered patio foundation option 3 - COVP3' },
 
   // 14 Series - Deck Foundation
-  { phaseCode: '014.100', phaseName: 'DECK FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 1 - DECK' },
-  { phaseCode: '014.200', phaseName: 'DECK FOUNDATION 2', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 2 - DECK2' },
-  { phaseCode: '014.300', phaseName: 'DECK FOUNDATION 3', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 3 - DECK3' },
+  { phaseCode: '014.000', phaseName: 'DECK FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation base - |14' },
+  { phaseCode: '014.100', phaseName: 'DECK 1 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 1 - DECK' },
+  { phaseCode: '014.200', phaseName: 'DECK 2 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 2 - DECK2' },
+  { phaseCode: '014.300', phaseName: 'DECK 3 FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Deck foundation option 3 - DECK3' },
 
   // 15 Series - Covered Deck Foundation
   { phaseCode: '015.100', phaseName: 'COVERED DECK FOUNDATION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 1, description: 'Covered deck foundation option 1 - COVD' },
@@ -415,14 +428,16 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phaseCode: '034.250', phaseName: '2ND FLOOR OPT ABR5', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor add bedroom 5' },
   { phaseCode: '034.260', phaseName: '2ND FLOOR OPT ABRBATH', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor add bedroom with bath' },
   { phaseCode: '034.270', phaseName: '2ND FLOOR OPT STUDY', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor study option' },
-  { phaseCode: '034.610', phaseName: '2ND FLOOR WALLS SUNROOM', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor sunroom walls' },
+  { phaseCode: '034.610', phaseName: 'LOFT TO BEDROOM', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Loft → Bedroom - |34.61' },
+  { phaseCode: '034.613', phaseName: 'LOFT TO BEDROOM + LOFT VARIANT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 4, description: 'Loft → Bedroom + Loft variant - |34.61lo' },
   { phaseCode: '034.620', phaseName: '2ND FLOOR WALLS LOFT2', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor loft 2 walls' },
   { phaseCode: '034.800', phaseName: '2ND FLOOR WALLS RETREAT', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 4, description: 'Second floor retreat walls' },
   { phaseCode: '034.909', phaseName: '2ND FLOOR WALLS 9T', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 4, description: 'Second floor 9-tall walls' },
 
   // 40 Series - Roof
-  { phaseCode: '040.000', phaseName: 'ROOF', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Main roof framing and sheathing' },
+  { phaseCode: '040.000', phaseName: 'ROOF', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Main roof framing and sheathing - |40' },
   { phaseCode: '040.006', phaseName: 'ROOF SUNROOM', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 5, description: 'Sunroom roof' },
+  { phaseCode: '040.010', phaseName: 'GABLE SHEETING', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Gable sheeting - |40gs' },
   { phaseCode: '040.600', phaseName: 'ROOF EXTENDED GREAT ROOM', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Extended great room roof' },
   { phaseCode: '040.610', phaseName: 'ROOF SUNROOM OPTION', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Sunroom roof option' },
   { phaseCode: '040.800', phaseName: 'ROOF RETREAT', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Retreat roof' },
@@ -442,6 +457,9 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phaseCode: '043.910', phaseName: 'COVERED PATIO 9T ROOF', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 5, description: 'Covered patio 9-tall roof' },
   { phaseCode: '043.920', phaseName: 'COVERED PATIO 10T ROOF', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1000', shippingOrder: 5, description: 'Covered patio 10-tall roof' },
 
+  // 44 Series - Deck Roof
+  { phaseCode: '044.000', phaseName: 'DECK ROOF', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Deck roof base - |44' },
+
   // 45 Series - Covered Deck Roof
   { phaseCode: '045.000', phaseName: 'COVERED DECK ROOF', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Covered deck roof base' },
   { phaseCode: '045.100', phaseName: 'COVERED DECK 1 ROOF', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Covered deck option 1 roof' },
@@ -449,77 +467,83 @@ const PHASE_DEFINITIONS: PhaseDefinition[] = [
   { phaseCode: '045.300', phaseName: 'COVERED DECK 3 ROOF', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1000', shippingOrder: 5, description: 'Covered deck option 3 roof' },
 
   // 58 Series - Housewrap
-  { phaseCode: '058.000', phaseName: 'HOUSEWRAP', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '1100', shippingOrder: 6, description: 'Exterior building wrap' },
+  { phaseCode: '058.000', phaseName: 'HOUSEWRAP', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '2100', shippingOrder: 6, description: 'Housewrap - |58' },
+  { phaseCode: '058.019', phaseName: 'HOUSEWRAP OPTIONS', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 6, description: 'Housewrap Options - |58hw' },
 
-  // 60 Series - Exterior Trim and Siding
-  { phaseCode: '060.000', phaseName: 'EXTERIOR TRIM AND SIDING', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Main exterior siding and trim' },
-  { phaseCode: '060.007', phaseName: 'POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Exterior post wraps' },
-  { phaseCode: '060.008', phaseName: 'EXTERIOR TALL CRAWL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Tall crawl exterior' },
-  { phaseCode: '060.011', phaseName: 'ENHANCED CORNERS', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Enhanced corner trim and siding' },
-  { phaseCode: '060.012', phaseName: 'ENHANCED REAR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Enhanced rear trim and siding' },
-  { phaseCode: '060.013', phaseName: 'FAUX WOOD', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Faux wood trim' },
-  { phaseCode: '060.014', phaseName: 'MASONRY EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Masonry exterior trim and siding' },
-  { phaseCode: '060.015', phaseName: 'PORCH RAIL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Porch railing - PORRAIL' },
-  { phaseCode: '060.020', phaseName: 'OPT FIREPLACE EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Optional fireplace exterior' },
-  { phaseCode: '060.110', phaseName: 'COVERED PATIO 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 1 exterior' },
-  { phaseCode: '060.120', phaseName: 'DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deck option 1 exterior' },
-  { phaseCode: '060.130', phaseName: 'COVERED DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 1 exterior' },
-  { phaseCode: '060.140', phaseName: 'OPT WDWBR2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Bedroom 2 window exterior' },
-  { phaseCode: '060.150', phaseName: 'OPT WDWBR3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Bedroom 3 window exterior' },
-  { phaseCode: '060.160', phaseName: 'OPT WDWBR4 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Bedroom 4 window exterior' },
-  { phaseCode: '060.170', phaseName: 'OPT WDWBR5 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Bedroom 5 window exterior' },
-  { phaseCode: '060.190', phaseName: 'OPT STUDY EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Study option exterior' },
-  { phaseCode: '060.210', phaseName: 'OPT DBA EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deluxe bath option exterior' },
-  { phaseCode: '060.220', phaseName: 'OPT DBA2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deluxe bath option 2 exterior' },
-  { phaseCode: '060.240', phaseName: 'OPT ABR4 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Add bedroom 4 exterior' },
-  { phaseCode: '060.270', phaseName: 'OPT STUDY ROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Study room exterior' },
-  { phaseCode: '060.605', phaseName: 'EXTENDED GREAT ROOM EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended great room exterior' },
-  { phaseCode: '060.610', phaseName: 'SUNROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Sunroom exterior' },
-  { phaseCode: '060.800', phaseName: 'RETREAT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Retreat exterior' },
+  // 60 Series - Exterior Trim and Siding (Trade 4155 / Unified 2100)
+  { phaseCode: '060.000', phaseName: 'EXTERIOR SIDING', isBasePhase: true, isOption: false, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Exterior Siding base - |60' },
+  { phaseCode: '060.007', phaseName: 'EXTERIOR POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Exterior Post Wrap - |60pw' },
+  { phaseCode: '060.008', phaseName: 'EXTERIOR TALL CRAWL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Tall crawl exterior' },
+  { phaseCode: '060.011', phaseName: 'ENHANCED CORNERS', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Enhanced Corners - |60ec' },
+  { phaseCode: '060.012', phaseName: 'ENHANCED REAR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Enhanced Rear - |60er' },
+  { phaseCode: '060.013', phaseName: 'FAUX WOOD', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Faux Wood siding - |60fw' },
+  { phaseCode: '060.014', phaseName: 'MASONRY SIDING', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Masonry Siding - |60m' },
+  { phaseCode: '060.015', phaseName: 'PORCH RAIL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Porch railing - PORRAIL' },
+  { phaseCode: '060.020', phaseName: 'OPT FIREPLACE EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Optional fireplace exterior' },
+  { phaseCode: '060.050', phaseName: 'ENHANCED ELEVATION B', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Enhanced Elevation B - |60.05' },
+  { phaseCode: '060.100', phaseName: 'ENHANCED ELEVATION C', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Enhanced Elevation C - |60.10' },
+  { phaseCode: '060.150', phaseName: 'ENHANCED ELEVATION D', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Enhanced Elevation D - |60.15' },
+  { phaseCode: '060.110', phaseName: 'COVERED PATIO 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 1 exterior' },
+  { phaseCode: '060.120', phaseName: 'DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Deck option 1 exterior' },
+  { phaseCode: '060.130', phaseName: 'COVERED DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 1 exterior' },
+  { phaseCode: '060.140', phaseName: 'OPT WDWBR2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Bedroom 2 window exterior' },
+  { phaseCode: '060.160', phaseName: 'OPT WDWBR4 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Bedroom 4 window exterior' },
+  { phaseCode: '060.170', phaseName: 'OPT WDWBR5 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Bedroom 5 window exterior' },
+  { phaseCode: '060.190', phaseName: 'OPT STUDY EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Study option exterior' },
+  { phaseCode: '060.210', phaseName: 'OPT DBA EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Deluxe bath option exterior' },
+  { phaseCode: '060.220', phaseName: 'OPT DBA2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Deluxe bath option 2 exterior' },
+  { phaseCode: '060.240', phaseName: 'OPT ABR4 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Add bedroom 4 exterior' },
+  { phaseCode: '060.270', phaseName: 'OPT STUDY ROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Study room exterior' },
+  { phaseCode: '060.605', phaseName: 'EXTENDED GREAT ROOM EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Extended great room exterior' },
+  { phaseCode: '060.610', phaseName: 'SUNROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Sunroom exterior' },
+  { phaseCode: '060.800', phaseName: 'RETREAT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Retreat exterior' },
 
-  // 62 Series - Garage Exterior
-  { phaseCode: '062.000', phaseName: 'GARAGE EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Garage exterior base' },
-  { phaseCode: '062.005', phaseName: 'GARAGE EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended garage exterior' },
-  { phaseCode: '062.400', phaseName: '4 CAR GARAGE EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: '4-car garage exterior' },
-  { phaseCode: '062.405', phaseName: '2 CAR GARAGE 4FT EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: '2-car garage 4-foot extension exterior' },
-  { phaseCode: '062.505', phaseName: '2 CAR GARAGE 5FT EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: '2-car garage 5-foot extension exterior' },
+  // 62 Series - Garage Siding
+  { phaseCode: '062.000', phaseName: '3RD CAR GARAGE SIDING', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: '3rd Car Garage Siding - |62' },
+  { phaseCode: '062.005', phaseName: 'GARAGE EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Extended garage exterior' },
+  { phaseCode: '062.400', phaseName: '4 CAR GARAGE EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: '4-car garage exterior' },
+  { phaseCode: '062.405', phaseName: '2 CAR GARAGE 4FT EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: '2-car garage 4-foot extension exterior' },
+  { phaseCode: '062.505', phaseName: '2 CAR GARAGE 5FT EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: '2-car garage 5-foot extension exterior' },
 
-  // 63 Series - Covered Patio Exterior
-  { phaseCode: '063.000', phaseName: 'COVERED PATIO EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered patio exterior base' },
-  { phaseCode: '063.005', phaseName: 'COVERED PATIO EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended covered patio exterior' },
-  { phaseCode: '063.006', phaseName: 'COVERED PATIO SUNROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Sunroom covered patio exterior' },
-  { phaseCode: '063.007', phaseName: 'COVERED PATIO POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered patio post wrap' },
-  { phaseCode: '063.100', phaseName: 'COVERED PATIO 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 1 exterior' },
-  { phaseCode: '063.107', phaseName: 'COVERED PATIO 1 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 1 post wrap' },
-  { phaseCode: '063.119', phaseName: 'COVERED PATIO 1 HOUSEWRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 1 housewrap' },
-  { phaseCode: '063.200', phaseName: 'COVERED PATIO 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 2 exterior' },
-  { phaseCode: '063.207', phaseName: 'COVERED PATIO 2 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 2 post wrap' },
-  { phaseCode: '063.300', phaseName: 'COVERED PATIO 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 3 exterior' },
-  { phaseCode: '063.307', phaseName: 'COVERED PATIO 3 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered patio option 3 post wrap' },
-  { phaseCode: '063.610', phaseName: 'COVERED PATIO SUNROOM EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Sunroom covered patio extended exterior' },
+  // 63 Series - Covered Patio Siding
+  { phaseCode: '063.000', phaseName: 'COVERED PATIO SIDING', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered Patio Siding - |63' },
+  { phaseCode: '063.005', phaseName: 'COVERED PATIO EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Extended covered patio exterior' },
+  { phaseCode: '063.006', phaseName: 'COVERED PATIO SUNROOM EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Sunroom covered patio exterior' },
+  { phaseCode: '063.007', phaseName: 'COVERED PATIO SIDING + POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered Patio Siding + Post Wrap - |63pw' },
+  { phaseCode: '063.100', phaseName: 'COVERED PATIO 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 1 exterior' },
+  { phaseCode: '063.107', phaseName: 'COVERED PATIO 1 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 1 post wrap' },
+  { phaseCode: '063.119', phaseName: 'COVERED PATIO 1 HOUSEWRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 1 housewrap' },
+  { phaseCode: '063.200', phaseName: 'COVERED PATIO 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 2 exterior' },
+  { phaseCode: '063.207', phaseName: 'COVERED PATIO 2 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 2 post wrap' },
+  { phaseCode: '063.300', phaseName: 'COVERED PATIO 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 3 exterior' },
+  { phaseCode: '063.307', phaseName: 'COVERED PATIO 3 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered patio option 3 post wrap' },
+  { phaseCode: '063.610', phaseName: 'COVERED PATIO SUNROOM EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Sunroom covered patio extended exterior' },
 
   // 65 Series - Covered Deck Exterior
-  { phaseCode: '065.100', phaseName: 'COVERED DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 1 exterior' },
-  { phaseCode: '065.107', phaseName: 'COVERED DECK 1 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 1 post wrap' },
-  { phaseCode: '065.200', phaseName: 'COVERED DECK 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 2 exterior' },
-  { phaseCode: '065.207', phaseName: 'COVERED DECK 2 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 2 post wrap' },
-  { phaseCode: '065.300', phaseName: 'COVERED DECK 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 3 exterior' },
-  { phaseCode: '065.307', phaseName: 'COVERED DECK 3 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Covered deck option 3 post wrap' },
+  { phaseCode: '065.100', phaseName: 'COVERED DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 1 exterior' },
+  { phaseCode: '065.107', phaseName: 'COVERED DECK 1 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 1 post wrap' },
+  { phaseCode: '065.200', phaseName: 'COVERED DECK 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 2 exterior' },
+  { phaseCode: '065.207', phaseName: 'COVERED DECK 2 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 2 post wrap' },
+  { phaseCode: '065.300', phaseName: 'COVERED DECK 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 3 exterior' },
+  { phaseCode: '065.307', phaseName: 'COVERED DECK 3 POST WRAP', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 7, description: 'Covered deck option 3 post wrap' },
 
-  // 74 Series - Deck Exterior
-  { phaseCode: '074.005', phaseName: 'DECK EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended deck exterior' },
-  { phaseCode: '074.100', phaseName: 'DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deck option 1 exterior' },
-  { phaseCode: '074.200', phaseName: 'DECK 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deck option 2 exterior' },
-  { phaseCode: '074.300', phaseName: 'DECK 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Deck option 3 exterior' },
-  { phaseCode: '074.605', phaseName: 'DECK EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended deck exterior option' },
+  // 74 Series - Deck Surface/Exterior
+  { phaseCode: '074.000', phaseName: 'DECK SURFACE', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Deck Surface base - |74' },
+  { phaseCode: '074.005', phaseName: 'DECK EXTERIOR EXT', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Extended deck exterior' },
+  { phaseCode: '074.018', phaseName: 'EXTERIOR STAIR MATERIAL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Exterior Stair Material - |74s' },
+  { phaseCode: '074.100', phaseName: 'DECK 1 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Deck option 1 exterior' },
+  { phaseCode: '074.200', phaseName: 'DECK 2 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Deck option 2 exterior' },
+  { phaseCode: '074.300', phaseName: 'DECK 3 EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Deck option 3 exterior' },
+  { phaseCode: '074.605', phaseName: 'DECK EXT EXTERIOR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Extended deck exterior option' },
 
-  // 75 Series - Exterior Stair Material
-  { phaseCode: '075.100', phaseName: 'EXTERIOR STAIR 1', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Exterior stair option 1' },
-  { phaseCode: '075.118', phaseName: 'EXTERIOR STAIR 1 EXT STAIR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended exterior stair option 1' },
-  { phaseCode: '075.200', phaseName: 'EXTERIOR STAIR 2', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Exterior stair option 2' },
-  { phaseCode: '075.218', phaseName: 'EXTERIOR STAIR 2 EXT STAIR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Extended exterior stair option 2' },
-  { phaseCode: '075.300', phaseName: 'EXTERIOR STAIR 3', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '1100', shippingOrder: 7, description: 'Exterior stair option 3' },
-  { phaseCode: '075.908', phaseName: 'EXTERIOR STAIR TALL CRAWL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '1100', shippingOrder: 7, description: 'Tall crawl exterior stair' },
+  // 75 Series - Deck Rail
+  { phaseCode: '075.000', phaseName: 'DECK RAIL', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Deck Rail base - |75' },
+  { phaseCode: '075.100', phaseName: 'EXTERIOR STAIR 1', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Exterior stair option 1' },
+  { phaseCode: '075.118', phaseName: 'EXTERIOR STAIR 1 EXT STAIR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Extended exterior stair option 1' },
+  { phaseCode: '075.200', phaseName: 'EXTERIOR STAIR 2', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Exterior stair option 2' },
+  { phaseCode: '075.218', phaseName: 'EXTERIOR STAIR 2 EXT STAIR', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Extended exterior stair option 2' },
+  { phaseCode: '075.300', phaseName: 'EXTERIOR STAIR 3', isBasePhase: false, isOption: true, isAlphaVariant: false, materialClass: '2100', shippingOrder: 8, description: 'Exterior stair option 3' },
+  { phaseCode: '075.908', phaseName: 'EXTERIOR STAIR TALL CRAWL', isBasePhase: false, isOption: true, isAlphaVariant: true, materialClass: '2100', shippingOrder: 8, description: 'Tall crawl exterior stair' },
 ];
 
 // ============================================================================
