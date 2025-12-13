@@ -237,6 +237,181 @@ async function validateDatabase() {
   }
 
   // ============================================================================
+  // 6. HOLT CROSS-REFERENCE SYSTEM
+  // ============================================================================
+  console.log('\n6. HOLT CROSS-REFERENCE SYSTEM');
+  console.log('───────────────────────────────────────────────────────────────');
+
+  // Holt Phase Mappings
+  try {
+    const holtPhaseCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM holt_phase_xref`;
+    if (Number(holtPhaseCount[0].count) >= 20) {
+      log('Holt Phase Mappings', 'PASS', `${holtPhaseCount[0].count} phase mappings`);
+    } else if (Number(holtPhaseCount[0].count) > 0) {
+      log('Holt Phase Mappings', 'WARN', `Only ${holtPhaseCount[0].count} phase mappings`);
+    } else {
+      log('Holt Phase Mappings', 'FAIL', 'No Holt phase mappings found');
+    }
+
+    // Check Holt->Unified phase links
+    const orphanedHolt = await prisma.$queryRaw<[{count: bigint}]>`
+      SELECT COUNT(*) as count FROM holt_phase_xref
+      WHERE unified_phase_id IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM phase_option_definitions p WHERE p.id = unified_phase_id)
+    `;
+    if (Number(orphanedHolt[0].count) === 0) {
+      log('Holt->Phase Links', 'PASS', 'All Holt mappings reference valid phases');
+    } else {
+      log('Holt->Phase Links', 'FAIL', `${orphanedHolt[0].count} invalid phase references`);
+    }
+  } catch {
+    log('Holt Phase Mappings', 'WARN', 'Table not yet created (run migration)');
+  }
+
+  // Item Type Mappings
+  try {
+    const itemTypeCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM item_type_xref`;
+    if (Number(itemTypeCount[0].count) >= 5) {
+      log('Item Type Mappings', 'PASS', `${itemTypeCount[0].count} item type mappings`);
+    } else if (Number(itemTypeCount[0].count) > 0) {
+      log('Item Type Mappings', 'WARN', `Only ${itemTypeCount[0].count} item type mappings`);
+    } else {
+      log('Item Type Mappings', 'FAIL', 'No item type mappings found');
+    }
+  } catch {
+    log('Item Type Mappings', 'WARN', 'Table not yet created (run migration)');
+  }
+
+  // BAT Pack Definitions
+  try {
+    const batPackCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM bat_pack_definitions`;
+    if (Number(batPackCount[0].count) >= 20) {
+      log('BAT Pack Definitions', 'PASS', `${batPackCount[0].count} pack definitions`);
+    } else if (Number(batPackCount[0].count) > 0) {
+      log('BAT Pack Definitions', 'WARN', `Only ${batPackCount[0].count} pack definitions`);
+    } else {
+      log('BAT Pack Definitions', 'FAIL', 'No BAT pack definitions found');
+    }
+
+    // Check shipping order consistency
+    const invalidShipping = await prisma.$queryRaw<[{count: bigint}]>`
+      SELECT COUNT(*) as count FROM bat_pack_definitions
+      WHERE shipping_order < 1 OR shipping_order > 15
+    `;
+    if (Number(invalidShipping[0].count) === 0) {
+      log('BAT Shipping Order', 'PASS', 'All shipping orders are valid (1-15)');
+    } else {
+      log('BAT Shipping Order', 'WARN', `${invalidShipping[0].count} packs with invalid shipping order`);
+    }
+  } catch {
+    log('BAT Pack Definitions', 'WARN', 'Table not yet created (run migration)');
+  }
+
+  // ============================================================================
+  // 7. LAYER 2 MATERIALS (SKU Level)
+  // ============================================================================
+  console.log('\n7. LAYER 2 MATERIALS (SKU Level)');
+  console.log('───────────────────────────────────────────────────────────────');
+
+  try {
+    const layer2Count = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM layer2_materials`;
+    if (Number(layer2Count[0].count) >= 100) {
+      log('Layer2 Materials', 'PASS', `${layer2Count[0].count} SKU-level materials`);
+    } else if (Number(layer2Count[0].count) > 0) {
+      log('Layer2 Materials', 'WARN', `Only ${layer2Count[0].count} SKU-level materials`);
+    } else {
+      log('Layer2 Materials', 'FAIL', 'No Layer2 materials found');
+    }
+
+    // Check materials by pack
+    const packDistribution = await prisma.$queryRaw<{bat_pack_id: string, count: bigint}[]>`
+      SELECT bat_pack_id, COUNT(*) as count FROM layer2_materials
+      GROUP BY bat_pack_id ORDER BY bat_pack_id
+    `;
+    const criticalPacks = ['|10', '|20', '|40', '|60'];
+    for (const pack of criticalPacks) {
+      const packData = packDistribution.find(p => p.bat_pack_id === pack);
+      if (packData && Number(packData.count) >= 5) {
+        log(`Layer2 Pack ${pack}`, 'PASS', `${packData.count} materials`);
+      } else if (packData) {
+        log(`Layer2 Pack ${pack}`, 'WARN', `Only ${packData.count} materials`);
+      } else {
+        log(`Layer2 Pack ${pack}`, 'WARN', 'No materials for critical pack');
+      }
+    }
+  } catch {
+    log('Layer2 Materials', 'WARN', 'Table not yet created (run migration)');
+  }
+
+  // ============================================================================
+  // 8. CUSTOMER CODE CROSS-REFERENCE
+  // ============================================================================
+  console.log('\n8. CUSTOMER CODE CROSS-REFERENCE');
+  console.log('───────────────────────────────────────────────────────────────');
+
+  try {
+    const custXrefCount = await prisma.$queryRaw<[{count: bigint}]>`SELECT COUNT(*) as count FROM customer_code_xref`;
+    if (Number(custXrefCount[0].count) > 0) {
+      log('Customer Code Xref', 'PASS', `${custXrefCount[0].count} customer code mappings`);
+
+      // Check validation status
+      const validatedCount = await prisma.$queryRaw<[{count: bigint}]>`
+        SELECT COUNT(*) as count FROM customer_code_xref WHERE is_validated = true
+      `;
+      const validatedPct = Number(custXrefCount[0].count) > 0
+        ? Math.round((Number(validatedCount[0].count) / Number(custXrefCount[0].count)) * 100)
+        : 0;
+      if (validatedPct >= 80) {
+        log('Customer Code Validation', 'PASS', `${validatedPct}% codes validated`);
+      } else if (validatedPct > 0) {
+        log('Customer Code Validation', 'WARN', `Only ${validatedPct}% codes validated`);
+      } else {
+        log('Customer Code Validation', 'WARN', 'No codes validated yet');
+      }
+    } else {
+      log('Customer Code Xref', 'WARN', 'No customer code mappings yet');
+    }
+  } catch {
+    log('Customer Code Xref', 'WARN', 'Table not yet created (run migration)');
+  }
+
+  // ============================================================================
+  // 9. OPTION SUFFIX COMPLETENESS
+  // ============================================================================
+  console.log('\n9. OPTION SUFFIX COMPLETENESS');
+  console.log('───────────────────────────────────────────────────────────────');
+
+  // Check complete suffix range 00-83
+  const allSuffixes = await prisma.$queryRaw<{suffix_code: string}[]>`
+    SELECT suffix_code FROM option_suffixes ORDER BY suffix_code
+  `;
+  const suffixSet = new Set(allSuffixes.map(s => s.suffix_code));
+
+  // Check critical suffixes exist
+  const criticalSuffixes = ['00', '01', '03', '04', '05', '06', '07', '08', '09', '10', '11', '20', '30', '40', '50', '60', '70', '80'];
+  let missingSuffixes = 0;
+  for (const cs of criticalSuffixes) {
+    if (!suffixSet.has(cs)) {
+      missingSuffixes++;
+    }
+  }
+  if (missingSuffixes === 0) {
+    log('Critical Suffixes', 'PASS', 'All critical suffixes defined');
+  } else {
+    log('Critical Suffixes', 'FAIL', `${missingSuffixes} critical suffixes missing`);
+  }
+
+  // Check suffix range completeness
+  const totalExpected = 84; // 00-83
+  if (suffixSet.size >= totalExpected) {
+    log('Suffix Range', 'PASS', `${suffixSet.size}/${totalExpected} suffixes defined`);
+  } else if (suffixSet.size >= 50) {
+    log('Suffix Range', 'WARN', `${suffixSet.size}/${totalExpected} suffixes defined`);
+  } else {
+    log('Suffix Range', 'WARN', `Only ${suffixSet.size}/${totalExpected} suffixes defined`);
+  }
+
+  // ============================================================================
   // SUMMARY
   // ============================================================================
   console.log('\n═══════════════════════════════════════════════════════════════');
