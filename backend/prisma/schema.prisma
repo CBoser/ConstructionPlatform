@@ -1493,6 +1493,7 @@ model MaterialClass {
   // Relationships
   phaseOptions PhaseOptionDefinition[]
   layer1Codes  Layer1Code[]
+  itemTypeXrefs ItemTypeXref[]
 
   @@index([classCode])
   @@map("material_classes")
@@ -1524,6 +1525,7 @@ model PhaseOptionDefinition {
   materialClass   MaterialClass @relation(fields: [materialClassId], references: [id])
   layer1Codes     Layer1Code[]
   richmondOptions RichmondOptionCode[]
+  holtPhaseXrefs  HoltPhaseXref[]
 
   @@index([phaseCode])
   @@index([materialClassId])
@@ -1702,6 +1704,106 @@ model OptionSuffix {
   @@index([suffixCode])
   @@index([abbreviation])
   @@map("option_suffixes")
+}
+
+// ============================================================================
+// HOLT CROSS-REFERENCE SYSTEM
+// Maps Holt's 5-digit phase codes to unified phase system
+// ============================================================================
+
+// Holt Phase Cross-Reference
+// Maps Holt's OptionPhase (10100, 10200, 40100) to unified phases (010.000, 020.000)
+model HoltPhaseXref {
+  id              String   @id @default(uuid())
+
+  // Holt Source Data
+  holtPhaseCode   String   @unique @map("holt_phase_code")   // "10100", "10200", "40100"
+  holtCostCode    String?  @map("holt_cost_code")            // "4085", "4120", "4155"
+  holtDescription String?  @map("holt_description")
+
+  // Unified System Mapping
+  unifiedPhaseId  String?  @map("unified_phase_id")
+  unifiedPhase    PhaseOptionDefinition? @relation(fields: [unifiedPhaseId], references: [id])
+
+  // Elevation extraction (from Holt's pattern)
+  // Holt uses: 10100=A, 10200=B, 10300=C, 10400=D
+  elevationCode   String?  @map("elevation_code")            // "A", "B", "C", "D", "**"
+
+  // Item Type mapping
+  itemTypeCode    String?  @map("item_type_code")            // "1000", "1100" (unified)
+
+  // BAT Pack association (for shipping order)
+  batPackId       String?  @map("bat_pack_id")               // "|10", "|20", "|22"
+  shippingOrder   Int?     @map("shipping_order")
+
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([holtPhaseCode])
+  @@index([holtCostCode])
+  @@index([unifiedPhaseId])
+  @@index([batPackId])
+  @@map("holt_phase_xref")
+}
+
+// Item Type Cross-Reference
+// Maps Holt cost codes to unified material classes
+model ItemTypeXref {
+  id                String   @id @default(uuid())
+
+  // Holt Cost Code
+  holtCostCode      String   @unique @map("holt_cost_code")   // "4085", "4086", "4120"
+  holtCostName      String?  @map("holt_cost_name")           // "Lumber", "Trusses"
+
+  // Unified Material Class
+  materialClassId   String?  @map("material_class_id")
+  materialClass     MaterialClass? @relation(fields: [materialClassId], references: [id])
+
+  // DART Category (if applicable)
+  dartCategory      Int?     @map("dart_category")
+  dartCategoryName  String?  @map("dart_category_name")
+
+  description       String?
+  isActive          Boolean  @default(true) @map("is_active")
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  @@index([holtCostCode])
+  @@index([materialClassId])
+  @@map("item_type_xref")
+}
+
+// BAT Pack Definition
+// Legacy BAT pack structure for shipping order and Richmond code grouping
+model BatPackDefinition {
+  id              String   @id @default(uuid())
+
+  packId          String   @unique @map("pack_id")           // "|10", "|20", "|22"
+  packName        String   @map("pack_name")                 // "Foundation", "Main Walls"
+  packTitle       String?  @map("pack_title")                // Legacy BAT title
+
+  // Richmond codes associated with this pack (comma-separated for legacy)
+  richmondCodes   String?  @map("richmond_codes")            // "ELVA,ELVB,ELVC"
+
+  // Shipping information
+  shippingOrder   Int      @map("shipping_order")
+  shipsWith       String?  @map("ships_with")                // Other packs that ship together
+
+  // Material class default
+  materialClassId String?  @map("material_class_id")
+
+  description     String?
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([packId])
+  @@index([shippingOrder])
+  @@map("bat_pack_definitions")
 }
 
 // ============================================================================
