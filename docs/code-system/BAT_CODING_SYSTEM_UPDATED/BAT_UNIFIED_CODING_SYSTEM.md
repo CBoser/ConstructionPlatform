@@ -680,6 +680,289 @@ For plan G914, Elevation B:
 
 ---
 
+## STO Item Code Schema
+
+### Sales Team One - Descriptive Material Codes
+
+**Version:** 1.0
+**Updated:** December 2025
+**Purpose:** Human-readable item codes that describe the material at a glance
+
+### Code Format Overview
+
+```
+PREFIX-DIMENSION-SPEC[-VARIANT][-SEQ]
+
+Examples:
+  2X4-8-SPF           → 2x4 x 8' SPF #2
+  2X6-92-5/8-DF       → 2x6 x 92-5/8" DF Stud Grade
+  OSB-7/16-4X8-TG     → 7/16" OSB 4x8 Tongue & Groove
+  HANGER-LUS28        → Simpson LUS28 Joist Hanger
+  GLB-5X18            → Glulam Beam 5" x 18"
+```
+
+### Category Prefixes
+
+#### Dimensional Lumber
+
+| Prefix | Description | Format | Examples |
+|--------|-------------|--------|----------|
+| `2X4` | 2x4 Lumber | `2X4-LENGTH-SPECIES` | `2X4-8-SPF`, `2X4-92-5/8-DF` |
+| `2X6` | 2x6 Lumber | `2X6-LENGTH-SPECIES` | `2X6-16-SPF`, `2X6-104-5/8-DF` |
+| `2X8` | 2x8 Lumber | `2X8-LENGTH-SPECIES` | `2X8-12-DF` |
+| `2X10` | 2x10 Lumber | `2X10-LENGTH-SPECIES` | `2X10-20-DF` |
+| `2X12` | 2x12 Lumber | `2X12-LENGTH-SPECIES` | `2X12-16-DF` |
+| `4X4` | 4x4 Post | `4X4-LENGTH-SPECIES` | `4X4-8-DF-PT-GC` |
+| `6X6` | 6x6 Post | `6X6-LENGTH-SPECIES` | `6X6-12-DF` |
+
+**Species Codes:**
+
+| Code | Species |
+|------|---------|
+| `DF` | Douglas Fir |
+| `SPF` | Spruce-Pine-Fir |
+| `HF` | Hem-Fir |
+| `SYP` | Southern Yellow Pine |
+| `CED` | Cedar |
+
+**Length Codes:**
+- Standard: `8`, `10`, `12`, `14`, `16`, `18`, `20`
+- Stud: `92-5/8` (8' walls), `104-5/8` (9' walls)
+- Random Length: `RL`
+
+#### Engineered Lumber
+
+| Prefix | Description | Format | Examples |
+|--------|-------------|--------|----------|
+| `IJT` | I-Joist | `IJT-DEPTH-MODEL` | `IJT-9-1/2-TJI110`, `IJT-11-7/8-TJI110` |
+| `LVL` | Laminated Veneer Lumber | `LVL-THKxDEPTH` | `LVL-1-3/4X11-7/8` |
+| `LSL` | Laminated Strand Lumber | `LSL-THKxDEPTH` | `LSL-1-1/2X9-1/2` |
+| `RIM` | Rim Board | `RIM-THKxDEPTH` | `RIM-1-1/8X9-1/2` |
+| `GLB` | Glulam Beam | `GLB-WIDTHxDEPTH` | `GLB-5-1/2X18`, `GLB-3-1/2X10-1/2` |
+
+#### Sheathing & Panels
+
+| Prefix | Description | Format | Examples |
+|--------|-------------|--------|----------|
+| `OSB` | Oriented Strand Board | `OSB-THK-SIZE[-VARIANT]` | `OSB-7/16-4X8`, `OSB-23/32-4X8-TG` |
+| `PLY` | Plywood | `PLY-THK-GRADE-SIZE` | `PLY-1/2-CDX-4X8`, `PLY-3/4-RTD-4X8` |
+
+**Variants:** `-TG` (Tongue & Groove), `-RAD` (Radiant Barrier), `-PT` (Pressure Treated)
+
+#### Hardware - Simpson Strong-Tie
+
+| Prefix | Description | Format | Examples |
+|--------|-------------|--------|----------|
+| `HANGER` | Joist Hanger | `HANGER-MODEL` | `HANGER-LUS28`, `HANGER-HUS210` |
+| `ANCHOR` | Hold-Down/Anchor | `ANCHOR-MODEL` | `ANCHOR-HD5A`, `ANCHOR-ABA` |
+| `BASE` | Post Base/Cap | `BASE-MODEL` | `BASE-ABU44Z`, `BASE-AC6Z` |
+| `STRAP` | Strap Tie | `STRAP-MODEL` | `STRAP-LSTA21`, `STRAP-MST48` |
+| `CLIP` | Clip/Angle | `CLIP-MODEL` | `CLIP-A35`, `CLIP-H2.5A` |
+
+#### Siding & Exterior
+
+| Prefix | Description | Format | Examples |
+|--------|-------------|--------|----------|
+| `SID` | Siding | `SID-BRAND-PROFILE` | `SID-HZ-LAP`, `SID-HZ-PANEL` |
+| `TRIM` | Exterior Trim | `TRIM-SIZE-TYPE` | `TRIM-1X4-WW`, `TRIM-HZ-5/4X6` |
+| `WRAP` | Housewrap | `WRAP-TYPE` | `WRAP-TYVEK` |
+
+### Suffix Codes
+
+| Suffix | Meaning |
+|--------|---------|
+| `-PT` | Pressure Treated (general) |
+| `-PT-GC` | Pressure Treated Ground Contact (.40) |
+| `-PT-AG` | Pressure Treated Above Ground (.15) |
+| `-TG` | Tongue & Groove |
+| `-FR` | Fire Rated |
+| `-01`, `-02` | Sequence numbers for disambiguation |
+
+### Code Structure Summary
+
+```
+CATEGORY-DIMENSION-MATERIAL[-TREATMENT][-SEQUENCE]
+
+Where:
+  CATEGORY   = Product type (2X4, OSB, HANGER, etc.)
+  DIMENSION  = Size/model (8, 92-5/8, LUS28, etc.)
+  MATERIAL   = Species/grade when applicable (DF, SPF, CDX)
+  TREATMENT  = Optional treatment suffix (-PT-GC, -TG, -FR)
+  SEQUENCE   = Disambiguation number when needed (-01, -02)
+```
+
+### Cross-Reference to Unified Codes
+
+| STO Code | BFS SKU | Unified Item Type |
+|----------|---------|-------------------|
+| `2X4-8-SPF` | 248SPF2 | 1000 (Framing) |
+| `HANGER-LUS28` | LUS28 | 1000 (Framing) |
+| `OSB-7/16-4X8` | 716OSB | 1000 (Framing) |
+| `SID-HZ-LAP` | HZ1048 | 2100 (Siding) |
+| `TRIM-HZ-5/4X6` | HZU54612 | 2100 (Siding) |
+
+---
+
+## MindFlow Unified Coding System Reference
+
+### Project Instructions - Version 3.0 | December 2025
+
+#### 1. Unified Code Format
+
+The unified coding system uses a four-segment format that eliminates triple-encoding and provides a clean, consistent structure for all material codes across Richmond American and Holt Homes.
+
+**Full Code Structure:**
+```
+PPPP-PPP.XXS-EE-IIII
+
+Segment   Description
+PPPP      Plan Code - The plan identifier (e.g., 1670, G603, 2321, LE93)
+PPP.XXS   Phase Code - Construction phase with fluid 3.3 format (e.g., 010.821, 060.011)
+EE        Elevation Code - Single (A, B), multiple (BCD), or universal (**)
+IIII      Item Type Code - Material category (1000=Framing, 2100=Siding)
+```
+
+**Example Codes:**
+
+| Full Code | Description |
+|-----------|-------------|
+| `1670-010.820-BCD-1000` | Plan 1670, Den Foundation, Elevations B/C/D, Framing |
+| `G603-020.000-**-1000` | Plan G603, Main Floor Walls, All Elevations, Framing |
+| `2321-060.000-A-2100` | Plan 2321, Exterior Siding, Elevation A, Siding |
+| `1890-012.040-ABC-1000` | Plan 1890, 2-Car Garage 4' Ext, Elevations A/B/C, Framing |
+
+#### 2. Phase Code Taxonomy
+
+Phase codes follow a hierarchical numeric structure organized by construction sequence. The format uses a fluid PPP.XXS structure.
+
+**Foundation & Site (000-019):**
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| 010.000 | Foundation (base) | Standard foundation |
+| 010.020 | Fireplace Foundation | FPSING01 option |
+| 010.820 | Den Foundation | DEN option |
+| 012.000 | 3rd Car Garage Foundation | 3CARA/B/C options |
+| 012.405 | 2-Car Garage 4' Ext Foundation | 2CAR4X options |
+| 013.100 | Covered Patio Foundation | COVP option |
+
+**Main Floor Walls (020-029):**
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| 020.000 | Main Floor Walls | Base walls |
+| 020.001 | Main Walls ReadyFrame | .rf suffix converted |
+| 020.820 | Den Walls | DEN option |
+| 022.000 | 3rd Car Garage Walls | 3CAR options |
+| 023.000 | Covered Patio Framing | COVP option |
+
+**Second Floor System (030-039):**
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| 030.000 | 2nd Floor System | Floor trusses |
+| 034.000 | 2nd Floor Walls | Upper framing |
+| 034.003 | 2nd Floor Walls (Loft) | .lp suffix converted |
+| 034.610 | Loft Becomes Bedroom | Loft conversion |
+
+**Roof (040-045):**
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| 040.000 | Roof | Main roof structure |
+| 040.006 | Roof Gable Sheeting | .gs suffix converted |
+| 042.000 | 3rd Car Garage Roof | 3CAR options |
+| 043.000 | Covered Patio Roof | COVP option |
+
+**Housewrap & Siding (058-075):**
+
+| Code | Description | Notes |
+|------|-------------|-------|
+| 058.000 | Housewrap | Weather barrier |
+| 060.000 | Exterior Trim and Siding | Main siding |
+| 060.011 | Corner Enhanced Siding | .ec suffix converted |
+| 062.000 | 3rd Car Garage Siding | 3CAR options |
+| 074.100 | Deck Surface & Rail | DECK option |
+
+#### 3. Elevation Code Reference
+
+| Code | Type | Description |
+|------|------|-------------|
+| `**` | Universal | Applies to ALL elevations |
+| `A` | Single | Elevation A only |
+| `B` | Single | Elevation B only |
+| `AB` | Multiple | Elevations A and B |
+| `ABC` | Multiple | Elevations A, B, and C |
+| `BCD` | Multiple | Elevations B, C, and D |
+| `ABCD` | All Four | All four elevations (explicit) |
+
+**RULE:** Always list elevation letters in alphabetical order (ABC not CAB).
+
+#### 4. Item Type Code Taxonomy
+
+**Structural (1000-1999):**
+
+| Code | Category | Examples |
+|------|----------|----------|
+| 1000 | Framing Lumber | Dimensional lumber, studs, plates |
+| 1100 | Engineered Lumber | TJI, LVL, LSL, glulam beams |
+| 1200 | Structural Hardware | Hangers, connectors, fasteners |
+
+**Exterior Envelope (2000-2999):**
+
+| Code | Category | Examples |
+|------|----------|----------|
+| 2000 | Sheathing/Housewrap | OSB, plywood, Tyvek |
+| 2100 | Siding | Lap siding, panels, trim |
+| 2200 | Roofing | Shingles, underlayment, flashing |
+| 2300 | Windows/Doors | Windows, exterior doors |
+
+#### 5. Suffix Code Reference (Fluid Format)
+
+| Old Suffix | New Code | Description |
+|------------|----------|-------------|
+| .rf | .001 | ReadyFrame - Pre-framed wall sections |
+| .lo | .002 | Loft - With loft configuration |
+| .nl | .003 | No Loft - Without loft configuration |
+| .ak | .004 | Alternate Kitchen - Kitchen variant |
+| .gs | .006 | Gable Sheeting - Gable end sheathing |
+| .pw | .007 | Post Wrap - Exterior post covering |
+| .tc | .008 | Tall Crawl - Tall crawlspace |
+| .ec | .011 | Enhanced Corner - Premium corner detail |
+| .er | .012 | Enhanced Rear - Premium rear elevation |
+| .ma | .014 | Masonry - Stone/masonry veneer |
+| .2x | .205 | 2' Extension - Garage 2-foot extension |
+| .4x | .405 | 4' Extension - Garage 4-foot extension |
+| .5x | .505 | 5' Extension - Garage 5-foot extension |
+| .9t | .909 | 9' Ceiling - 9-foot ceiling height |
+
+#### 6. Triple-Encoding Solution
+
+**The Problem (OLD System):**
+Richmond's legacy system encoded elevation THREE times:
+1. Pack ID: `|10.82BCD OPT DEN FOUNDATION`
+2. Location Column: `- ELVB - ELVC - ELVD`
+3. Option Codes: `ELVB, ELVC, ELVD`
+
+**The Solution (NEW System):**
+Unified system stores elevation ONCE in a dedicated segment:
+```
+1670-010.820-BCD-1000
+```
+The `-BCD-` segment is the single source of truth for elevation information.
+
+#### 7. Key Translation Examples
+
+| Richmond Pack ID | Unified Code | Type |
+|------------------|--------------|------|
+| `\|10.82 OPT DEN FOUNDATION (B,C,D)` | PPPP-010.820-BCD-1000 | 1000 |
+| `\|12.4x OPT 2 CAR GARAGE 4' EXT (A,B,C)` | PPPP-012.405-ABC-1000 | 1000 |
+| `\|20.rf MAIN WALLS READYFRAME` | PPPP-020.001-**-1000 | 1000 |
+| `\|60.00 EXTERIOR TRIM AND SIDING (B)` | PPPP-060.000-B-2100 | 2100 |
+| `\|60.ec CORNER ENHANCED SIDING` | PPPP-060.011-**-2100 | 2100 |
+
+---
+
 ## Summary Statistics
 
 | Metric | Count |
@@ -691,8 +974,12 @@ For plan G914, Elevation B:
 | Numeric Suffix Extensions | 19 |
 | Unified Item Types | 9 |
 | Pack Variations | 312+ |
+| RICHMOND Materials | 400 |
+| HOLT Materials | 278 |
+| Total Unique SKUs | 516 |
 
 ---
 
-*Document Version 2.0 - December 2025*
+*Document Version 3.0 - December 2025*
 *Sales Team One PDX - Builder's FirstSource*
+*MindFlow Unified Coding System Active*
