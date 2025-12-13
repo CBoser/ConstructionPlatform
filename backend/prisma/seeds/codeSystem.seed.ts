@@ -109,40 +109,95 @@ const STORY_TYPES = [
 ];
 
 // ============================================================================
-// OPTION SUFFIXES - Fluid Phase Code System v2.0
-// BAT Unified Coding System: PPP.XXS format
+// ELEVATION MAPPING - Letter ↔ Digit Conversion
+// BAT Unified Coding System v2.0
+//
+// In Holt 9-digit codes, elevation is position 7:
+// PPPP-XXXEY-CCCC where E = Elevation digit (1=A, 2=B, etc.)
+//
+// Example: 1670-10103-4085 → Elevation digit: 3 → Elevation C
+// ============================================================================
+const ELEVATION_MAPPINGS = [
+  // Standard Elevations
+  { letter: 'A', digit: 1, name: 'Elevation A', description: 'Primary elevation' },
+  { letter: 'B', digit: 2, name: 'Elevation B', description: 'Secondary elevation' },
+  { letter: 'C', digit: 3, name: 'Elevation C', description: 'Tertiary elevation' },
+  { letter: 'D', digit: 4, name: 'Elevation D', description: 'Fourth elevation' },
+  { letter: 'E', digit: 5, name: 'Elevation E', description: 'Fifth elevation' },
+  { letter: 'F', digit: 6, name: 'Elevation F', description: 'Sixth elevation' },
+  { letter: 'G', digit: 7, name: 'Elevation G', description: 'Seventh elevation' },
+  { letter: 'H', digit: 8, name: 'Elevation H', description: 'Eighth elevation' },
+  { letter: 'J', digit: 9, name: 'Elevation J', description: 'Ninth elevation (I skipped)' },
+  { letter: 'K', digit: 10, name: 'Elevation K', description: 'Tenth elevation' },
+  { letter: '**', digit: 0, name: 'All Elevations', description: 'Universal - applies to all elevations' },
+];
+
+// Multi-Elevation Combinations
+const MULTI_ELEVATION_CODES = [
+  { code: 'AB', meaning: 'Elevations A and B', elevations: ['A', 'B'] },
+  { code: 'BC', meaning: 'Elevations B and C', elevations: ['B', 'C'] },
+  { code: 'CD', meaning: 'Elevations C and D', elevations: ['C', 'D'] },
+  { code: 'ABC', meaning: 'Elevations A, B, and C', elevations: ['A', 'B', 'C'] },
+  { code: 'BCD', meaning: 'Elevations B, C, and D', elevations: ['B', 'C', 'D'] },
+  { code: 'ABCD', meaning: 'All four elevations', elevations: ['A', 'B', 'C', 'D'] },
+  { code: '**', meaning: 'Universal (all elevations)', elevations: [] },
+];
+
+// Helper functions for elevation conversion
+export function elevationLetterToDigit(letter: string): number | null {
+  const mapping = ELEVATION_MAPPINGS.find(e => e.letter === letter.toUpperCase());
+  return mapping?.digit ?? null;
+}
+
+export function elevationDigitToLetter(digit: number): string | null {
+  const mapping = ELEVATION_MAPPINGS.find(e => e.digit === digit);
+  return mapping?.letter ?? null;
+}
+
+// ============================================================================
+// OPTION SUFFIXES - BAT Unified Coding System v2.0
+// Fluid Phase Code Format: PPP.XXS
 // - PPP = Phase (009-090)
 // - XX = Option (00-99)
-// - S = Suffix variant (0-9)
+// - S = Suffix variant (0-9) or ZZ = Two-digit suffix (10-19)
 //
-// Core Suffix Codes (v2.0 - 17 primary codes):
-// Single-digit (1-9): rf, lo, nl, x, sr, pw, tc, 9t
-// Two-digit (10-17): 10t, ec, er, fw, ma, pr, s, hw
+// Single-Digit Suffixes (S = 1-9): Used in .XXS format
+// Two-Digit Suffixes (ZZ = 10-19): Used in .0ZZ format (no option code)
+//
+// Usage Examples:
+// |20rf → 020.001 (00 + S=1 ReadyFrame)
+// |34lo → 034.003 (00 + S=3 Loft)
+// |60ec → 060.011 (0 + ZZ=11 Enhanced Corners)
+// |10.82rf → 010.821 (XX=82 + S=1 Optional Den + RF)
 // ============================================================================
 const OPTION_SUFFIXES = [
-  // 00-09: Core Structural Options (Primary suffix codes)
+  // 00: Base configuration
   { suffixCode: '00', abbreviation: 'base', fullName: 'Base/Standard', category: 'base', description: 'Base configuration - no option applied' },
-  { suffixCode: '01', abbreviation: 'rf', fullName: 'ReadyFrame', category: 'structural', description: 'ReadyFrame prefab wall panels' },
-  { suffixCode: '02', abbreviation: 'lo', fullName: 'Loft Option', category: 'structural', description: 'Loft addition to plan' },
-  { suffixCode: '03', abbreviation: 'nl', fullName: 'No Loft', category: 'structural', description: 'Without Loft configuration' },
-  { suffixCode: '04', abbreviation: 'x', fullName: 'Extended', category: 'structural', description: 'Extended version of room/area' },
-  { suffixCode: '05', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition', description: 'Sunroom addition' },
-  { suffixCode: '06', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior', description: 'Decorative post wraps' },
-  { suffixCode: '07', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation', description: 'Tall crawl space foundation' },
-  { suffixCode: '08', abbreviation: '9t', fullName: "9' Tall Walls", category: 'structural', description: '9-foot wall height option' },
-  { suffixCode: '09', abbreviation: 'alt', fullName: 'Alternate', category: 'structural', description: 'Alternate configuration variant' },
 
-  // 10-19: Wall & Exterior Options (Secondary suffix codes)
+  // ========== SINGLE-DIGIT SUFFIXES (S = 1-9) ==========
+  // Used in .XXS format where option code takes first two positions
+  { suffixCode: '01', abbreviation: 'rf', fullName: 'ReadyFrame', category: 'structural', description: 'ReadyFrame prefab wall panels. Example: 010.821 = Optional Den + ReadyFrame' },
+  { suffixCode: '02', abbreviation: '', fullName: 'Reserved', category: 'reserved', description: 'Reserved for future use', isActive: false },
+  { suffixCode: '03', abbreviation: 'lo', fullName: 'Loft Variant', category: 'structural', description: 'Loft variant. Example: 034.003 = 2nd Floor Walls Loft' },
+  { suffixCode: '04', abbreviation: 'nl', fullName: 'No Loft Variant', category: 'structural', description: 'No Loft variant. Example: 034.004 = 2nd Floor Walls No Loft' },
+  { suffixCode: '05', abbreviation: 'x', fullName: 'Extended', category: 'structural', description: 'Extended version of room/area' },
+  { suffixCode: '06', abbreviation: 'sr', fullName: 'Sunroom', category: 'addition', description: 'Sunroom addition' },
+  { suffixCode: '07', abbreviation: 'pw', fullName: 'Post Wrap', category: 'exterior', description: 'Decorative post wraps. Example: 013.207 = Covered Patio 2 + Post Wrap' },
+  { suffixCode: '08', abbreviation: 'tc', fullName: 'Tall Crawl', category: 'foundation', description: 'Tall crawl space foundation. Example: 010.008 = Foundation Tall Crawl' },
+  { suffixCode: '09', abbreviation: '9t', fullName: "9' Tall Walls", category: 'structural', description: '9-foot wall height option' },
+
+  // ========== TWO-DIGIT SUFFIXES (ZZ = 10-19) ==========
+  // Used in .0ZZ format where no option code is present
   { suffixCode: '10', abbreviation: '10t', fullName: "10' Tall Walls", category: 'structural', description: '10-foot wall height option' },
-  { suffixCode: '11', abbreviation: 'ec', fullName: 'Enhanced Corners', category: 'exterior', description: 'Enhanced corner trim package' },
-  { suffixCode: '12', abbreviation: 'er', fullName: 'Enhanced Rear', category: 'exterior', description: 'Enhanced rear elevation trim' },
-  { suffixCode: '13', abbreviation: 'fw', fullName: 'Fauxwood Siding', category: 'exterior', description: 'Fauxwood siding option' },
-  { suffixCode: '14', abbreviation: 'ma', fullName: 'Masonry', category: 'exterior', description: 'Masonry/stone veneer option' },
+  { suffixCode: '11', abbreviation: 'ec', fullName: 'Enhanced Corners', category: 'exterior', description: 'Enhanced corner trim package. Example: 060.011 = Siding + Enhanced Corners' },
+  { suffixCode: '12', abbreviation: 'er', fullName: 'Enhanced Rear', category: 'exterior', description: 'Enhanced rear elevation trim. Example: 060.012 = Enhanced Rear' },
+  { suffixCode: '13', abbreviation: 'fw', fullName: 'Faux Wood', category: 'exterior', description: 'Faux wood siding option. Example: 060.013 = Faux Wood' },
+  { suffixCode: '14', abbreviation: 'ma', fullName: 'Masonry', category: 'exterior', description: 'Masonry/stone veneer option. Example: 060.014 = Masonry Siding' },
   { suffixCode: '15', abbreviation: 'pr', fullName: 'Porch Rail', category: 'exterior', description: 'Porch railing option' },
-  { suffixCode: '16', abbreviation: 's', fullName: 'Exterior Stair Material', category: 'exterior', description: 'Exterior stair materials' },
-  { suffixCode: '17', abbreviation: 'hw', fullName: 'Housewrap for Options', category: 'exterior', description: 'Housewrap for option areas' },
-  { suffixCode: '18', abbreviation: 'dk', fullName: 'Deck', category: 'addition', description: 'Deck addition' },
-  { suffixCode: '19', abbreviation: 'cp', fullName: 'Covered Patio', category: 'addition', description: 'Covered patio option' },
+  { suffixCode: '16', abbreviation: '', fullName: 'Reserved 16', category: 'reserved', description: 'Reserved for future use', isActive: false },
+  { suffixCode: '17', abbreviation: '', fullName: 'Reserved 17', category: 'reserved', description: 'Reserved for future use', isActive: false },
+  { suffixCode: '18', abbreviation: 's', fullName: 'Exterior Stair', category: 'exterior', description: 'Exterior stair materials. Example: 074.018 = Deck + Exterior Stair Material' },
+  { suffixCode: '19', abbreviation: 'hw', fullName: 'Housewrap Options', category: 'exterior', description: 'Housewrap for option areas. Example: 058.019 = Housewrap Options' },
 
   // 20-29: Room/Area Options
   { suffixCode: '20', abbreviation: 'fp', fullName: 'Fireplace', category: 'interior', description: 'Fireplace addition' },

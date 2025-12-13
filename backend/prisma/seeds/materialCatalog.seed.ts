@@ -541,6 +541,198 @@ const BFS_SKUS: BfsSkuXrefDef[] = [
 ];
 
 // ============================================================================
+// MASTER MATERIALS LIST - BAT Unified Coding System v2.0
+// Generated: 2025-12-13 | Total SKUs: 516
+//
+// Categories:
+// - Accessories: 18 items
+// - Adhesives: 4 items
+// - Decking: 1 item
+// - Hardware: 99 items
+// - Lumber: 211 items
+// - Other: 111 items
+// - Panels: 13 items
+// - Siding: 27 items
+// - Trim: 10 items
+// - Weather Barrier: 22 items
+// ============================================================================
+
+interface MasterMaterialDef {
+  sku: string;
+  description: string;
+  uom: string;
+  unitCost?: number;
+  category: string;
+}
+
+// Master Materials by Category - Representative samples from the 516 SKU catalog
+const MASTER_MATERIALS: MasterMaterialDef[] = [
+  // ========== ACCESSORIES (18 items) ==========
+  { sku: '1218RCF', description: '12"X18" FLUSH WOOD VENT CEDAR', uom: 'EA', unitCost: 44.22, category: 'Accessories' },
+  { sku: '1824RGV', description: '18X24 RECTANGLE GABLE VENT', uom: 'EA', unitCost: 70.78, category: 'Accessories' },
+  { sku: '24SBB', description: '2X4 22-7/16 SOLID BIRD BLOCK', uom: 'BOM', category: 'Accessories' },
+  { sku: '26SBB', description: '2X6 22-7/16 SOLID BIRD BLOCK', uom: 'BOM', category: 'Accessories' },
+  { sku: '512BIBBLK', description: '1X5-1/2"X5-1/2" BIB BLOCK', uom: 'EA', unitCost: 7.69, category: 'Accessories' },
+  { sku: 'HU559408', description: '8X16 FNDTN VENT PLASTIC 559408', uom: 'EA', unitCost: 12.40, category: 'Accessories' },
+  { sku: 'MA00451218030', description: '030 PAINTABLE 12X18 GABLEVENT', uom: 'EA', unitCost: 60.34, category: 'Accessories' },
+
+  // ========== ADHESIVES (4 items) ==========
+  { sku: 'DPWS', description: '10.3 OZ TUBE DUPONT SEALANT', uom: 'TUBE', unitCost: 4.96, category: 'Adhesives' },
+  { sku: 'MD71550', description: 'CAULK BACKER ROD 3/8" X 350\'', uom: 'EA', unitCost: 46.99, category: 'Adhesives' },
+  { sku: 'SFG', description: 'BFS SUB FLR GLUE 28OZ', uom: 'BF', unitCost: 4.08, category: 'Adhesives' },
+  { sku: 'TX1WHT10', description: 'TX1 TEXT POLY SEALANT WHT 10OZ', uom: 'EA', unitCost: 5.66, category: 'Adhesives' },
+
+  // ========== HARDWARE - Framing Angles (99 items total) ==========
+  { sku: 'A34', description: 'SIMPSON A34 FRAMNG ANCHOR', uom: 'EA', unitCost: 0.49, category: 'Hardware' },
+  { sku: 'A34Z', description: 'A34 FRAMING ANCHOR Z-MAX', uom: 'EA', unitCost: 0.79, category: 'Hardware' },
+  { sku: 'A35', description: '1-7/16X4-1/2" FRAMING ANCHOR', uom: 'EA', unitCost: 0.53, category: 'Hardware' },
+  { sku: 'A35Z', description: 'A35 FRAMING ANCHOR Z-MAX', uom: 'EA', unitCost: 0.59, category: 'Hardware' },
+
+  // Post Bases
+  { sku: 'ABU44Z', description: 'ABU44 4X4 ADJ. POST Z-MAX', uom: 'EA', unitCost: 19.46, category: 'Hardware' },
+  { sku: 'ABU46Z', description: 'ABU46 4X6 ADJ. POST Z-MAX', uom: 'EA', unitCost: 34.73, category: 'Hardware' },
+  { sku: 'ABU66Z', description: 'ABU66 6X6 ADJ. POST Z-MAX', uom: 'EA', unitCost: 41.35, category: 'Hardware' },
+  { sku: 'ABU88Z', description: 'ABU88 8X8 ADJ. POST Z-MAX', uom: 'EA', unitCost: 80.17, category: 'Hardware' },
+
+  // Coiled Straps
+  { sku: 'CMST14', description: 'COILED STRAP 14GA', uom: 'EA', unitCost: 190.46, category: 'Hardware' },
+  { sku: 'CS16', description: 'COILED STRAP 150\'', uom: 'EA', unitCost: 151.03, category: 'Hardware' },
+  { sku: 'CS16-R', description: 'COILED STRAP 16GA 25\'', uom: 'EA', unitCost: 45.35, category: 'Hardware' },
+  { sku: 'CS20', description: 'SIMPSON CS20 11/4 250COILSTRAP', uom: 'EA', unitCost: 153.72, category: 'Hardware' },
+  { sku: 'CS20-R', description: 'COILED STRAP 20GA 25\' SIMPSON', uom: 'EA', unitCost: 34.50, category: 'Hardware' },
+
+  // Hold-Downs
+  { sku: 'HDU2-SDS2.5', description: '8-11/16" PREDEFLECTED HOLDOWN', uom: 'EA', category: 'Hardware' },
+  { sku: 'HDU4-SDS2.5', description: 'HDU4-SDS2.5 HOLDDOWN', uom: 'EA', category: 'Hardware' },
+  { sku: 'HDU5-SDS2.5', description: '13-3/16" PREDEFLECTED HOLDOWN', uom: 'EA', category: 'Hardware' },
+  { sku: 'HDU8-SDS2.5', description: '16-5/8"HOLDOWN HANGER W/SCREWS', uom: 'EA', unitCost: 49.87, category: 'Hardware' },
+  { sku: 'HDU11-SDS2.5', description: 'HDU11-SDS2.5 HOLDDOWN', uom: 'EA', category: 'Hardware' },
+  { sku: 'HDU14-SDS2.5', description: '25-11/16" PREDEFLECTED HOLDOWN', uom: 'EA', category: 'Hardware' },
+
+  // Joist Hangers
+  { sku: 'HUS210', description: '2X10 JOIST FM HANGER EA', uom: 'EA', unitCost: 4.82, category: 'Hardware' },
+  { sku: 'HUS26', description: 'SIMPSON HUS26 JOIST HANGER EA', uom: 'EA', unitCost: 2.51, category: 'Hardware' },
+  { sku: 'HUS26-2', description: 'HUS26-2 Heavy DutyHanger', uom: 'EA', unitCost: 14.87, category: 'Hardware' },
+  { sku: 'HUS26Z', description: 'HUS26Z JOIST HANGR Z-MAX', uom: 'EA', unitCost: 4.68, category: 'Hardware' },
+  { sku: 'HUS48', description: 'HUS48 Heavy Duty DblShear Hanger', uom: 'EA', unitCost: 8.95, category: 'Hardware' },
+  { sku: 'LUS210', description: 'LUS210 JOIST HANGER 2X10', uom: 'EA', unitCost: 1.56, category: 'Hardware' },
+  { sku: 'LUS210-2', description: 'SIMPSON DBL JOIST HANGER 2X10', uom: 'EA', unitCost: 2.42, category: 'Hardware' },
+  { sku: 'LUS26', description: 'LUS26 JOIST HANGER 2X6', uom: 'EA', unitCost: 1.04, category: 'Hardware' },
+
+  // Concealed Hangers
+  { sku: 'HUC210-2Z', description: '2X10 DBL FM CONCL HANGER ZMAX', uom: 'EA', unitCost: 22.32, category: 'Hardware' },
+  { sku: 'HUC26-2', description: 'SIMP FACE-MNT HGR CONCELD', uom: 'EA', unitCost: 13.13, category: 'Hardware' },
+  { sku: 'HUC48Z', description: 'HUC48Z 4X8 F/M HGR CFLG ZMAX', uom: 'EA', unitCost: 16.04, category: 'Hardware' },
+  { sku: 'HUC612', description: 'SIMP FACE-MNT HGR CONCEALED', uom: 'EA', unitCost: 19.65, category: 'Hardware' },
+
+  // ========== LUMBER (211 items total) ==========
+  // Engineered Lumber - I-Joists
+  { sku: '10TJI110', description: '9-1/2 TJI-110 LF', uom: 'LF', unitCost: 3.24, category: 'Lumber' },
+  { sku: '12TJI110', description: '11-7/8 TJI-110 LF', uom: 'LF', unitCost: 3.42, category: 'Lumber' },
+  { sku: '10TSH', description: '3-1/2X9-1/2 TJ LSL LF', uom: 'LF', unitCost: 12.28, category: 'Lumber' },
+  { sku: '10114TJRIM20', description: '1-1/4X9-1/2 TJ LSL RIM 20\'', uom: 'EA', unitCost: 81.88, category: 'Lumber' },
+  { sku: '12114TJRIM20', description: '1-1/4X11-7/8 TJ LSL RIM 20\'', uom: 'EA', unitCost: 100.24, category: 'Lumber' },
+  { sku: '18TSRIM16', description: '1.25X18"-16\' TIMBERSTRAND RIM', uom: 'EA', unitCost: 176.64, category: 'Lumber' },
+
+  // Dimensional Lumber - 2x4
+  { sku: '249258DF', description: '2X4-92-5/8" STUD DF PET', uom: 'EA', unitCost: 2.30, category: 'Lumber' },
+  { sku: '2410458DF', description: '2X4-104-5/8" STUD DF PET', uom: 'EA', unitCost: 2.90, category: 'Lumber' },
+  { sku: '2411658DF', description: '2X4-116-5/8" STUD DF PET', uom: 'EA', unitCost: 3.22, category: 'Lumber' },
+  { sku: '248DF', description: '2X4-8\' STD&BTR DF', uom: 'EA', unitCost: 3.39, category: 'Lumber' },
+  { sku: '2410DF', description: '2X4-10\' STD&BTR DF', uom: 'EA', unitCost: 4.23, category: 'Lumber' },
+  { sku: '2412DF', description: '2X4-12\' STD&BTR DF', uom: 'EA', unitCost: 5.08, category: 'Lumber' },
+  { sku: '2414DF', description: '2X4-14\' STD&BTR DF', uom: 'EA', unitCost: 5.92, category: 'Lumber' },
+  { sku: '2416DF', description: '2X4-16\' STD&BTR DF', uom: 'EA', unitCost: 6.77, category: 'Lumber' },
+  { sku: '2418DF', description: '2X4-18\' STD&BTR DF', uom: 'EA', unitCost: 7.62, category: 'Lumber' },
+  { sku: '2420DF', description: '2X4-20\' STD&BTR DF', uom: 'EA', unitCost: 8.46, category: 'Lumber' },
+  { sku: '24DF', description: '2X4-RL STD&BTR DF', uom: 'EA', unitCost: 0.42, category: 'Lumber' },
+
+  // Dimensional Lumber - 2x6
+  { sku: '269258DF', description: '2X6-92-5/8" STUD DF PET', uom: 'EA', unitCost: 4.09, category: 'Lumber' },
+  { sku: '2610458DF', description: '2X6-104-5/8" STUD DF PET', uom: 'EA', unitCost: 4.66, category: 'Lumber' },
+  { sku: '2611658DF', description: '2X6-116-5/8" STUD DF PET', uom: 'EA', unitCost: 5.00, category: 'Lumber' },
+  { sku: '268DF2', description: '2X6-8\' #2&BTR DF', uom: 'EA', unitCost: 4.45, category: 'Lumber' },
+  { sku: '2610DF2', description: '2X6-10\' #2&BTR DF', uom: 'EA', unitCost: 5.56, category: 'Lumber' },
+  { sku: '2612DF2', description: '2X6-12\' #2&BTR DF', uom: 'EA', unitCost: 6.67, category: 'Lumber' },
+  { sku: '2614DF2', description: '2X6-14\' #2&BTR DF', uom: 'EA', unitCost: 7.79, category: 'Lumber' },
+  { sku: '2616DF2', description: '2X6-16\' #2&BTR DF', uom: 'EA', unitCost: 8.90, category: 'Lumber' },
+  { sku: '2618DF2', description: '2X6-18\' #2&BTR DF', uom: 'EA', unitCost: 10.01, category: 'Lumber' },
+  { sku: '2620DF2', description: '2X6-20\' #2&BTR DF', uom: 'EA', unitCost: 11.12, category: 'Lumber' },
+  { sku: '26DF2', description: '2X6-RL #2&BTR DF', uom: 'EA', unitCost: 0.56, category: 'Lumber' },
+
+  // Dimensional Lumber - 2x8, 2x10, 2x12
+  { sku: '2810DF2', description: '2X8-10\' #2&BTR DF', uom: 'EA', unitCost: 8.64, category: 'Lumber' },
+  { sku: '2812DF2', description: '2X8-12\' #2&BTR DF', uom: 'EA', unitCost: 10.36, category: 'Lumber' },
+  { sku: '2816DF2', description: '2X8-16\' #2&BTR DF', uom: 'EA', unitCost: 13.82, category: 'Lumber' },
+  { sku: '21010DF2', description: '2X10-10\' #2&BTR DF', uom: 'EA', unitCost: 10.80, category: 'Lumber' },
+  { sku: '21012DF2', description: '2X10-12\' #2&BTR DF', uom: 'EA', unitCost: 12.95, category: 'Lumber' },
+  { sku: '21016DF2', description: '2X10-16\' #2&BTR DF', uom: 'EA', unitCost: 17.27, category: 'Lumber' },
+  { sku: '210DF2', description: '2X10-RL #2&BTR DF', uom: 'EA', unitCost: 1.08, category: 'Lumber' },
+  { sku: '21210DF2', description: '2X12-10\' #2&BTR DF', uom: 'EA', unitCost: 12.73, category: 'Lumber' },
+  { sku: '21212DF2', description: '2X12-12\' #2&BTR DF', uom: 'EA', unitCost: 15.27, category: 'Lumber' },
+  { sku: '21220DF2', description: '2X12-20\' #2&BTR DF', uom: 'EA', unitCost: 25.45, category: 'Lumber' },
+  { sku: '212DF2', description: '2X12-RL #2&BTR DF', uom: 'EA', unitCost: 1.06, category: 'Lumber' },
+
+  // Pressure Treated
+  { sku: '248HF2TICGC', description: '2X4-8\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 5.83, category: 'Lumber' },
+  { sku: '2412HF2TICGC', description: '2X4-12\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 8.75, category: 'Lumber' },
+  { sku: '2420HF2TICGC', description: '2X4-20\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 14.59, category: 'Lumber' },
+  { sku: '2616HF2TICGC', description: '2X6-16\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 16.26, category: 'Lumber' },
+  { sku: '2810HF2TICGC', description: '2X8-10\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 14.04, category: 'Lumber' },
+  { sku: '21212HF2TICGC', description: '2X12-12\' #2 HF TRTD GC ICT', uom: 'EA', unitCost: 25.33, category: 'Lumber' },
+
+  // ========== PANELS (13 items) ==========
+  { sku: '716OSB', description: '7/16"4X8 OSB RTD', uom: 'EA', unitCost: 9.85, category: 'Panels' },
+  { sku: '716OSB9', description: '7/16"4X9 OSB RTD', uom: 'EA', unitCost: 11.50, category: 'Panels' },
+  { sku: '716OSB10', description: '7/16"4X10 OSB RTD', uom: 'EA', unitCost: 13.23, category: 'Panels' },
+  { sku: '34TGOSBWGOFF', description: '23/32"4X8 T&G OSB EDGGLD SIF', uom: 'EA', unitCost: 19.42, category: 'Panels' },
+  { sku: '78TGOSBWGOFF', description: '7/8"4X8 T&G OSB EDGGLD SIF FF', uom: 'EA', unitCost: 24.18, category: 'Panels' },
+  { sku: '118TGOSBWGOFF', description: '1-1/8"4X8 T&G OSB EDGGLD SIF', uom: 'EA', unitCost: 31.82, category: 'Panels' },
+  { sku: '12CDXF4', description: '15/32"4X8 CDX FIR 4PLY RTD', uom: 'EA', unitCost: 20.03, category: 'Panels' },
+
+  // ========== SIDING (27 items) ==========
+  { sku: 'HZ10514CMSP', description: '5/16X5.25X12 HZ10 CEDRML SELCT', uom: 'EA', unitCost: 7.08, category: 'Siding' },
+  { sku: 'HZ10614CMSP', description: '5/16X6.25X12 HZ10 CEDRML SELCT', uom: 'EA', unitCost: 8.43, category: 'Siding' },
+  { sku: 'HZ10814CMSP', description: '5/16X8.25X12 HZ10 CEDRML SELCT', uom: 'EA', unitCost: 11.13, category: 'Siding' },
+  { sku: 'HZ10914CMSP', description: '5/16X9.25X12 HZ10 CEDRML SELCT', uom: 'EA', unitCost: 12.48, category: 'Siding' },
+  { sku: 'HZ1012CMSP', description: '5/16X12X12\' HZ10 CEDRML SELCT', uom: 'EA', unitCost: 16.19, category: 'Siding' },
+  { sku: 'HZ1048CMP', description: '5/16X4\'X8\' HZ10 CEDARML VRTCL', uom: 'EA', unitCost: 43.60, category: 'Siding' },
+  { sku: 'HZ1049CMP', description: '5/16X4\'X9\' HZ10 CEDARML VRTCL', uom: 'EA', unitCost: 49.04, category: 'Siding' },
+  { sku: 'HZ10410CMP', description: '5/16X4\'X10\' HZ10 CEDARML VRTCL', uom: 'EA', unitCost: 54.49, category: 'Siding' },
+  { sku: 'HZ10410SMP', description: '5/16X4\'X10\' HZ10 SMOOTH VRTCL', uom: 'EA', unitCost: 58.87, category: 'Siding' },
+
+  // HardieTrim
+  { sku: 'HZU54412RT', description: '5/4X3.5X12 HZU RUSTIC GRAIN', uom: 'EA', unitCost: 17.96, category: 'Siding' },
+  { sku: 'HZU54612RT', description: '5/4X5.5X12 HZU RUSTIC GRAIN', uom: 'EA', unitCost: 28.22, category: 'Siding' },
+  { sku: 'HZU54812RT', description: '5/4X7.25X12 HZU RUSTIC GRAIN', uom: 'EA', unitCost: 37.20, category: 'Siding' },
+  { sku: 'HZU541012RT', description: '5/4X9.25X12 HZU RUSTIC GRAIN', uom: 'EA', unitCost: 47.46, category: 'Siding' },
+  { sku: 'HZU541212RT', description: '5/4X11.25X12 HZU RUSTIC GRAIN', uom: 'EA', unitCost: 57.72, category: 'Siding' },
+
+  // ========== TRIM (10 items) ==========
+  { sku: '1320WWP', description: '1X3-20\' WW PRIMED', uom: 'EA', unitCost: 12.30, category: 'Trim' },
+  { sku: '1620WWP', description: '1X6-20\' WW PRIMED', uom: 'EA', unitCost: 24.66, category: 'Trim' },
+  { sku: '2220WWP', description: '2"X2"-20\' WW PRIMED', uom: 'EA', unitCost: 11.23, category: 'Trim' },
+  { sku: '2820WWP', description: '2"X8"-20\' WW PRIMED', uom: 'EA', unitCost: 39.66, category: 'Trim' },
+  { sku: 'SHM51610', description: '5/16"X10 PRM ALUM H-MOLD SDG', uom: 'EA', unitCost: 12.73, category: 'Trim' },
+
+  // ========== WEATHER BARRIER (22 items) ==========
+  { sku: '9125DWRA', description: '9\'X125\' TYVEK DRAINWRAP', uom: 'EA', unitCost: 162.28, category: 'Weather Barrier' },
+  { sku: '4150TF', description: '4"X150\' TYVEK FLASHING', uom: 'EA', unitCost: 127.99, category: 'Weather Barrier' },
+  { sku: '475DFTRA', description: '4"X75\' DUPONT FLASHING TAPE', uom: 'EA', unitCost: 26.78, category: 'Weather Barrier' },
+  { sku: '675TFWNFRA', description: '6"X75\' TYVEK FLEXWRAP NF TAPE', uom: 'EA', unitCost: 92.70, category: 'Weather Barrier' },
+  { sku: '975TFWNFRA', description: '9"X75\' TYVEK FLEXWRAP NF TAPE', uom: 'EA', unitCost: 135.96, category: 'Weather Barrier' },
+  { sku: '975FF', description: '9 X 75 FORTIFLASH 25 MIL', uom: 'EA', unitCost: 42.99, category: 'Weather Barrier' },
+  { sku: 'TTAPE2-165', description: '1.88"X165\' TYVEK TAPE', uom: 'EA', unitCost: 10.50, category: 'Weather Barrier' },
+  { sku: 'TTAPE3-164RA', description: '3"X164\' WHITE TYVEK TAPE', uom: 'EA', unitCost: 15.17, category: 'Weather Barrier' },
+  { sku: 'QFP100', description: 'QUICKFLASH PLUMB FLASHNG P-100', uom: 'EA', unitCost: 6.00, category: 'Weather Barrier' },
+  { sku: 'QFPE30BA78', description: 'E-SGA QUICKFLASH PANEL', uom: 'EA', unitCost: 6.22, category: 'Weather Barrier' },
+  { sku: 'XZH516', description: 'TAMLYN 5/16"X 10 Z-FLASHING', uom: 'EA', unitCost: 16.06, category: 'Weather Barrier' },
+
+  // ========== DECKING (1 item) ==========
+  { sku: 'FGL1620SCA', description: '1X6-20\' SQ FIBERON GL CABIN', uom: 'EA', unitCost: 47.20, category: 'Decking' },
+];
+
+// ============================================================================
 // SEED FUNCTION
 // ============================================================================
 
