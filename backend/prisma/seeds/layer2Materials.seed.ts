@@ -387,7 +387,7 @@ export async function seedLayer2Materials() {
 
   for (const material of ALL_LAYER2_MATERIALS) {
     try {
-      await prisma.layer2Material.upsert({
+      await prisma.materialSku.upsert({
         where: { sku: material.sku },
         update: {
           description: material.description,

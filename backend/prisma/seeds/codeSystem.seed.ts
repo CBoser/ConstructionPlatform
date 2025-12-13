@@ -33,6 +33,38 @@ const MATERIAL_CLASSES = [
 ];
 
 // ============================================================================
+// BUILDING TYPES - Dwelling Classification
+// Separates dwelling types from story counts for flexible filtering
+// ============================================================================
+const BUILDING_TYPES = [
+  { code: 'SFR', name: 'Single Family Residence', description: 'Detached single-family home', sortOrder: 1 },
+  { code: 'MF', name: 'Multi-Family', description: 'Multi-family residential building (apartments, condos)', sortOrder: 2 },
+  { code: 'DUP', name: 'Duplex', description: 'Two-unit attached dwelling', sortOrder: 3 },
+  { code: 'TRI', name: 'Tri-Plex', description: 'Three-unit attached dwelling', sortOrder: 4 },
+  { code: 'QUAD', name: 'Quad-Plex', description: 'Four-unit attached dwelling', sortOrder: 5 },
+  { code: 'COT', name: 'Cottage', description: 'Small detached dwelling, often accessory unit', sortOrder: 6 },
+  { code: 'ADU', name: 'Accessory Dwelling Unit', description: 'Secondary dwelling on property (granny flat, in-law suite)', sortOrder: 7 },
+  { code: 'TH', name: 'Townhome', description: 'Multi-story attached dwelling with shared walls', sortOrder: 8 },
+];
+
+// ============================================================================
+// STORY TYPES - Floor/Level Classification
+// Separates story count from building type for flexible filtering
+// ============================================================================
+const STORY_TYPES = [
+  { code: '1S', name: 'One Story', description: 'Single-level floor plan', sortOrder: 1 },
+  { code: '1.5S', name: 'One and Half Story', description: 'Main floor with partial second floor or bonus room', sortOrder: 2 },
+  { code: '2S', name: 'Two Story', description: 'Two-level floor plan', sortOrder: 3 },
+  { code: '3S', name: 'Three Story', description: 'Three-level floor plan', sortOrder: 4 },
+  { code: 'WO', name: 'Walkout Basement', description: 'Basement with walkout access to grade', sortOrder: 5 },
+  { code: 'FULL', name: 'Full Basement', description: 'Full below-grade basement', sortOrder: 6 },
+  { code: 'PART', name: 'Partial Basement', description: 'Partial below-grade basement', sortOrder: 7 },
+  { code: 'CRAWL', name: 'Crawl Space', description: 'Crawl space foundation', sortOrder: 8 },
+  { code: 'SLAB', name: 'Slab on Grade', description: 'Concrete slab foundation', sortOrder: 9 },
+  { code: 'PIER', name: 'Pier/Post', description: 'Pier or post foundation (coastal, flood zone)', sortOrder: 10 },
+];
+
+// ============================================================================
 // OPTION SUFFIXES - Complete Range (.01-.83)
 // Based on MindFlow Unified Coding System v2.0
 // Format: .xNN where x is the tens digit and NN is the full code
@@ -539,7 +571,37 @@ export async function seedCodeSystem() {
   }
   console.log(`    ✓ ${MATERIAL_CLASSES.length} material classes seeded`);
 
-  // 2. Seed Option Suffixes
+  // 2. Seed Building Types
+  console.log('  🏠 Seeding Building Types...');
+  for (const bt of BUILDING_TYPES) {
+    await prisma.buildingType.upsert({
+      where: { code: bt.code },
+      update: {
+        name: bt.name,
+        description: bt.description,
+        sortOrder: bt.sortOrder,
+      },
+      create: bt,
+    });
+  }
+  console.log(`    ✓ ${BUILDING_TYPES.length} building types seeded`);
+
+  // 3. Seed Story Types
+  console.log('  🏢 Seeding Story Types...');
+  for (const st of STORY_TYPES) {
+    await prisma.storyType.upsert({
+      where: { code: st.code },
+      update: {
+        name: st.name,
+        description: st.description,
+        sortOrder: st.sortOrder,
+      },
+      create: st,
+    });
+  }
+  console.log(`    ✓ ${STORY_TYPES.length} story types seeded`);
+
+  // 4. Seed Option Suffixes
   console.log('  🏷️  Seeding Option Suffixes...');
   for (const suffix of OPTION_SUFFIXES) {
     await prisma.optionSuffix.upsert({
@@ -563,7 +625,7 @@ export async function seedCodeSystem() {
   }
   console.log(`    ✓ ${OPTION_SUFFIXES.length} option suffixes seeded`);
 
-  // 3. Seed Phase Option Definitions
+  // 5. Seed Phase Option Definitions
   console.log('  📋 Seeding Phase Option Definitions...');
   const materialClassMap = new Map<string, string>();
   const classes = await prisma.materialClass.findMany();
@@ -605,7 +667,7 @@ export async function seedCodeSystem() {
   }
   console.log(`    ✓ ${PHASE_DEFINITIONS.length} phase definitions seeded`);
 
-  // 4. Seed Richmond Option Codes
+  // 6. Seed Richmond Option Codes
   console.log('  🏠 Seeding Richmond Option Codes...');
   for (const option of RICHMOND_OPTIONS) {
     const phaseId = option.phaseCode ? phaseMap.get(option.phaseCode) : undefined;

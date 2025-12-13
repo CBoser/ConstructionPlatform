@@ -1706,6 +1706,42 @@ model OptionSuffix {
   @@map("option_suffixes")
 }
 
+// Building Type Classification
+// Categorizes plans by dwelling type (SFR, Multi-Family, Duplex, etc.)
+model BuildingType {
+  id              String   @id @default(uuid())
+  code            String   @unique                          // "SFR", "MF", "DUP", "TRI", "COT"
+  name            String                                     // "Single Family Residence", "Multi-Family"
+  description     String?
+  sortOrder       Int      @default(0) @map("sort_order")
+
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("building_types")
+}
+
+// Story Type Classification
+// Categorizes plans by number of stories and foundation type
+model StoryType {
+  id              String   @id @default(uuid())
+  code            String   @unique                          // "1S", "2S", "3S", "WO", "WO2"
+  name            String                                     // "One Story", "Two Story", "Walk-Out"
+  description     String?
+  sortOrder       Int      @default(0) @map("sort_order")
+
+  isActive        Boolean  @default(true) @map("is_active")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("story_types")
+}
+
 // ============================================================================
 // HOLT CROSS-REFERENCE SYSTEM
 // Maps Holt's 5-digit phase codes to unified phase system
@@ -1806,9 +1842,9 @@ model BatPackDefinition {
   @@map("bat_pack_definitions")
 }
 
-// Layer 2 Materials - SKU-level items within BAT packs
+// Material SKU Catalog - Master list of SKU-level items within BAT packs
 // Individual material items that make up each pack (e.g., 2616HF3TICAG, SS550)
-model Layer2Material {
+model MaterialSku {
   id              String   @id @default(uuid())
 
   // SKU Identifier
@@ -1846,7 +1882,7 @@ model Layer2Material {
   @@index([batPackId])
   @@index([materialClassId])
   @@index([dartCategory])
-  @@map("layer2_materials")
+  @@map("material_skus")
 }
 
 // Customer Code Cross-Reference
