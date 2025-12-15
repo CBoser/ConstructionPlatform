@@ -17,7 +17,7 @@ const getAuthToken = (): string | null => {
 };
 
 const api = {
-  async get<T = any>(endpoint: string, options: { params?: Record<string, any> } = {}): Promise<{ data: T }> {
+  async get<T = unknown>(endpoint: string, options: { params?: Record<string, string | number | boolean | undefined | null> } = {}): Promise<{ data: T }> {
     const token = getAuthToken();
     const url = new URL(`${API_BASE_URL}/api/v1${endpoint}`);
     if (options.params) {
@@ -41,7 +41,7 @@ const api = {
     return { data };
   },
 
-  async post<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+  async post<T = unknown>(endpoint: string, body?: unknown): Promise<{ data: T }> {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: 'POST',
@@ -59,7 +59,7 @@ const api = {
     return { data };
   },
 
-  async put<T = any>(endpoint: string, body?: any): Promise<{ data: T }> {
+  async put<T = unknown>(endpoint: string, body?: unknown): Promise<{ data: T }> {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: 'PUT',
@@ -77,7 +77,7 @@ const api = {
     return { data };
   },
 
-  async delete<T = any>(endpoint: string): Promise<{ data: T }> {
+  async delete<T = unknown>(endpoint: string): Promise<{ data: T }> {
     const token = getAuthToken();
     const response = await fetch(`${API_BASE_URL}/api/v1${endpoint}`, {
       method: 'DELETE',
@@ -178,7 +178,7 @@ export interface Feedback {
   title: string | null;
   description: string | null;
   notes: string | null;
-  context: Record<string, any> | null;
+  context: Record<string, unknown> | null;
   tags: string[];
   source: string | null;
   submittedById: string | null;
@@ -264,7 +264,7 @@ export interface CreateFeedbackInput {
   title?: string;
   description?: string;
   notes?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   tags?: string[];
   source?: string;
 }
@@ -287,7 +287,7 @@ export interface VarianceReportInput {
   actualValue: number;
   title?: string;
   description?: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   tags?: string[];
 }
 

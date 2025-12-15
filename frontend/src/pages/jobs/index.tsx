@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageHeader from '../../components/layout/PageHeader';
 import Button from '../../components/common/Button';
@@ -100,7 +100,7 @@ const Jobs: React.FC = () => {
     }
   };
 
-  const handleDeleteJob = async (job: Job) => {
+  const handleDeleteJob = useCallback(async (job: Job) => {
     if (!confirm(`Are you sure you want to cancel job ${job.jobNumber}?`)) return;
 
     try {
@@ -108,7 +108,7 @@ const Jobs: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete job:', error);
     }
-  };
+  }, [deleteJob]);
 
   // Table columns
   const columns: Column<Job>[] = useMemo(
@@ -219,7 +219,7 @@ const Jobs: React.FC = () => {
         ),
       },
     ],
-    []
+    [handleDeleteJob]
   );
 
   const jobs = jobsData?.data || [];
